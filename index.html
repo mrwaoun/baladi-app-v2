@@ -28,6 +28,7 @@
   --good:#1a7f37; --good-soft:#E4F0E4; --warn:#9A6B00; --warn-soft:#FBF0D8;
   --crit:#B3261E; --crit-soft:#F8E3E1;
   --gold:#A5791F; --gold-soft:#F6EEDA;
+  --s1:#1D6FA3; --s2:#A05A00;   /* recycling, composting — validated for CVD on both surfaces */
   --shadow:0 1px 2px rgba(33,29,24,.06), 0 10px 30px -18px rgba(33,29,24,.35);
 }
 @media (prefers-color-scheme: dark){
@@ -42,6 +43,7 @@
     --good:#5FD15F; --good-soft:#15251A; --warn:#F7C45C; --warn-soft:#2A2110;
     --crit:#E87373; --crit-soft:#2C1513;
     --gold:#D9B45A; --gold-soft:#272015;
+    --s1:#4A94C6; --s2:#B8822A;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 32px -20px rgba(0,0,0,.9);
   }
 }
@@ -113,6 +115,8 @@ a{color:var(--accent-ink)}
 .btn.g{background:var(--gold);border-color:var(--gold);color:#241C08}
 .btn.sm{padding:8px 11px;font-size:13px;border-radius:10px;width:auto}
 .btn[disabled]{opacity:.45;pointer-events:none}
+[hidden]{display:none!important}
+svg.ic{width:17px;height:17px;flex:none}
 .btn .ic{width:17px;height:17px;flex:none}
 .btn.row{justify-content:space-between;text-align:start}
 .btnrow{display:flex;gap:8px}
@@ -149,11 +153,13 @@ a{color:var(--accent-ink)}
 .stat{background:var(--surface-3);border:1px solid var(--line);border-radius:13px;padding:11px 12px;display:flex;flex-direction:column;gap:2px}
 .stat b{font-family:"Archivo",sans-serif;font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
 .stat span{font-size:10.5px;color:var(--muted);line-height:1.35}
+.stat b svg{width:21px;height:21px;display:block;stroke-width:1.7}
 
 input[type=text],input[type=tel],input[type=number],input[type=search],select,textarea{
   width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface);font-size:15px}
 textarea{resize:vertical;min-height:72px}
 label.fld{display:flex;flex-direction:column;gap:5px}
+#custblock{display:flex;flex-direction:column;gap:12px}
 label.fld>span{font-size:11.5px;color:var(--muted);font-weight:600}
 .seg{display:flex;background:var(--surface-2);border-radius:11px;padding:3px;gap:2px}
 .seg button{flex:1;padding:8px 4px;font-size:12.5px;font-weight:600;border-radius:9px;color:var(--ink-2)}
@@ -176,6 +182,11 @@ label.fld>span{font-size:11.5px;color:var(--muted);font-weight:600}
   border:1px solid color-mix(in oklab,var(--accent) 24%,transparent);font-size:12.5px;color:var(--ink-2);line-height:1.45}
 .note.w{background:var(--warn-soft);border-color:color-mix(in oklab,var(--warn) 34%,transparent)}
 .note.c{background:var(--crit-soft);border-color:color-mix(in oklab,var(--crit) 30%,transparent)}
+.note.g{background:var(--good-soft);border-color:color-mix(in oklab,var(--good) 30%,transparent)}
+.note.g svg{color:var(--good)}
+.btn.row.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+select.sel,label.fld>select{appearance:none;-webkit-appearance:none;width:100%;padding:11px 12px;border:1px solid var(--line);
+  border-radius:11px;background:var(--surface);color:var(--ink);font:inherit;font-size:13.5px}
 .note b{display:block;color:var(--ink);font-size:13px;margin-bottom:2px}
 .note svg{width:17px;height:17px;flex:none;margin-top:1px;color:var(--accent-ink)}
 
@@ -191,6 +202,7 @@ tr:last-child td{border-bottom:none}
 .scanbox{position:relative;border-radius:16px;overflow:hidden;background:#15120F;aspect-ratio:1/1;display:grid;place-items:center}
 .scanbox video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .scanbox canvas{display:none}
+.scanbox img.shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .reticle{position:relative;width:64%;aspect-ratio:1;border-radius:16px;box-shadow:0 0 0 2000px rgba(16,13,11,.45)}
 .reticle:before,.reticle:after,.reticle>i:first-child:before,.reticle>i:first-child:after{content:"";position:absolute;width:32px;height:32px;border:3px solid #E0B27C}
 .reticle:before{top:-1px;inset-inline-start:-1px;border-width:3px 0 0 3px;border-radius:12px 0 0 0}
@@ -215,7 +227,8 @@ tr:last-child td{border-bottom:none}
   max-height:84dvh;overflow-y:auto;padding:10px 16px calc(20px + env(safe-area-inset-bottom))}
 .sheet.on{transform:translate(-50%,0)}
 .grab{width:38px;height:4px;border-radius:3px;background:var(--line);margin:0 auto 10px}
-.sheet .shead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sheet .shead{display:flex;align-items:center;gap:10px;margin-bottom:10px;position:sticky;top:-2px;
+  background:var(--surface);z-index:2;padding:4px 0}
 .sheet .shead h3{font-size:17px;font-weight:600;flex:1}
 .toast{position:fixed;left:50%;transform:translate(-50%,16px);bottom:92px;background:var(--ink);color:var(--paper);
   padding:11px 15px;border-radius:12px;font-size:13px;font-weight:500;z-index:90;opacity:0;transition:.2s;
@@ -223,7 +236,10 @@ tr:last-child td{border-bottom:none}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 /* ---------- login ---------- */
-.login{flex:1;display:flex;flex-direction:column;gap:16px;padding:28px 22px calc(28px + env(safe-area-inset-bottom));justify-content:center;background:var(--surface)}
+.login{flex:1;display:flex;flex-direction:column;gap:16px;padding:22px 22px calc(28px + env(safe-area-inset-bottom));
+  background:var(--surface);overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.login>:first-child{margin-top:auto}
+.login>:last-child{margin-bottom:auto}
 .mark{width:62px;height:62px;border-radius:19px;background:linear-gradient(155deg,#9A6B41,#5E3E22);display:flex;align-items:center;
   justify-content:center;color:#F6EFE6;font-family:"Reem Kufi","Noto Naskh Arabic",serif;font-size:36px;line-height:1;direction:rtl}
 .mark.sm{width:34px;height:34px;border-radius:11px;font-size:20px}
@@ -260,12 +276,98 @@ tr:last-child td{border-bottom:none}
 .wheel{height:64px;overflow:hidden;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .wheel .w{position:absolute;inset:0;display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;font-size:18px;font-weight:600}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* compact quick actions */
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.quick button{background:var(--surface-3);border:1px solid var(--line);border-radius:13px;padding:10px 4px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
+.quick button svg{width:20px;height:20px;color:var(--ink-2);stroke-width:1.7}
+.quick button span{font-size:10px;color:var(--muted);line-height:1.2}
+/* desktop viewing mode */
+.page.wide{align-items:center}
+.page.wide .device{width:min(1180px, calc(100vw - 48px));height:min(920px, calc(100dvh - 48px));border-radius:26px}
+.page.wide .sidecard{display:none}
+.page.wide .appbar{padding:8px 22px 13px}
+.page.wide .view{display:block;column-count:2;column-gap:16px;padding:16px 22px 26px}
+.page.wide .view>*{break-inside:avoid;margin:0 0 14px}
+.page.wide .carou{margin:0;padding:2px 0}
+.page.wide .carou>*{flex-basis:46%}
+.page.wide .login{max-width:640px;margin-inline:auto}
+.page.wide .tabbar button span{font-size:12px}
+.page.wide .sheet{width:min(560px,100%)}
+@media(min-width:1500px){ .page.wide .view{column-count:3} }
+@media(max-width:1000px){ .page.wide .device{width:100%;height:100dvh;border:none;border-radius:0}
+  .page.wide .view{column-count:1;padding:14px 16px 24px} }
+/* chart: grouped participation bars */
+.zrow{display:block;width:100%;text-align:start;padding:9px 0;border-top:1px solid var(--line-soft)}
+.zrow:first-of-type{border-top:none}
+.zhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:5px}
+.zhead b{font-size:13px}
+.zhead span{font-size:11px;color:var(--muted)}
+.zb{display:flex;align-items:center;gap:7px;margin-top:2px}
+.ztrack{position:relative;flex:1;height:11px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.ztrack i{position:absolute;inset-inline-start:0;top:0;height:100%;border-radius:4px;display:block}
+.zb em{font-style:normal;font-size:11px;font-family:"IBM Plex Mono",monospace;color:var(--ink-2);min-width:34px;text-align:end}
+.lgnd{display:flex;gap:14px;flex-wrap:wrap;padding:2px 0 4px}
+.lgnd span{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)}
+.lgnd i{width:10px;height:10px;border-radius:3px;display:block}
+/* chat */
+.chat{display:flex;flex-direction:column;gap:9px}
+.bub{max-width:84%;padding:9px 12px;border-radius:15px;font-size:13.5px;line-height:1.45}
+.bub.b{align-self:flex-start;background:var(--surface-2);border-end-start-radius:5px}
+.bub.m{align-self:flex-end;background:var(--accent);color:#FBF7F1;border-end-end-radius:5px}
+.bub .w{display:block;font-size:10.5px;opacity:.7;margin-top:3px}
+.typing{align-self:flex-start;color:var(--muted);font-size:12px}
+/* inbox */
+.nrow{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line-soft);width:100%;text-align:start}
+.nrow:first-of-type{border-top:none}
+.nrow .ni{flex:none;width:30px;height:30px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2)}
+.nrow .ni svg{width:16px;height:16px}
+.nrow .nb{flex:1;min-width:0}
+.nrow .nb b{display:block;font-size:13px;line-height:1.3}
+.nrow .nb p{margin:2px 0 0;font-size:11.5px;color:var(--ink-2);line-height:1.4}
+.nrow .nb span{font-size:10.5px;color:var(--muted)}
+.nrow .dot{flex:none;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-top:11px}
+/* sorting guide */
+.sg{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line-soft)}
+.sg:first-of-type{border-top:none}
+.sg .tagi{flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;color:var(--ink-2);background:var(--surface-2)}
+.sg .tagi svg{width:15px;height:15px}
+.sg b{display:block;font-size:13px}
+.sg p{margin:0;font-size:11.5px;color:var(--ink-2);line-height:1.4}
+.sg .no{color:var(--stamp)}
+/* carousel */
+.carou{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;margin:0 -16px;padding:2px 16px 2px}
+.carou::-webkit-scrollbar{display:none}
+.carou>*{flex:0 0 84%;scroll-snap-align:center;margin:0}
+.dots{display:flex;gap:5px;justify-content:center;padding-top:2px}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--line);display:block;transition:width .2s,background .2s}
+.dots i.on{background:var(--accent);width:17px;border-radius:3px}
+/* guide sheet */
+.gstep{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line-soft)}
+.gstep:first-child{border-top:none}
+.gn{flex:none;width:21px;height:21px;border-radius:7px;background:var(--accent-soft);color:var(--accent-ink);
+  display:grid;place-items:center;font-size:11.5px;font-weight:700;font-family:"Archivo",sans-serif;margin-top:1px}
+.gstep b{display:block;font-size:13.5px;margin-bottom:1px}
+.gstep p{margin:0}
+/* next-collection rows */
+.nxt{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line-soft)}
+.nxt:first-of-type{border-top:none}
+.nxt .ico{flex:none;width:29px;height:29px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2)}
+.nxt .ico svg{width:17px;height:17px}
+.nxt .m{flex:1;min-width:0}
+.nxt .m b{display:block;font-size:13.5px;line-height:1.25}
+.nxt .m span{display:block;font-size:11.5px;color:var(--muted)}
+.nxt .w{flex:none;text-align:end}
+.nxt .w b{display:block;font-size:13px;font-family:"Archivo",sans-serif}
+.nxt .w span{display:block;font-size:11px;color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="page">
   <div class="device" id="device">
-    <div class="statusbar"><span id="clock">07:12</span><span id="netstate">baladiservices.com</span></div>
+    <div class="statusbar"><span id="clock">07:12</span><span id="netstate">baladiservice.com</span></div>
     <header class="appbar" id="appbar" hidden></header>
     <main class="view" id="view"></main>
     <nav class="tabbar" id="tabbar" hidden></nav>
@@ -287,7 +389,26 @@ var MINWAGE = 312;              /* USD per month, private-sector minimum wage ba
 var FX = 89500;                 /* LL per USD, rate of record */
 var TOWN = "Municipality of Al-Zeitoun";
 var TOWN_AR = "بلدية الزيتون";
-var DEMO_PHONE = "96170150153";
+var PRIMARY_PHONE = "96170150153";
+/* Numbers cleared to sign in. Codes are not stored — only a hash of number+code,
+   so the file does not list them. Issue a code to a person out of band. */
+var DIAL = [{cc:"961", en:"Lebanon"}, {cc:"33", en:"France"}];
+var REGISTER = [
+  {cc:"961", n:"70150153", name:"Marc Aoun", h:"17e2babd"},
+  {cc:"961", n:"3298298", name:"Diane Fadel", h:"8edae017"},
+  {cc:"961", n:"70602217", name:"Rayan Sabra", h:"f1f31a03"},
+  {cc:"961", n:"3946984", name:"Elie Rouhana", h:"8e9c23eb"},
+  {cc:"961", n:"3451062", name:"Wael Zmerly", h:"aff31d7"},
+  {cc:"961", n:"70652315", name:"Tarek Samarji", h:"c36a9f65"},
+  {cc:"33", n:"674836231", name:"Eric Mimoz \u00b7 CS Cannes", h:"cd9a502e"},
+  {cc:"961", n:"3366078", name:"Rabih Osta", h:"7a239cd"},
+  {cc:"961", n:"70175402", name:"Marc el Khoury", h:"e176117"}
+];
+function fnv(str){
+  var hsh=2166136261;
+  for(var i=0;i<str.length;i++){ hsh^=str.charCodeAt(i); hsh=Math.imul(hsh,16777619)>>>0; }
+  return (hsh>>>0).toString(16);
+}
 
 /* statutory bands from the national fee schedule, % of the monthly minimum wage */
 var CATS = [
@@ -328,6 +449,54 @@ var STREAMS = {
     howAr:"جمع منهجي: كل النقاط في كل يوم مقرَّر، بلا طلب ولا حاجة إليه."}
 };
 
+/* the short sorting guide — three bags, four rules */
+var SORTG = [
+  {k:"organic", icon:"leaf", en:"Organic bag", ar:"\u0643\u064a\u0633 \u0639\u0636\u0648\u064a",
+   yes:"Food scraps and peel, bones, coffee grounds and tea, garden trimmings, soiled paper napkins.",
+   yesAr:"\u0628\u0642\u0627\u064a\u0627 \u0627\u0644\u0637\u0639\u0627\u0645 \u0648\u0627\u0644\u0642\u0634\u0648\u0631\u060c \u0627\u0644\u0639\u0638\u0627\u0645\u060c \u062a\u0641\u0644 \u0627\u0644\u0642\u0647\u0648\u0629 \u0648\u0627\u0644\u0634\u0627\u064a\u060c \u0642\u0635\u0627\u0635\u0627\u062a \u0627\u0644\u062d\u062f\u064a\u0642\u0629\u060c \u0627\u0644\u0645\u0646\u0627\u062f\u064a\u0644 \u0627\u0644\u0648\u0631\u0642\u064a\u0629 \u0627\u0644\u0645\u062a\u0633\u062e\u0629.",
+   no:"No plastic wrappers, no liquids, no nappies.",
+   noAr:"\u0628\u0644\u0627 \u0623\u0643\u064a\u0627\u0633 \u0628\u0644\u0627\u0633\u062a\u064a\u0643\u060c \u0628\u0644\u0627 \u0633\u0648\u0627\u0626\u0644\u060c \u0628\u0644\u0627 \u062d\u0641\u0627\u0636\u0627\u062a."},
+  {k:"recycle", icon:"ticket", en:"Recyclables bag", ar:"\u0643\u064a\u0633 \u0642\u0627\u0628\u0644 \u0644\u0644\u062a\u062f\u0648\u064a\u0631",
+   yes:"Paper and card, plastic bottles, cans, glass jars \u2014 empty, dry, lids off.",
+   yesAr:"\u0627\u0644\u0648\u0631\u0642 \u0648\u0627\u0644\u0643\u0631\u062a\u0648\u0646\u060c \u0642\u0646\u0627\u0646\u064a \u0627\u0644\u0628\u0644\u0627\u0633\u062a\u064a\u0643\u060c \u0627\u0644\u0639\u0644\u0628 \u0627\u0644\u0645\u0639\u062f\u0646\u064a\u0629\u060c \u0627\u0644\u0645\u0631\u0627\u0637\u0628\u0627\u0646 \u0627\u0644\u0632\u062c\u0627\u062c\u064a\u0629 \u2014 \u0641\u0627\u0631\u063a\u0629 \u0648\u062c\u0627\u0641\u0629 \u0648\u0628\u0644\u0627 \u0623\u063a\u0637\u064a\u0629.",
+   no:"No food, no tissues, no oily card.",
+   noAr:"\u0628\u0644\u0627 \u0637\u0639\u0627\u0645\u060c \u0628\u0644\u0627 \u0645\u0646\u0627\u062f\u064a\u0644\u060c \u0628\u0644\u0627 \u0643\u0631\u062a\u0648\u0646 \u0645\u062f\u0647\u0646."},
+  {k:"commingled", icon:"truck", en:"Commingled bag", ar:"\u0643\u064a\u0633 \u0645\u062e\u062a\u0644\u0637",
+   yes:"Everything else: nappies, soiled packaging, broken household items, sweepings.",
+   yesAr:"\u0643\u0644 \u0645\u0627 \u0639\u062f\u0627 \u0630\u0644\u0643: \u0627\u0644\u062d\u0641\u0627\u0636\u0627\u062a\u060c \u0627\u0644\u062a\u063a\u0644\u064a\u0641 \u0627\u0644\u0645\u062a\u0633\u062e\u060c \u0627\u0644\u0623\u062f\u0648\u0627\u062a \u0627\u0644\u0645\u0643\u0633\u0648\u0631\u0629\u060c \u0627\u0644\u0643\u0646\u0627\u0633\u0629.",
+   no:"Nothing hazardous \u2014 that goes to the municipality.",
+   noAr:"\u0644\u0627 \u0634\u064a\u0621 \u062e\u0637\u0631 \u2014 \u064a\u064f\u0633\u0644\u0651\u064e\u0645 \u0625\u0644\u0649 \u0627\u0644\u0628\u0644\u062f\u064a\u0629."}
+];
+var SORT_RULES = [
+  ["Empty it", "Tip food out before the bottle or the tin goes in the recyclables bag."],
+  ["Dry it", "A wet bag contaminates the whole load and the batch is downgraded."],
+  ["Lids off", "Caps and lids are a different plastic. Loose in the bag, not on the bottle."],
+  ["Tag it", "One tag on one bag. An untagged bag is collected but earns nothing."]
+];
+var SORT_NEVER = "Batteries, paint and solvents, medicines and sharps, gas canisters. None of these go in any bag \u2014 they are taken to the municipality counter.";
+
+/* each service runs on its own schedule and has its own next collection */
+var SCHED = [
+  {k:"commingled", icon:"truck",
+   en:"Commingled collection", ar:"الجمع المختلط",
+   days:"Monday, Wednesday, Friday", daysAr:"الاثنين والأربعاء والجمعة",
+   next:"Monday", nextAr:"الاثنين", at:"06:30", win:"06:30 – 09:00",
+   howEn:"Systematic. Every point on the line, every scheduled day. Nothing to request.",
+   howAr:"جمع منهجي: كل النقاط في كل يوم مقرَّر، بلا طلب."},
+  {k:"recycle", icon:"ticket",
+   en:"Recyclables collection", ar:"جمع القابل للتدوير",
+   days:"Saturday", daysAr:"السبت",
+   next:"Saturday", nextAr:"السبت", at:"07:00", win:"07:00 – 11:00",
+   howEn:"Fixed weekly round of 96 points. An extra pickup can be requested on top.",
+   howAr:"جولة أسبوعية ثابتة على ٩٦ نقطة، مع إمكانية طلب رفع إضافي."},
+  {k:"organic", icon:"leaf",
+   en:"Organic collection", ar:"جمع العضوي",
+   days:"Tuesday, Thursday", daysAr:"الثلاثاء والخميس",
+   next:"Thursday", nextAr:"الخميس", at:"06:30", win:"06:30 – 09:30",
+   howEn:"Built from requests made before 22:00 the night before — 51 stops instead of 214.",
+   howAr:"تُبنى من الطلبات المقدَّمة قبل ١٠:٠٠ مساءً — ٥١ نقطة بدل ٢١٤."}
+];
+
 /* the monthly pot scales with the town; the odds scale with the entries */
 var DRAW = {
   participants: 4736,      /* customers who earned at least one voucher this month */
@@ -339,12 +508,18 @@ var DRAW = {
 function potValue(){ return Math.round(DRAW.participants * DRAW.perCustomer); }
 function oddsOne(entries, mine){ return Math.round(entries / Math.max(1,mine)); }
 
-/* the demo customer */
+/* the signed-in customer */
 var ME = {
   id:"C-2417", name:"Nabil Haddad", nameAr:"نبيل حداد", cat:"res",
   addr:"Bldg 14, Fl 3, Rue Zeitouna", point:"Z-14-P", flats:12, phone:"03 412 417",
-  bagsThisMonth:5, recycleKg:87, organicKg:61, otherKg:34, since:"Feb 2026"
+  bagsThisMonth:5, recycleKg:87, organicKg:61, otherKg:34, since:"Feb 2026",
+  bagsLifetime:214, recycleKgLife:263, organicKgLife:188
 };
+/* what this household kept out of central treatment and final disposal */
+function myAvoidedKg(){ return ME.recycleKgLife + ME.organicKgLife; }
+function myAvoidedT(){ return Math.round(myAvoidedKg()/10)/100; }
+function myCo2Kg(){ return 132; }
+function myTrees(){ return Math.max(1, Math.round(myCo2Kg()/21)); }
 
 var TAGS = [
   {s:"baladi:bag:00042291", kind:"organic",  state:"credited", at:"2 Oct"},
@@ -499,6 +674,81 @@ var MATERIALS = [
   {en:"Other recoverables", ar:"مواد أخرى", t:125, usd:6640}
 ];
 
+var ZONES = [
+  {id:"Z", en:"Zeitouna",        ar:"الزيتونة",    rate:78, premises:1840, recy:71, comp:52, route:"COM-5B", bags:4820},
+  {id:"O", en:"Old Quarter",     ar:"الحي القديم", rate:82, premises:1120, recy:76, comp:61, route:"COM-5A", bags:3410},
+  {id:"M", en:"Al-Marj",         ar:"المرج",       rate:74, premises:1410, recy:64, comp:44, route:"REC-4B", bags:3180},
+  {id:"T", en:"Al-Talleh",       ar:"التلة",       rate:70, premises:1265, recy:58, comp:39, route:"ORG-2B", bags:2640},
+  {id:"I", en:"Industrial Zone", ar:"المنطقة الصناعية", rate:63, premises:395, recy:47, comp:12, route:"REC-4C", bags:760},
+  {id:"D", en:"Al-Dahr",         ar:"الضهر",       rate:56, premises:1150, recy:41, comp:23, route:"COM-5C", bags:1890}
+];
+function zoneById(id){ var z=null; ZONES.forEach(function(x){ if(x.id===id) z=x; }); return z; }
+function partAvg(k){ var t=0,n=0; ZONES.forEach(function(z){ t+=z[k]*z.premises; n+=z.premises; }); return Math.round(t/n); }
+
+/* route efficiency, averaged by service type, with the sub-routes behind each average */
+var ROUTEPERF = [
+  {k:"commingled", icon:"truck", en:"Commingled", ar:"مختلط", subs:[
+    {id:"COM-5A", zone:"Old Quarter",     planned:72, served:71, min:214, km:18.2, t:9.4, onTime:true},
+    {id:"COM-5B", zone:"Zeitouna",        planned:78, served:74, min:243, km:21.6, t:10.1, onTime:true},
+    {id:"COM-5C", zone:"Al-Dahr",         planned:64, served:55, min:236, km:26.4, t:7.2, onTime:false}
+  ]},
+  {k:"recycle", icon:"ticket", en:"Recyclables", ar:"قابل للتدوير", subs:[
+    {id:"REC-4A", zone:"Zeitouna",        planned:38, served:37, min:121, km:11.4, t:2.6, onTime:true},
+    {id:"REC-4B", zone:"Al-Marj",         planned:33, served:31, min:118, km:13.1, t:2.1, onTime:true},
+    {id:"REC-4C", zone:"Industrial Zone", planned:25, served:20, min:104, km:17.8, t:3.4, onTime:false}
+  ]},
+  {k:"organic", icon:"leaf", en:"Organic", ar:"عضوي", subs:[
+    {id:"ORG-2A", zone:"Old Quarter",     planned:22, served:22, min:74,  km:7.9,  t:3.1, onTime:true},
+    {id:"ORG-2B", zone:"Al-Talleh",       planned:18, served:17, min:66,  km:9.2,  t:2.4, onTime:true},
+    {id:"ORG-2C", zone:"Al-Marj",         planned:11, served:9,  min:58,  km:10.6, t:1.2, onTime:false}
+  ]}
+];
+function subStopsPerHr(x){ return Math.round(x.served/(x.min/60)*10)/10; }
+function subCompletion(x){ return Math.round(x.served/x.planned*1000)/10; }
+function subKmPerT(x){ return Math.round(x.km/Math.max(0.1,x.t)*10)/10; }
+function routeAvg(r){
+  var p=0,sv=0,mn=0,km=0,tn=0,ot=0;
+  r.subs.forEach(function(x){ p+=x.planned; sv+=x.served; mn+=x.min; km+=x.km; tn+=x.t; if(x.onTime) ot++; });
+  return {completion:Math.round(sv/p*1000)/10, stopsPerHr:Math.round(sv/(mn/60)*10)/10,
+          kmPerT:Math.round(km/Math.max(0.1,tn)*10)/10, onTime:Math.round(ot/r.subs.length*100),
+          planned:p, served:sv, km:Math.round(km*10)/10, t:Math.round(tn*10)/10};
+}
+function routeByKey(k){ var o=null; ROUTEPERF.forEach(function(r){ if(r.k===k) o=r; }); return o; }
+function subById(id){ var o=null; ROUTEPERF.forEach(function(r){ r.subs.forEach(function(x){ if(x.id===id) o=x; }); }); return o; }
+
+/* what the municipality types in each month */
+var MUNI_MONTHS = ["September 2026","August 2026","July 2026"];
+var MUNI_DATA = {
+  "September 2026":{toCentral:612, recySoldT:98, recySoldUsd:9840, organicsToCompost:92, tPaidContractor:782, filed:true},
+  "August 2026":{toCentral:634, recySoldT:91, recySoldUsd:9120, organicsToCompost:88, tPaidContractor:806, filed:true},
+  "July 2026":{toCentral:648, recySoldT:86, recySoldUsd:8470, organicsToCompost:81, tPaidContractor:821, filed:true}
+};
+
+/* loads arriving at the facility gate, and the inspection log */
+var LOADS = [
+  {id:"WB-2026-11408", veh:"M-04", route:"REC-4A", stream:"recycle",    net:3180, at:"07:42", st:"Awaiting"},
+  {id:"WB-2026-11407", veh:"M-02", route:"ORG-2B", stream:"organic",    net:2240, at:"07:18", st:"Awaiting"},
+  {id:"WB-2026-11406", veh:"M-07", route:"COM-5C", stream:"commingled", net:5120, at:"06:55", st:"Accepted"},
+  {id:"WB-2026-11405", veh:"M-04", route:"REC-4C", stream:"recycle",    net:2860, at:"06:31", st:"Downgraded"}
+];
+var INSPECTIONS = [
+  {id:"INS-2026-0414", at:"10 Oct 07:05", kind:"Load",   ref:"WB-2026-11405", result:"Downgraded", contam:14.2, note:"Organic fraction in a recyclables load"},
+  {id:"INS-2026-0413", at:"09 Oct 15:40", kind:"Sample", ref:"6 bags · REC-4B", result:"Pass",      contam:3.1,  note:""},
+  {id:"INS-2026-0412", at:"09 Oct 09:12", kind:"Load",   ref:"WB-2026-11392", result:"Pass",        contam:2.4,  note:""},
+  {id:"INS-2026-0411", at:"08 Oct 14:22", kind:"Sample", ref:"6 bags · ORG-2A", result:"Pass",      contam:5.8,  note:"Two bags with wrappers"}
+];
+function sampleDraw(n){
+  var pool=[]; TAGS.forEach(function(x){ pool.push(x.s); }); TAG_POOL.forEach(function(x){ pool.push(x); });
+  BATCH.forEach(function(b){ if(b.c.indexOf("baladi:bag:")===0) pool.push(b.c); });
+  pool = pool.filter(function(v,i){ return pool.indexOf(v)===i; });
+  var out=[];
+  while(out.length<Math.min(n,pool.length)){
+    var pick=pool[Math.floor(Math.random()*pool.length)];
+    if(out.indexOf(pick)<0) out.push(pick);
+  }
+  return out;
+}
+
 var PAYOUTS = [
   {id:"PO-2026-09", op:"Zeitoun Collection Co.", period:"September 2026", stops:18420, t:782, gross:25203.86, ded:1134.17, net:24069.69, st:"Approved"},
   {id:"PO-2026-08", op:"Zeitoun Collection Co.", period:"August 2026",    stops:18960, t:806, gross:25977.38, ded:259.77,  net:25717.61, st:"Paid"},
@@ -506,13 +756,65 @@ var PAYOUTS = [
 ];
 var COST_PER_TONNE = 32.23;
 
+/* what lands in the customer's inbox */
+var NOTIFS = [
+  {id:"N-1", k:"service", ic:"truck", t:"Organic collection moves to Friday this week", d:"Today 08:10",
+   b:"Rue Zeitouna and Rue Marj only. The Tuesday round is unaffected."},
+  {id:"N-2", k:"payment", ic:"cash", t:"Instalment 2 is due 30 November", d:"Yesterday 18:02",
+   b:"Pay at an OMT counter, by bank transfer, or in cash to a field collector against a numbered receipt."},
+  {id:"N-3", k:"draw", ic:"gift", t:"Your October vouchers are in the pool", d:"8 Oct",
+   b:"Three vouchers, serials listed under Rewards. The monthly draw is on 31 October."},
+  {id:"N-4", k:"service", ic:"bag", t:"Bag 00042291 credited", d:"2 Oct",
+   b:"Scanned by the crew on the organic round and counted towards your sorting rebate."},
+  {id:"N-5", k:"announce", ic:"pin", t:"New drop-off point at ST-05", d:"28 Sep",
+   b:"Open daily 06:00 to 20:00. Free tags at the counter."}
+];
+var MSGS = [
+  {me:false, t:"Your report about blocked access on Rue Zeitouna is with operations. A crew will check it on Thursday.", d:"Yesterday 16:40"},
+  {me:true,  t:"Thank you. The bins were still blocked this morning.", d:"Today 07:12"},
+  {me:false, t:"Noted \u2014 we have raised it with the contractor and will come back to you today.", d:"Today 09:05"}
+];
+
+/* what the person who collects the fee earns: 1% of cash taken, multiplied by
+   observations that were upheld — reported, not merely filed, so volume alone pays nothing */
+var COMMISSION = {
+  rate: 1.0,
+  tiers: [{obs:0, mult:1.00, en:"Base"},
+          {obs:3, mult:1.10, en:"Three upheld"},
+          {obs:8, mult:1.25, en:"Eight upheld"},
+          {obs:15,mult:1.40, en:"Fifteen upheld"}],
+  rejectedPenalty: 0.02   /* each rejected observation shaves this off the multiplier */
+};
+var COLLECTOR = {
+  name:"Walid Assaf", round:"Al-Talleh",
+  cashToday: 1285, cashMonth: 18640,
+  obsFiled: 11, obsUpheld: 9, obsRejected: 2,
+  lastPaid: 198.40, lastPeriod:"September 2026"
+};
+function commMult(upheld, rejected){
+  var m=1; COMMISSION.tiers.forEach(function(t){ if(upheld>=t.obs) m=t.mult; });
+  m = m - (rejected||0)*COMMISSION.rejectedPenalty;
+  return Math.max(1, Math.round(m*100)/100);
+}
+function commBase(amount){ return Math.round(amount*COMMISSION.rate)/100; }
+function commEarned(amount, upheld, rejected){
+  return Math.round(commBase(amount)*commMult(upheld,rejected)*100)/100;
+}
+
 /* ============================== core ============================== */
 var S = {
   step:"phone", phone:"", otp:"", role:null, tab:null, stack:[], ar:false, lbp:false,
   scanTarget:null, lastScan:null, pendingPhotos:3, queued:4, scansSinceCheck:0, camErr:"", trainBonus:false,
   stream:"organic", shiftOn:false, visited:{}, quizI:0, quizScore:0, quizDone:false,
   tariff:{}, hidOn:true, camOn:false, trainDone:false, pickupPhoto:false, tLeft:60, tInt:null,
-  drawRun:false, drawWinner:null, drawKind:"monthly"
+  drawRun:false, drawWinner:null, drawKind:"monthly",
+  hist:[], loginErr:"", muniMonth:"September 2026", routeOpen:null, newUser:null,
+  scanRank:null, scanOutcome:null, scanTouched:false, users:[], camPhoto:false, photoShot:"",
+  pickScan:false, pickTag:"", pickCamTried:false,
+  readIds:{}, inboxTab:"notifs", chat:null, fbScore:0,
+  wide:(typeof window!=="undefined" && window.matchMedia && window.matchMedia("(min-width:1100px)").matches),
+  cc:"961", who:null, otpErr:"", otpTries:0,
+  sample:null, sampleSeen:{}, sampleN:6, inspectFor:null
 };
 CATS.forEach(function(c){ S.tariff[c.id]=c.pct; });
 
@@ -525,6 +827,8 @@ var AR = {
   "Customer":"المشترك","Collection crew":"طاقم الرفع","Driver":"السائق","Field collector":"الجابي الميداني",
   "Operations":"العمليات","Claims reviewer":"مراجع المطالبات","Municipality":"البلدية","Administrator":"المسؤول",
   "Sign in":"تسجيل الدخول","Continue":"متابعة","Back":"رجوع","Save":"حفظ","Submit":"إرسال","Cancel":"إلغاء",
+  "Guide":"دليل","Next collection":"الرفع القادم","Full schedule":"الجدول الكامل","Collection days":"أيام الرفع",
+  "Put out between":"أخرج الكيس بين","Prizes":"الجوائز","Vouchers":"القسائم","Impact":"الأثر",
   "Confirm":"تأكيد","Close":"إغلاق","Next":"التالي","Done":"تم","Export":"تصدير","Search":"بحث",
   "Switch interface":"تبديل الواجهة","Sign out":"تسجيل الخروج","Language":"اللغة","Currency":"العملة",
   "Scan a bag":"امسح كيساً","Scan a collection point":"امسح نقطة جمع","Open camera":"فتح الكاميرا","Photograph the code":"صوّر الرمز",
@@ -581,6 +885,7 @@ var I = {
   bell:'<path d="M18 15V10a6 6 0 1 0-12 0v5l-2 3h16z"/><path d="M10 21h4"/>',
   leaf:'<path d="M20 4c0 9-5 14-13 14H4c0-9 5-14 13-14z"/><path d="M4 20c4-6 8-9 13-10"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.6"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.8-.9 1.4v.5"/><path d="M12 16.6v.4"/>',
   alert:'<path d="M12 4 21 20H3z"/><path d="M12 10v4M12 17v.4"/>',
   pin:'<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>'
 };
@@ -608,21 +913,31 @@ var ROLES = {
   muni:{label:"Municipality", sub:"Fee collection, service payouts, reporting", icon:"chart",
     who:{n:"Rima Saab", s:"Municipal treasurer"},
     tabs:[["overview","Overview","chart"],["fees","Fees","cash"],["payouts","Payouts","truck"],["report","Report","doc"]]},
+  facility:{label:"Facility operator", sub:"Gate intake and random inspection", icon:"db",
+    who:{n:"Hadi Nassar", s:"Sorting facility · gate"},
+    tabs:[["gate","Gate","truck"],["inspect","Inspect","scan"],["findings","Findings","alert"]]},
   admin:{label:"Administrator", sub:"Tariff, draws, users and data", icon:"gear",
     who:{n:"System administrator", s:"Full clearance"},
     tabs:[["setup","Setup","gear"],["draw","Draw","gift"],["users","Users","users"],["data","Data","db"]]}
 };
 
 /* ---------------- navigation ---------------- */
-function go(tab){ S.tab=tab; S.stack=[]; paint(); }
-function push(screen,arg){ S.stack.push({s:screen,a:arg}); paint(); }
-function back(){ S.stack.pop(); paint(); }
+function snap(){ return {tab:S.tab, stack:S.stack.slice()}; }
+function remember(){ if(S.hist.length>40) S.hist.shift(); S.hist.push(snap()); }
+function go(tab){ if(tab===S.tab && !S.stack.length) return; remember(); S.tab=tab; S.stack=[]; paint(); }
+function push(screen,arg){ remember(); S.stack.push({s:screen,a:arg}); paint(); }
+function back(){
+  if(S.hist.length){ var p=S.hist.pop(); S.tab=p.tab; S.stack=p.stack; }
+  else if(S.stack.length){ S.stack.pop(); }
+  paint();
+}
 function cur(){ return S.stack.length ? S.stack[S.stack.length-1] : null; }
 
 var V = {};   /* view registry: key -> function(arg) returning html */
 
 function paint(){
   var dev=$("device");
+  var pg=document.querySelector(".page"); if(pg) pg.classList.toggle("wide", !!S.wide);
   document.documentElement.setAttribute("dir", S.ar?"rtl":"ltr");
   document.documentElement.setAttribute("lang", S.ar?"ar":"en");
   if(!S.role){ paintLogin(); return; }
@@ -633,20 +948,46 @@ function paint(){
   var tabDef=null; R.tabs.forEach(function(x){ if(x[0]===S.tab) tabDef=x; });
   var title = c ? (c.title || screenTitle(c.s)) : t(tabDef?tabDef[1]:R.label);
   $("appbar").innerHTML =
-    (c ? '<button class="iconbtn" data-a="back" aria-label="Back">'+svg("back")+'</button>'
+    ((c||S.hist.length) ? '<button class="iconbtn" data-a="back" aria-label="'+h(t("Back"))+'">'+svg("back")+'</button>'
        : '<div class="mark sm">&#1576;</div>')+
     '<div class="ttl">'+h(title)+'<span class="sub">'+h(c?t(R.label):TOWN)+'</span></div>'+
+    '<button class="iconbtn" data-a="guide" aria-label="'+h(t("Guide"))+'">'+svg("help")+'</button>'+
     '<button class="iconbtn" data-a="menu" aria-label="Menu">'+svg("gear")+'</button>';
   $("view").innerHTML = fn(c?c.a:null);
   $("view").scrollTop = 0;
+  wireCarou();
   $("tabbar").innerHTML = R.tabs.map(function(x){
     return '<button data-a="tab" data-v="'+x[0]+'" class="'+(x[0]===S.tab&&!c?"on":"")+'">'+svg(x[2])+'<span>'+h(t(x[1]))+'</span></button>';
   }).join("");
   sidecard();
-  if(key!==S.role+".scan" && key!==S.role+".sorting") stopCam();
+  var wantsCam = (key===S.role+".scan" || key===S.role+".sorting" || key==="facility.inspect"
+                  || key==="customer.pickup" || S.camPhoto || S.pickScan);
+  if(!wantsCam){ stopCam(); S.pickCamTried=false; S.pickScan=false; }
+  /* reading the tag is the point of this screen, so the scanner opens itself */
+  if(key==="customer.pickup" && !S.pickupPhoto && !S.pickTag && !S.camOn && !S.camErr && !S.pickCamTried){
+    S.pickCamTried=true; S.pickScan=true; setTimeout(startCam, 60);
+  }
 }
 var TITLES = {};
 function screenTitle(s){ return TITLES[s] || s; }
+
+function wireCarou(){
+  var list=document.querySelectorAll(".carou");
+  [].forEach.call(list, function(el){
+    var dots = el.nextElementSibling;
+    if(!dots || !dots.classList || !dots.classList.contains("dots")) return;
+    var upd=function(){
+      var n=el.children.length; if(!n) return;
+      var step=el.scrollWidth/n;
+      var i=Math.round(Math.abs(el.scrollLeft)/Math.max(1,step));
+      if(i>n-1) i=n-1;
+      [].forEach.call(dots.children,function(d,j){ d.classList.toggle("on", j===i); });
+    };
+    el.addEventListener("scroll", upd, {passive:true});
+    upd();
+  });
+}
+function dotsFor(n){ var o=''; for(var i=0;i<n;i++) o+='<i'+(i===0?' class="on"':'')+'></i>'; return '<div class="dots">'+o+'</div>'; }
 
 function sidecard(){
   var el=$("sidecard");
@@ -659,8 +1000,8 @@ function sidecard(){
        '<span class="t"><b>'+h(t(ROLES[k].label))+'</b><span>'+h(ROLES[k].who.n)+'</span></span>'+
        (k===S.role?'<span class="pill p-acc">'+h(t("Signed in"))+'</span>':'<span class="chev">'+svg("chev")+'</span>')+'</button>';
    }).join("")+'</div>'+
-   '<div class="card flat"><p class="sm">One number, one confirmation, and the interface follows. In the demo build '+
-   '<b class="mono">+961 70 150 153</b> is cleared for every role.</p></div>';
+   '<div class="card flat"><p class="sm">One number, one confirmation, and the interface follows. '+
+   'A cleared number is confirmed with the six-digit code issued for it.</p></div>';
 }
 
 /* ---------------- chrome ---------------- */
@@ -696,7 +1037,7 @@ function stopCam(){
 function camWhy(e){
   var n = (e && e.name) || "";
   if(location.protocol==="file:")
-    return "A page opened straight from a file cannot use the camera. Put the app on baladiservices.com, or press Photograph the code below — that works everywhere.";
+    return "A page opened straight from a file cannot use the camera. Put the app on baladiservice.com, or press Photograph the code below — that works everywhere.";
   if(!window.isSecureContext)
     return "The live camera needs an https address. Press Photograph the code below, or use the handheld scanner.";
   if(window.self!==window.top)
@@ -745,6 +1086,7 @@ function startCam(){
   navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false}).then(function(st){
     cam.stream=st; v.srcObject=st; v.setAttribute("playsinline",""); v.play();
     S.camOn=true; var ss=$("scanstate"); if(ss) ss.innerHTML='<i class="dotlive"></i>'+h(t("Camera"))+' · '+h(t("Waiting for a scan"));
+    if(S.camPhoto){ paint(); return; }
     if("BarcodeDetector" in window){
       try{ cam.det=new window.BarcodeDetector({formats:["qr_code"]}); }catch(e){ cam.det=null; }
     }
@@ -752,6 +1094,7 @@ function startCam(){
   }).catch(function(e1){
     navigator.mediaDevices.getUserMedia({video:true,audio:false}).then(function(st){
       cam.stream=st; v.srcObject=st; v.setAttribute("playsinline",""); v.play(); S.camOn=true;
+      if(S.camPhoto){ paint(); return; }
       if("BarcodeDetector" in window){ try{ cam.det=new window.BarcodeDetector({formats:["qr_code"]}); }catch(e){ cam.det=null; } }
       loop();
     }).catch(function(e2){ S.camErr=camWhy(e2||e1); paint(); });
@@ -805,9 +1148,25 @@ function onScan(raw, src){
   if(!code) return;
   if(S.lastScan && S.lastScan.code===code && Date.now()-S.lastScan.at<2500) return;
   S.lastScan={code:code, at:Date.now(), src:src};
+  /* nothing logged means nothing was wrong: a bag is assumed sorted, a point assumed clear */
+  var P0=parseCode(code);
+  S.scanRank    = P0.kind==="bag" ? "ok" : null;
+  S.scanOutcome = P0.kind==="bag" ? "Collected" : POINT_OUTCOMES[0];
+  S.scanTouched = false;
   if(navigator.vibrate) try{ navigator.vibrate(35); }catch(e){}
   stopCam();
   S.scansSinceCheck++;
+  if(S.role==="facility"){
+    if(S.sample){
+      if(S.sample.indexOf(code)>=0){ S.sampleSeen[code]=true; toast("In the sample \u00b7 checked off"); }
+      else toast("Not in the drawn sample \u2014 logged as an extra check");
+    } else toast("Draw a sample first, then scan the bags it names");
+    paint(); return;
+  }
+  if(S.role==="customer" && S.pickScan){
+    S.pickTag=code; S.pickScan=false; paint();
+    toast("Tag attached to the request"); return;
+  }
   if(S.role==="customer") push("bagscanned",code);
   else if(S.role==="collector") push("scanned",code);
   else push("scanned",code);
@@ -815,11 +1174,23 @@ function onScan(raw, src){
 
 /* ============================== login ============================== */
 function digits(s){ return String(s||"").replace(/\D/g,""); }
-function phoneOk(s){
-  var d=digits(s);
-  if(d.indexOf("961")===0) d=d.slice(3);
-  if(d.indexOf("0")===0) d=d.slice(1);
-  return ("961"+d)===DEMO_PHONE;
+/* strip a pasted country code, a leading 00 and the national trunk 0 */
+function localPart(cc, raw){
+  var d=digits(raw);
+  if(d.indexOf("00")===0) d=d.slice(2);
+  if(d.indexOf(cc)===0 && d.length>cc.length) d=d.slice(cc.length);
+  while(d.indexOf("0")===0) d=d.slice(1);
+  return d;
+}
+function findNumber(cc, raw){
+  var d=localPart(cc, raw), hit=null;
+  REGISTER.forEach(function(r){ if(r.cc===cc && r.n===d) hit=r; });
+  return hit;
+}
+function phoneOk(s){ return !!findNumber(S.cc||"961", s); }
+function codeOk(entry, code){
+  var c=digits(code);
+  return !!entry && c.length===6 && fnv(entry.cc+entry.n+":"+c+":baladi")===entry.h;
 }
 function paintLogin(){
   $("appbar").hidden=true; $("tabbar").hidden=true;
@@ -836,28 +1207,31 @@ function paintLogin(){
     '<h2 style="font-size:21px;font-weight:600">'+h(t("Sign in"))+'</h2>'+
     '<p class="b2">Your number decides what you see. Crews, drivers, collectors, the municipality and administrators all sign in here.</p>'+
     '<label class="fld"><span>Mobile number</span>'+
-      '<div style="display:flex;gap:8px"><div class="chip" style="padding:11px 12px">+961</div>'+
-      '<input id="ph" type="tel" inputmode="numeric" placeholder="70 150 153" value="'+h(S.phone)+'" autocomplete="tel-national"></div></label>'+
+      '<div style="display:flex;gap:8px"><select id="cc" style="width:112px;flex:none">'+
+        DIAL.map(function(x){ return '<option value="'+x.cc+'"'+(x.cc===S.cc?' selected':'')+'>+'+x.cc+' '+h(x.en)+'</option>'; }).join("")+
+      '</select>'+
+      '<input id="ph" type="tel" inputmode="numeric" value="'+h(S.phone)+'" autocomplete="tel-national"></div></label>'+
+    (S.loginErr? '<div class="note w"><span>'+svg("alert")+'</span><div><b>'+h(S.loginErr)+'</b>Type another number and continue.</div></div>' : '')+
     '<button class="btn p" data-a="sendotp">'+h(t("Continue"))+'</button>'+
-    '<div class="note"><span>'+svg("info")+'</span><div><b>Demo build</b>One number is cleared on this build: <b class="mono">+961 70 150 153</b>. Any other number is refused, as it would be in production.</div></div>'+
-    '<p class="sm" style="text-align:center">baladiservices.com</p>';
-    setTimeout(function(){ var e=$("ph"); if(e) e.focus(); },60);
+    '<p class="sm" style="text-align:center">baladiservice.com</p>';
+    setTimeout(function(){ var e=$("ph"); if(e){ e.focus(); if(S.loginErr) e.select(); } },60);
   } else if(S.step==="otp"){
     v.innerHTML =
     '<div class="mark">&#1576;</div>'+
     '<h2 style="font-size:21px;font-weight:600">Confirm your number</h2>'+
-    '<p class="b2">We sent a six-digit code to <b class="mono">+961 '+h(S.phone)+'</b> by SMS and WhatsApp.</p>'+
+    '<p class="b2">Enter the six-digit code issued for <b class="mono">+'+h(S.cc)+' '+h(S.phone)+'</b>.</p>'+
     '<label class="fld"><span>Confirmation code</span>'+
       '<input id="otp" class="mono" inputmode="numeric" maxlength="6" placeholder="------" style="text-align:center;font-size:26px;letter-spacing:.3em"></label>'+
     '<button class="btn p" data-a="checkotp">'+h(t("Continue"))+'</button>'+
     '<button class="btn" data-a="backphone">'+h(t("Back"))+'</button>'+
-    '<div class="note"><span>'+svg("info")+'</span><div>On this build any six digits are accepted once the number matches.</div></div>';
+    (S.otpErr? '<div class="note w"><span>'+svg("alert")+'</span><div><b>'+h(S.otpErr)+'</b>Check the code you were given and try again.</div></div>' : '');
     setTimeout(function(){ var e=$("otp"); if(e) e.focus(); },60);
   } else {
     v.innerHTML =
     '<div class="mark">&#1576;</div>'+
     '<h2 style="font-size:21px;font-weight:600">Choose an interface</h2>'+
-    '<p class="b2">This number is cleared for every role on the demo register. In production a number carries one clearance and lands straight in it.</p>'+
+    '<p class="b2">'+(S.who? h(S.who)+' \u2014 this number is cleared for every role. ' : 'This number is cleared for every role. ')+
+    'A number normally carries one clearance and lands straight in it.</p>'+
     '<div style="display:flex;flex-direction:column;gap:9px">'+
       Object.keys(ROLES).map(function(k){ var R=ROLES[k];
         return '<button class="rolecard" data-a="role" data-v="'+k+'"><span class="av">'+svg(R.icon)+'</span>'+
@@ -881,38 +1255,185 @@ function myPayable(){ return Math.round((feeOf("res")-myRebate())*100)/100; }
 V["customer.home"]=function(){
   var kg=ME.recycleKg+ME.organicKg+ME.otherKg;
   return ''+
-  '<div class="card acc"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'+
-    '<div><p class="sm">'+h(t("Amount due"))+'</p><div class="big">'+money(myPayable()/2)+'</div>'+
-    '<p class="sm">Instalment 2 · due 30 Nov 2026</p></div>'+
-    '<button class="btn p sm" data-a="push" data-v="pay">'+h(t("Pay now"))+'</button></div>'+
-    '<button class="link" data-a="push" data-v="history" style="text-align:start">'+h(t("Payment history"))+' &rsaquo;</button></div>'+
+  '<div class="card acc"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'+
+    '<div><p class="sm">'+h(t("Amount due"))+' &middot; instalment 2, due 30 Nov</p><div class="big">'+money(myPayable()/2)+'</div></div>'+
+    '<button class="btn p sm" data-a="push" data-v="pay">'+h(t("Pay now"))+'</button></div></div>'+
 
-  '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center">'+
-    '<div><p class="eyebrow">Next collection</p><p class="h">Thursday 06:30 · '+h(t("Organic"))+'</p>'+
-    '<p class="sm">Recyclables Saturday · Commingled Mon and Fri</p></div>'+svg("truck","")+'</div></div>'+
+  '<div class="card"><p class="eyebrow">'+h(t("Next collection"))+'</p>'+
+    SCHED.map(function(x){
+      return '<div class="nxt"><span class="ico">'+svg(x.icon)+'</span>'+
+        '<span class="m"><b>'+h(S.ar?x.ar:x.en)+'</b><span>'+h(S.ar?x.daysAr:x.days)+'</span></span>'+
+        '<span class="w"><b>'+h(S.ar?x.nextAr:x.next)+'</b><span class="mono">'+h(x.at)+'</span></span></div>';
+    }).join("")+
+    '<button class="link" data-a="push" data-v="schedule" style="text-align:start">'+h(t("Full schedule"))+' &rsaquo;</button></div>'+
 
-  '<div class="grid3">'+
-    '<button class="stat" data-a="push" data-v="pickup"><b>'+svg("bag","")+'</b><span>'+h(t("Request a pickup"))+'</span></button>'+
-    '<button class="stat" data-a="tab" data-v="sorting"><b>'+svg("scan","")+'</b><span>'+h(t("Scan a bag"))+'</span></button>'+
-    '<button class="stat" data-a="push" data-v="history"><b>'+svg("doc","")+'</b><span>'+h(t("Payment history"))+'</span></button>'+
+  '<div class="quick">'+
+    '<button data-a="push" data-v="pickup">'+svg("bag")+'<span>'+h(t("Request a pickup"))+'</span></button>'+
+    '<button data-a="push" data-v="tags">'+svg("ticket")+'<span>'+h(t("Request tags"))+'</span></button>'+
+    '<button data-a="push" data-v="sortguide">'+svg("leaf")+'<span>'+h(t("How to sort"))+'</span></button>'+
+    '<button data-a="push" data-v="training">'+svg("task")+'<span>'+h(t("Sorting training"))+(S.trainDone?' \u2713':'')+'</span></button>'+
   '</div>'+
 
+  '<div class="sect"><span class="eyebrow">'+h(t("Prizes"))+'</span><button class="link" data-a="tab" data-v="rewards">'+h(t("Vouchers"))+'</button></div>'+
+  prizeCarousel()+
+
   '<div class="sect"><span class="eyebrow">'+h(t("Impact"))+'</span><button class="link" data-a="push" data-v="impact">Detail</button></div>'+
-  '<div class="card"><div class="grid2">'+
-    '<div><div class="big">'+kg+' kg</div><p class="sm">sorted and collected this year</p></div>'+
-    '<div><div class="big">132 kg</div><p class="sm">CO&#8322;e avoided, on the municipality&rsquo;s factors</p></div>'+
-  '</div><div class="meter"><div class="lab"><span>Your street this month</span><b>78%</b></div>'+
-  '<div class="bar"><i style="width:78%"></i></div>'+
-  '<p class="sm">share of doors on Rue Zeitouna that put out a sorted bag</p></div></div>'+
+  impactCarousel()+
 
-  '<button class="card gold" style="text-align:start;width:100%" data-a="tab" data-v="rewards">'+
-    '<div style="display:flex;gap:11px;align-items:flex-start">'+svg("gift","")+
-    '<div><p class="h">'+h(t("Monthly prize"))+': '+money(potValue())+' in gold</p>'+
-    '<p class="sm">Drawn on the last day of the month. Your '+myVouchers().length+' vouchers are '+myVouchers().length+
-    ' of '+nf(DRAW.entries)+' entries &mdash; about 1 in '+nf(oddsOne(DRAW.entries,myVouchers().length))+'.</p></div></div></button>'+
+  '';
+};
 
-  '<div class="note"><span>'+svg("info")+'</span><div><b>Waste tariff, not waste collection</b>'+
-  'The fee on this screen is the municipal waste tariff. Collection itself is run under a separate service contract and is never charged at the door.</div></div>';
+function prizeCarousel(){
+  var mine=myVouchers().length;
+  return '<div class="carou">'+
+    '<button class="card gold" style="text-align:start" data-a="tab" data-v="rewards">'+
+      '<div style="display:flex;gap:11px;align-items:flex-start">'+svg("gift","")+
+      '<div><p class="eyebrow">'+h(t("Monthly prize"))+'</p>'+
+      '<p class="h">'+money(potValue())+' in gold</p>'+
+      '<p class="sm">Drawn on the last day of the month. Your '+mine+' vouchers are '+mine+
+      ' of '+nf(DRAW.entries)+' entries &mdash; about 1 in '+nf(oddsOne(DRAW.entries,mine))+'.</p></div></div></button>'+
+    '<button class="card gold" style="text-align:start" data-a="tab" data-v="rewards">'+
+      '<div style="display:flex;gap:11px;align-items:flex-start">'+svg("truck","")+
+      '<div><p class="eyebrow">'+h(t("National grand prize"))+'</p>'+
+      '<p class="h">An electric SUV</p>'+
+      '<p class="sm">Drawn nationally on '+h(DRAW.grandDate)+' from every voucher earned this year. '+
+      nf(DRAW.annualEntries)+' entries in the national pool.</p></div></div></button>'+
+  '</div>'+dotsFor(2);
+}
+
+function impactCarousel(){
+  var yr=ME.recycleKg+ME.organicKg+ME.otherKg;
+  var cards=[
+    ['<div class="big">'+myTrees()+'</div>','trees planted, equivalent','Your '+myCo2Kg()+' kg of CO&#8322;e avoided is about what '+myTrees()+' mature trees take in over a year.'],
+    ['<div class="big">'+nf(ME.bagsLifetime)+'</div>','bags sorted, lifetime','Since '+h(ME.since)+'. '+ME.bagsThisMonth+' so far this month.'],
+    ['<div class="big">'+myAvoidedT().toFixed(2)+' t</div>','kept out of central treatment',myAvoidedKg()+' kg that never went to the central facility or to final disposal.'],
+    ['<div class="big">'+yr+' kg</div>','sorted this year','Recyclables '+ME.recycleKg+' kg &middot; organics '+ME.organicKg+' kg &middot; commingled '+ME.otherKg+' kg.'],
+    ['<div class="big">'+myCo2Kg()+' kg</div>','CO&#8322;e avoided','On the factors the municipality publishes in its annual report.'],
+    ['<div class="big">78%</div>','of your street sorting','Share of doors on Rue Zeitouna that put out a sorted bag this month.']
+  ];
+  return '<div class="carou">'+cards.map(function(c){
+    return '<div class="card">'+c[0]+'<p class="sm">'+c[1]+'</p>'+
+      '<p class="sm" style="border-top:1px solid var(--line-soft);padding-top:7px">'+c[2]+'</p></div>';
+  }).join("")+'</div>'+dotsFor(cards.length);
+}
+
+TITLES.inbox="Notifications and messages"; TITLES.help="Help and feedback";
+TITLES.sortguide="What goes in which bag";
+
+function unreadCount(){
+  var n=0; NOTIFS.forEach(function(x){ if(!S.readIds[x.id]) n++; }); return n;
+}
+V["customer.inbox"]=function(){
+  var tab=S.inboxTab;
+  return '<div class="seg" data-g="ibx"><button class="'+(tab==="notifs"?"on":"")+'" data-v="notifs">'+
+      h(t("Notifications"))+(unreadCount()?' ('+unreadCount()+')':'')+'</button>'+
+    '<button class="'+(tab==="msgs"?"on":"")+'" data-v="msgs">'+h(t("Messages"))+'</button></div>'+
+  (tab==="notifs"
+    ? '<div class="card plain">'+NOTIFS.map(function(x){
+        var unread=!S.readIds[x.id];
+        return '<button class="nrow" data-a="readnotif" data-v="'+h(x.id)+'">'+
+          '<span class="ni">'+svg(x.ic)+'</span>'+
+          '<span class="nb"><b>'+h(x.t)+'</b><p>'+h(x.b)+'</p><span>'+h(x.d)+'</span></span>'+
+          (unread?'<span class="dot"></span>':'')+'</button>';
+      }).join("")+'</div>'+
+      (unreadCount()? '<button class="btn" data-a="readall">'+h(t("Mark all as read"))+'</button>' : '')+
+      '<p class="sm">Service changes, payment reminders and draw results arrive here and by SMS. Turn SMS off under Settings.</p>'
+    : '<div class="card plain"><p class="eyebrow">Municipality of Al-Zeitoun</p><div class="chat">'+
+        MSGS.map(function(m){
+          return '<div class="bub '+(m.me?"m":"b")+'">'+h(m.t)+'<span class="w">'+h(m.d)+'</span></div>';
+        }).join("")+'</div></div>'+
+      '<label class="fld"><span>'+h(t("Reply"))+'</span><input id="msgin" placeholder="'+h(t("Type a message"))+'"></label>'+
+      '<button class="btn p" data-a="sendmsg">'+h(t("Send"))+'</button>'+
+      '<p class="sm">Messages go to the municipal office, not to the collection crew. Anything urgent on the street should be reported as a problem so it reaches operations.</p>');
+};
+
+/* ---- help, feedback and the assistant ---- */
+var CHAT_SUGGEST = ["How much do I owe?","When is my next collection?","How do I get tags?","How does the rebate work?","What can I win?"];
+function botAnswer(q){
+  var x=(q||"").toLowerCase();
+  function has(){ for(var i=0;i<arguments.length;i++){ if(x.indexOf(arguments[i])>=0) return true; } return false; }
+  if(has("owe","amount","due","bill","how much","pay","payment","instal"))
+    return "Your tariff for 2026 is "+money(feeOf("res"))+", less "+money(myRebate())+" of sorting rebate, so "+money(myPayable())+
+           ". Instalment 1 was paid on 2 October. Instalment 2 is "+money(myPayable()/2)+", due 30 November. "+
+           "You can pay at an OMT counter, by bank transfer, or in cash to a field collector against a numbered receipt.";
+  if(has("collect","pickup","pick up","when","schedule","day"))
+    return "Three services, three schedules. "+SCHED.map(function(c){ return c.en+": "+c.days+", next "+c.next+" at "+c.at; }).join(". ")+
+           ". A change of day is announced here and by SMS at least three days ahead.";
+  if(has("tag","sticker","label"))
+    return "Tags are pre-printed with a unique serial and issued to your premises \u2014 nobody can create one in the app. "+
+           "Request a batch under Sorting, or collect them free from the municipality, an OMT branch, a drop-off station, or your own crew on the round.";
+  if(has("rebate","discount","reduction","cheaper"))
+    return "Scan "+REBATE_BAGS+" or more sorted bags in a month and the rebate applies: "+REBATE_PCT+"% off next year's tariff. "+
+           "You are at "+ME.bagsThisMonth+" bags this month. The rebate is on sorting, not on paying early.";
+  if(has("draw","prize","win","voucher","gold","car"))
+    return "One voucher per activity type per month \u2014 sorting recyclables, sorting organics, and paying on time \u2014 so three a month. "+
+           "This month's pot is "+money(potValue())+" in gold, drawn on 31 October. The national grand prize is an electric SUV, drawn on "+DRAW.grandDate+".";
+  if(has("sort","recycl","organic","compost","which bag","plastic","glass"))
+    return "Three bags. Organic takes food scraps, peel, bones, coffee and garden trimmings. Recyclables takes paper, card, bottles, cans and jars \u2014 empty, dry, lids off. "+
+           "Everything else goes commingled. Nothing hazardous in any bag. Open What goes in which bag under Sorting for the full version.";
+  if(has("missed","complaint","problem","not collected","late","smell","dump"))
+    return "Report it under Report a problem on your Account tab. It goes straight to operations with your collection point attached, "+
+           "and anything upheld counts against the contractor's monthly payment.";
+  if(has("receipt","history","proof","paid"))
+    return "Every payment issues a numbered receipt. Payment history on your Account tab lists them all and each one can be sent to you again by SMS or WhatsApp.";
+  if(has("person","human","call","office","speak","agent"))
+    return "The municipal office answers messages in the Messages tab of your inbox, and the counter is open Monday to Friday, 08:00 to 14:00.";
+  if(has("hello","hi","salam","marhaba","good morning"))
+    return "Hello. Ask me about your fee, your collection days, tags, the rebate or the draw.";
+  return "I could not match that to anything I hold. I can answer on your fee and instalments, collection days, tags, the sorting rebate, the draw, and how to report a problem. "+
+         "For anything else, send a message to the municipality from the Messages tab.";
+}
+V["customer.help"]=function(){
+  if(!S.chat) S.chat=[{b:true, t:"Hello "+ME.name.split(" ")[0]+". Ask me about your fee, your collection days, tags, the rebate or the draw."}];
+  return '<div class="card plain"><p class="eyebrow">'+h(t("Assistant"))+'</p>'+
+    '<div class="chat">'+S.chat.map(function(m){
+      return '<div class="bub '+(m.b?"b":"m")+'">'+h(m.t)+'</div>';
+    }).join("")+'</div></div>'+
+    '<div class="chips">'+CHAT_SUGGEST.map(function(q){
+      return '<button class="chip" data-a="chatq" data-v="'+h(q)+'">'+h(q)+'</button>'; }).join("")+'</div>'+
+    '<label class="fld"><span>'+h(t("Your question"))+'</span><input id="chatin" placeholder="'+h(t("Type a question"))+'"></label>'+
+    '<div class="btnrow"><button class="btn" data-a="chatclear">'+h(t("Clear"))+'</button>'+
+    '<button class="btn p" data-a="chatsend">'+h(t("Ask"))+'</button></div>'+
+    '<p class="sm">The assistant answers from your own account and the published rules. It does not guess, and it cannot change anything on your account. '+
+    'Anything it cannot answer goes to the municipal office.</p>'+
+    '<div class="sect"><span class="eyebrow">'+h(t("Feedback"))+'</span></div>'+
+    '<div class="card plain"><p class="sm">How is the service on your street?</p>'+
+    '<div class="chips">'+[1,2,3,4,5].map(function(n){
+      return '<button class="chip'+(S.fbScore===n?" on":"")+'" data-a="fbscore" data-v="'+n+'">'+n+'</button>'; }).join("")+
+    '<span class="sm" style="align-self:center">1 poor &middot; 5 good</span></div>'+
+    '<label class="fld"><span>'+h(t("What would you change"))+'</span><input id="fbtext" placeholder="'+h(t("optional"))+'"></label>'+
+    '<button class="btn p" data-a="fbsend">'+h(t("Send feedback"))+'</button>'+
+    '<p class="sm">Feedback is read by the municipality and reported in the monthly service review. It is not a complaint channel &mdash; use Report a problem for anything that needs a crew.</p></div>'+
+    '<button class="btn row" data-a="push" data-v="creports"><span>'+svg("alert","ic")+' Report a problem</span><span class="chev">'+svg("chev")+'</span></button>';
+}; TITLES.schedule="Collection schedule";
+V["customer.sortguide"]=function(){
+  return '<div class="note"><span>'+svg("leaf")+'</span><div><b>Three bags, four rules</b>'+
+    'Get these right and the bag is credited, the rebate counts and the load is not downgraded at the facility.</div></div>'+
+    SORTG.map(function(g){
+      return '<div class="card"><div class="sg"><span class="tagi">'+svg(g.icon)+'</span>'+
+        '<div><b>'+h(S.ar?g.ar:g.en)+'</b>'+
+        '<p>'+h(S.ar?g.yesAr:g.yes)+'</p>'+
+        '<p class="no">'+h(S.ar?g.noAr:g.no)+'</p></div></div></div>';
+    }).join("")+
+    '<div class="card plain"><p class="eyebrow">The four rules</p>'+
+    SORT_RULES.map(function(r,i){
+      return '<div class="gstep"><span class="gn">'+(i+1)+'</span><div><b>'+h(r[0])+'</b><p class="sm">'+h(r[1])+'</p></div></div>';
+    }).join("")+'</div>'+
+    '<div class="note c"><span>'+svg("alert")+'</span><div><b>Never in any bag</b>'+h(SORT_NEVER)+'</div></div>'+
+    '<button class="btn p" data-a="push" data-v="training">'+svg("task","ic")+h(t("Sorting training"))+'</button>'+
+    '<button class="btn" data-a="push" data-v="dropoff">'+svg("map","ic")+h(t("Drop-off network"))+'</button>';
+};
+V["customer.schedule"]=function(){
+  return SCHED.map(function(x){
+    return '<div class="card"><div style="display:flex;gap:11px;align-items:flex-start">'+
+      '<span class="tagi">'+svg(x.icon)+'</span>'+
+      '<div style="flex:1"><p class="h">'+h(S.ar?x.ar:x.en)+'</p>'+
+      '<p class="sm">'+h(S.ar?x.howAr:x.howEn)+'</p></div></div>'+
+      '<div class="kv"><span>'+h(t("Collection days"))+'</span><b>'+h(S.ar?x.daysAr:x.days)+'</b></div>'+
+      '<div class="kv"><span>'+h(t("Next collection"))+'</span><b>'+h(S.ar?x.nextAr:x.next)+' '+h(x.at)+'</b></div>'+
+      '<div class="kv"><span>'+h(t("Put out between"))+'</span><b class="mono">'+h(x.win)+'</b></div></div>';
+  }).join("")+
+  '<p class="sm">Each service runs on its own schedule. A change of day is announced in the app and by SMS at least three days ahead.</p>';
 };
 
 V["customer.impact"]=function(){
@@ -922,8 +1443,15 @@ V["customer.impact"]=function(){
   '<div class="kv"><span>Organics diverted</span><b>'+ME.organicKg+' kg</b></div>'+
   '<div class="kv"><span>Commingled handed over</span><b>'+ME.otherKg+' kg</b></div>'+
   '<div class="kv"><span>Bags scanned</span><b>23</b></div></div>'+
+  '<div class="card acc"><p class="eyebrow">Kept out of central treatment and disposal</p>'+
+  '<div class="kv" style="border:none"><span>Lifetime, since '+h(ME.since)+'</span><b>'+myAvoidedT().toFixed(2)+' t &middot; '+nf(myAvoidedKg())+' kg</b></div>'+
+  '<div class="kv"><span>Recyclables, lifetime</span><b>'+nf(ME.recycleKgLife)+' kg</b></div>'+
+  '<div class="kv"><span>Organics, lifetime</span><b>'+nf(ME.organicKgLife)+' kg</b></div>'+
+  '<div class="kv"><span>Bags sorted, lifetime</span><b class="num">'+nf(ME.bagsLifetime)+'</b></div>'+
+  '<p class="sm">Every kilogram here is one the town did not pay to haul to the central facility or to bury.</p></div>'+
   '<div class="card"><p class="eyebrow">What that is worth</p>'+
-  '<div class="kv"><span>CO&#8322;e avoided</span><b>132 kg</b></div>'+
+  '<div class="kv"><span>Equivalent trees planted</span><b class="num">'+myTrees()+'</b></div>'+
+  '<div class="kv"><span>CO&#8322;e avoided</span><b>'+myCo2Kg()+' kg</b></div>'+
   '<div class="kv"><span>Material value at the gate</span><b>'+money(9.4)+'</b></div>'+
   '<div class="kv"><span>Landfill volume avoided</span><b>0.34 m&#179;</b></div></div>'+
   '<div class="card plain"><p class="eyebrow">Town-wide this year</p>'+
@@ -936,20 +1464,16 @@ V["customer.impact"]=function(){
 V["customer.sorting"]=function(){
   var ok=ME.bagsThisMonth>=REBATE_BAGS;
   return ''+
-  '<div class="card plain" style="gap:10px">'+
-    '<div class="scanbox" style="aspect-ratio:4/3">'+
-      '<video id="camvid" playsinline muted></video><canvas id="camcan"></canvas>'+
-      '<div class="reticle"><i></i><div class="scanline"></div></div>'+
-      '<div class="scanstate" id="scanstate"><i class="dotlive"></i>'+h(t("Handheld scanner"))+' · '+h(t("Waiting for a scan"))+'</div>'+
-      '<div class="scancap">'+h(t("Scan a bag"))+'</div>'+
-    '</div>'+
-    (S.camErr? '<div class="note w"><span>'+svg("info")+'</span><div><b>Live camera unavailable</b>'+h(S.camErr)+'</div></div>' : '')+
-    '<div class="btnrow"><button class="btn p" data-a="cam">'+svg("cam","ic")+h(S.camOn?t("Stop camera"):t("Open camera"))+'</button>'+
-    '<button class="btn" data-a="snap">'+svg("cam","ic")+h(t("Photograph the code"))+'</button></div>'+
-    '<button class="btn" data-a="manual">'+h(t("Enter the code by hand"))+'</button>'+
-    '<p class="sm">A paired Bluetooth scanner works anywhere in the app: pull the trigger and the code arrives as if typed. Photographing the code works on every phone, even offline.</p>'+
-  '</div>'+
+  '<div class="note"><span>'+svg("ticket")+'</span><div><b>Your tag is read for you</b>'+
+  'Put the tagged bag out and the crew scans it on the round \u2014 that is what credits it. '+
+  'If you are asking for a pickup, the tag goes on the request itself.</div></div>'+
+  '<button class="btn p" data-a="push" data-v="pickup">'+svg("bag","ic")+h(t("Request a pickup"))+'</button>'+
 
+  '<button class="card flat" style="text-align:start;width:100%;padding:11px 13px" data-a="push" data-v="sortguide">'+
+    '<div style="display:flex;gap:10px;align-items:center">'+svg("leaf","ic")+
+    '<div style="flex:1"><b style="font-size:13.5px;display:block">'+h(t("What goes in which bag"))+'</b>'+
+    '<span class="sm">Organic, recyclables, commingled &mdash; and the four rules</span></div>'+
+    '<span class="chev">'+svg("chev")+'</span></div></button>'+
   '<div class="grid2">'+
     '<button class="stat" data-a="push" data-v="tags"><b>'+svg("ticket","")+'</b><span>'+h(t("Request tags"))+'</span></button>'+
     '<button class="stat" data-a="push" data-v="points"><b>'+svg("pin","")+'</b><span>'+h(t("Nearest free tag points"))+'</span></button>'+
@@ -1067,19 +1591,22 @@ V["customer.pickup"]=function(){
       '<p class="h">Photo verification</p>'+
       '<p class="sm">Your request was selected for a spot check. Photograph the bag at your collection point within the minute.</p></div>'+
       '<div class="timer" id="ptimer">0:'+(S.tLeft<10?"0":"")+S.tLeft+'</div>'+
-      '<div class="scanbox" style="aspect-ratio:4/3"><div class="reticle" style="width:70%"><i></i></div>'+
-      '<div class="scancap">camera only &mdash; no gallery</div></div>'+
-      '<button class="btn p" data-a="pickupphoto">Capture and send</button>'+
+      photoCard("photograph the bag at your point","pickupphoto","Send the photograph")+
       '<p class="sm">If the minute runs out the request still goes through; it is simply queued for a reviewer.</p>';
   }
   return ''+
+  (S.pickTag
+    ? '<div class="card acc"><div style="display:flex;gap:10px;align-items:center">'+svg("check","ic")+
+      '<div style="flex:1"><p class="eyebrow">'+h(t("Tag read"))+'</p><p class="mono" style="font-size:13px">'+h(S.pickTag)+'</p></div>'+
+      '<button class="btn sm" data-a="pickrescan">'+h(t("Scan another"))+'</button></div></div>'
+    : scanCard(t("Scan the tag on the bag")))+
+  '<label class="fld"><span>Tag on the bag</span>'+
+    '<input id="ptag" class="mono" placeholder="baladi:bag:00000000" value="'+h(S.pickTag||"")+'"></label>'+
+  '<p class="sm">The scanner is already running. Type the serial instead if the tag will not read, or leave it blank and the crew will tag the bag at the door.</p>'+
   '<label class="fld"><span>Stream</span><div class="seg" data-g="pstr">'+
     '<button class="on" data-v="organic">'+h(t("Organic"))+'</button>'+
     '<button data-v="recycle">'+h(t("Recyclables"))+'</button>'+
     '<button data-v="bulky">Bulky</button></div></label>'+
-  '<label class="fld"><span>Tag on the bag</span>'+
-    '<div style="display:flex;gap:8px"><input id="ptag" class="mono" placeholder="BG-4417-____" value="'+h(S.lastScan?S.lastScan.code:"")+'">'+
-    '<button class="btn sm" data-a="tab" data-v="sorting">'+svg("scan","ic")+'</button></div></label>'+
   '<label class="fld"><span>Slot</span><div class="seg" data-g="pslot" style="flex-direction:column">'+
     '<button class="on" data-v="thu">Thursday 06:30–09:00</button>'+
     '<button data-v="sat">Saturday 06:30–09:00</button></div></label>'+
@@ -1087,7 +1614,7 @@ V["customer.pickup"]=function(){
   '<button class="btn p" data-a="pickupsend">Send request</button>'+
   '<p class="sm">Requests close at 22:00. Only points that asked are scheduled on the organic round.</p>'+
   '<div class="note"><span>'+svg("info")+'</span><div><b>Commingled needs no request</b>'+
-  'Commingled waste is systematic collection &mdash; every point on the line, Monday and Friday. There is nothing to ask for.</div></div>';
+  'Commingled waste is systematic collection &mdash; every point on the line, '+h(SCHED[0].days)+'. There is nothing to ask for.</div></div>';
 };
 
 V["customer.pay"]=function(){
@@ -1183,8 +1710,10 @@ V["customer.account"]=function(){
     '<div class="kv"><span>Instalment 2</span><b>'+money(myPayable()/2)+' due 30 Nov</b></div></div>'+
   '<button class="btn row" data-a="push" data-v="history"><span>'+svg("doc","ic")+' '+h(t("Payment history"))+'</span><span class="chev">'+svg("chev")+'</span></button>'+
   '<button class="btn row" data-a="push" data-v="creports"><span>'+svg("alert","ic")+' Report a problem</span><span class="chev">'+svg("chev")+'</span></button>'+
-  '<button class="btn row" data-a="menu"><span>'+svg("gear","ic")+' Settings and language</span><span class="chev">'+svg("chev")+'</span></button>'+
-  '<div class="note"><span>'+svg("info")+'</span><div><b>Waste tariff</b>This is the municipal waste tariff set under the national fee schedule. The collection service itself is paid by the municipality to its contractor, never by you at the door.</div></div>';
+  '<button class="btn row" data-a="push" data-v="inbox"><span>'+svg("bell","ic")+' '+h(t("Notifications and messages"))+'</span>'+
+    (unreadCount()? '<span class="pill p-acc"><i></i>'+unreadCount()+' new</span>' : '<span class="chev">'+svg("chev")+'</span>')+'</button>'+
+  '<button class="btn row" data-a="push" data-v="help"><span>'+svg("info","ic")+' '+h(t("Help and feedback"))+'</span><span class="chev">'+svg("chev")+'</span></button>'+
+  '<button class="btn row" data-a="menu"><span>'+svg("gear","ic")+' Settings and language</span><span class="chev">'+svg("chev")+'</span></button>';
 };
 
 /* ============================== shared bits ============================== */
@@ -1214,6 +1743,25 @@ function miniMap(served, total, exception){
     '<div class="legend"><span><i style="background:#7A5230"></i>Served</span><span><i style="background:#FBFAF7;border-color:#7A5230"></i>Pending</span>'+
     '<span><i style="background:#B3261E"></i>Exception</span></div></div>';
 }
+/* a photograph the app has asked for: live camera, the phone's own camera, or neither */
+function photoCard(cap, act, actLabel){
+  return '<div class="card plain" style="gap:10px">'+
+    '<div class="scanbox" style="aspect-ratio:4/3">'+
+      '<video id="camvid" playsinline muted></video><canvas id="camcan"></canvas>'+
+      (S.photoShot? '<img class="shot" src="'+S.photoShot+'" alt="">' : '')+
+      (!S.camOn && !S.photoShot ? '<div class="reticle" style="width:70%"><i></i></div>' : '')+
+      '<div class="scancap">'+h(S.photoShot? t("Photograph taken") : cap)+'</div></div>'+
+    (S.camErr? '<div class="note w"><span>'+svg("info")+'</span><div><b>Live camera unavailable</b>'+h(S.camErr)+'</div></div>' : '')+
+    '<div class="btnrow">'+
+      '<button class="btn p" data-a="photocam">'+svg("cam","ic")+h(S.camOn? t("Stop camera") : t("Open camera"))+'</button>'+
+      '<button class="btn" data-a="photosnap">'+svg("cam","ic")+h(t("Use the phone camera"))+'</button></div>'+
+    (S.camOn? '<button class="btn p" data-a="shoot">'+h(t("Take the photograph"))+'</button>' : '')+
+    (S.photoShot? '<div class="btnrow"><button class="btn" data-a="reshoot">'+h(t("Retake"))+'</button>'+
+      '<button class="btn p" data-a="'+act+'">'+h(t(actLabel||"Send"))+'</button></div>'
+      : '<button class="btn" data-a="'+act+'">'+h(t(actLabel||"Send"))+' '+h(t("without a photograph"))+'</button>')+
+  '</div>';
+}
+
 function scanCard(label){
   return '<div class="card plain" style="gap:10px">'+
     '<div class="scanbox"><video id="camvid" playsinline muted></video><canvas id="camcan"></canvas>'+
@@ -1252,13 +1800,19 @@ V["crew.scanned"]=function(code){
   return '<div class="card acc" style="text-align:center"><p class="h">'+h(codeLabel(P))+'</p>'+
     '<p class="mono" style="font-size:14px">'+h(code)+'</p>'+
     '<p class="sm">'+h(STREAMS[S.stream].en)+' · '+h(S.lastScan&&S.lastScan.src==="handheld"?t("Handheld scanner"):t("Camera"))+' · queued offline</p></div>'+
+  '<div class="note '+(S.scanTouched?"":"g")+'"><span>'+svg(S.scanTouched?"doc":"check")+'</span><div><b>'+
+    h(S.scanTouched ? "Logged as "+(P.kind==="bag" ? (RANKS.filter(function(r){return r.id===S.scanRank;})[0]||{en:""}).en : S.scanOutcome)
+                    : (P.kind==="bag" ? "Assumed sorted correctly" : "Assumed no issue at the point"))+'</b>'+
+    h(S.scanTouched ? "Change it below if that is not right."
+                    : "Nothing to do if that is right \u2014 walk on. Log something below only when it is not.")+'</div></div>'+
   (P.kind==="bag"
     ? '<div class="sect"><span class="eyebrow">Rank the bag</span></div><div class="chips">'+
-      RANKS.map(function(r){ return '<button class="chip" data-a="rank" data-v="'+r.id+'">'+h(S.ar?r.ar:r.en)+'</button>'; }).join("")+'</div>'
+      RANKS.map(function(r){ return '<button class="chip'+(S.scanRank===r.id?" on":"")+'" data-a="rank" data-v="'+r.id+'">'+h(S.ar?r.ar:r.en)+'</button>'; }).join("")+'</div>'
     : '')+
   '<div class="sect"><span class="eyebrow">'+h(P.kind==="bag"?"What happened to the bag":"What was at the point")+'</span></div>'+
   opts.map(function(o){
-    return '<button class="btn row" data-a="outcome" data-v="'+h(o)+'"><span>'+h(o)+'</span><span class="chev">'+svg("chev")+'</span></button>'; }).join("")+
+    return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'"><span>'+h(o)+'</span>'+
+      (S.scanOutcome===o?'<span class="pill p-acc"><i></i>logged</span>':'<span class="chev">'+svg("chev")+'</span>')+'</button>'; }).join("")+
   '<div class="sect"><span class="eyebrow">'+h(t("Comment"))+'</span></div>'+
   '<div class="chips">'+SCAN_COMMENTS.map(function(c,i){
     return '<button class="chip'+(i===0?" on":"")+'" data-a="cmt" data-v="'+c.id+'">'+h(S.ar?c.ar:c.en)+'</button>'; }).join("")+'</div>'+
@@ -1270,12 +1824,10 @@ V["crew.scanned"]=function(code){
 };
 
 V["crew.spot"]=function(){
-  return '<div class="scanbox" style="aspect-ratio:4/3"><div class="reticle" style="width:72%"><i></i></div>'+
-    '<div class="scancap">camera only &mdash; stored on the handset</div></div>'+
+  return photoCard("photograph the point","spotdone","Store the photograph")+
     '<div class="card"><div class="kv" style="border:none"><span>Point</span><b class="mono">Z-14-P</b></div>'+
     '<div class="kv"><span>Queued for upload</span><b>'+S.pendingPhotos+' photos</b></div>'+
     '<div class="kv"><span>Uploads</span><b>'+h(t("Upload later at home"))+'</b></div></div>'+
-    '<button class="btn p" data-a="spotdone">Capture</button>'+
     '<p class="sm">Spot checks never block the round. They queue locally with their own timestamp and go up on the depot or home network.</p>';
 };
 
@@ -1397,9 +1949,16 @@ V["driver.sync"]=V["crew.sync"];
 /* ============================== field collector ============================== */
 V["collector.round"]=function(){
   var left=ROUTE_DOORS.filter(function(d){ return !S.visited[d.id]; });
-  return '<div class="card acc"><div class="kv" style="border:none"><span>Collected today</span><b>'+money(1285)+'</b></div>'+
+  var mult=commMult(COLLECTOR.obsUpheld, COLLECTOR.obsRejected);
+  return '<div class="card acc"><div class="kv" style="border:none"><span>Collected today</span><b>'+money(COLLECTOR.cashToday)+'</b></div>'+
     '<div class="kv"><span>Doors left</span><b class="num">'+left.length+' of '+ROUTE_DOORS.length+'</b></div>'+
     '<div class="kv"><span>Deposit due</span><b>before 17:00</b></div></div>'+
+    '<button class="card gold" style="text-align:start;width:100%" data-a="push" data-v="earnings">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'+
+      '<div><p class="eyebrow">'+h(t("Your commission today"))+'</p>'+
+      '<p class="h">'+money(commEarned(COLLECTOR.cashToday, COLLECTOR.obsUpheld, COLLECTOR.obsRejected))+'</p>'+
+      '<p class="sm">'+COMMISSION.rate+'% of the cash you took, &times;'+mult.toFixed(2)+' for '+COLLECTOR.obsUpheld+' upheld observations</p></div>'+
+      '<span class="chev">'+svg("chev")+'</span></div></button>'+
     (left.length? '<div class="card plain"><div class="list">'+left.map(function(d){
       return '<button class="item" data-a="push" data-v="door" data-x="'+h(d.id)+'"><span class="av">'+(S.ar?"":h(d.n[0]))+'</span>'+
         '<span class="t"><b>'+h(S.ar?d.ar:d.n)+'</b><span class="mono">'+h(d.id)+' · '+h(d.a)+'</span></span>'+
@@ -1478,7 +2037,10 @@ V["collector.cash"]=function(){
     '<button class="btn" data-a="exp" data-v="cash">'+svg("doc","ic")+h(t("Export"))+' today&rsquo;s receipts</button>';
 };
 V["collector.obs"]=function(){
-  return '<button class="btn p" data-a="push" data-v="obsnew">'+svg("cam","ic")+'New observation</button>'+
+  return '<div class="card flat"><div class="kv" style="border:none"><span>Upheld this month</span><b class="num">'+COLLECTOR.obsUpheld+'</b></div>'+
+    '<div class="kv"><span>Commission multiplier</span><b>&times;'+commMult(COLLECTOR.obsUpheld,COLLECTOR.obsRejected).toFixed(2)+'</b></div>'+
+    '<button class="link" data-a="push" data-v="earnings" style="text-align:start">'+h(t("Your commission"))+' &rsaquo;</button></div>'+
+    '<button class="btn p" data-a="push" data-v="obsnew">'+svg("cam","ic")+'New observation</button>'+
     '<div class="sect"><span class="eyebrow">Today</span></div>'+
     '<div class="card plain"><div class="list">'+
     [["OB-2026-0455","Damaged bin · T-21-P","p-warn"],["OB-2026-0452","Illegal dumping · Corniche","p-crit"]].map(function(r){
@@ -1488,13 +2050,41 @@ V["collector.obs"]=function(){
 V["collector.obsnew"]=function(){
   return '<div class="chips">'+OBS.map(function(o,i){
       return '<button class="chip'+(i===0?" on":"")+'" data-a="obspick" data-v="'+i+'">'+h(S.ar?o.ar:o.en)+'</button>'; }).join("")+'</div>'+
-    '<div class="scanbox" style="aspect-ratio:4/3"><div class="reticle" style="width:72%"><i></i></div>'+
-    '<div class="scancap">camera only</div></div>'+
+    photoCard("photograph what you found","obssend","Send to operations")+
     '<div class="card"><div class="kv" style="border:none"><span>Location</span><b class="mono">33.8412, 35.5810</b></div>'+
     '<div class="kv"><span>Nearest point</span><b class="mono">T-21-P · 40 m</b></div></div>'+
     '<label class="fld"><span>Note</span><input placeholder="optional"></label>'+
-    '<label class="fld"><span>Priority</span><div class="seg" data-g="prio"><button data-v="r">Routine</button><button class="on" data-v="u">Urgent</button></div></label>'+
-    '<button class="btn p" data-a="obssend">Send to operations</button>';
+    '<label class="fld"><span>Priority</span><div class="seg" data-g="prio"><button data-v="r">Routine</button><button class="on" data-v="u">Urgent</button></div></label>';
+};
+
+TITLES.earnings="Commission";
+V["collector.earnings"]=function(){
+  var up=COLLECTOR.obsUpheld, rj=COLLECTOR.obsRejected, mult=commMult(up,rj);
+  var baseM=commBase(COLLECTOR.cashMonth), totM=commEarned(COLLECTOR.cashMonth, up, rj);
+  var nextT=null; COMMISSION.tiers.forEach(function(t){ if(!nextT && up<t.obs) nextT=t; });
+  return '<div class="card acc"><p class="eyebrow">This month</p>'+
+    '<div class="big">'+money(totM)+'</div>'+
+    '<div class="kv"><span>Cash collected</span><b>'+money(COLLECTOR.cashMonth)+'</b></div>'+
+    '<div class="kv"><span>Commission at '+COMMISSION.rate+'%</span><b>'+money(baseM)+'</b></div>'+
+    '<div class="kv"><span>Observation multiplier</span><b>&times;'+mult.toFixed(2)+'</b></div>'+
+    '<div class="kv"><span>Paid '+h(COLLECTOR.lastPeriod)+'</span><b>'+money(COLLECTOR.lastPaid)+'</b></div></div>'+
+    '<div class="note"><span>'+svg("cam")+'</span><div><b>Upheld observations, not filed ones</b>'+
+    'The multiplier counts observations operations accepted. Filing more does not pay more; '+
+    'each rejected one takes '+(COMMISSION.rejectedPenalty*100).toFixed(0)+' points off, and the multiplier never falls below &times;1.00.</div></div>'+
+    '<div class="grid3">'+
+    '<div class="stat"><b class="num">'+COLLECTOR.obsFiled+'</b><span>filed this month</span></div>'+
+    '<div class="stat"><b class="num" style="color:var(--good)">'+up+'</b><span>upheld</span></div>'+
+    '<div class="stat"><b class="num" style="color:var(--stamp)">'+rj+'</b><span>rejected</span></div></div>'+
+    '<div class="sect"><span class="eyebrow">The ladder</span></div>'+
+    '<div class="card plain">'+COMMISSION.tiers.map(function(tr){
+      var on = up>=tr.obs;
+      return '<div class="kv"><span>'+h(tr.en)+(tr.obs?' ('+tr.obs+'+)':'')+'</span>'+
+        '<b style="'+(on?'color:var(--good)':'color:var(--muted)')+'">&times;'+tr.mult.toFixed(2)+(on?' &#10003;':'')+'</b></div>';
+    }).join("")+'</div>'+
+    (nextT? '<div class="card flat"><p class="sm">'+(nextT.obs-up)+' more upheld observations takes you to &times;'+nextT.mult.toFixed(2)+
+      ' &mdash; worth about '+money(Math.round((commEarned(COLLECTOR.cashMonth,nextT.obs,rj)-totM)*100)/100)+' a month at this pace.</p></div>' : '')+
+    '<button class="btn" data-a="tab" data-v="obs">'+svg("cam","ic")+'Log an observation</button>'+
+    '<p class="sm">Commission is paid on cash actually deposited, after the round is reconciled. It is a cost of fee collection and sits in the municipality&rsquo;s own ledger, not in the collection contract.</p>';
 };
 
 /* ============================== operations ============================== */
@@ -1588,9 +2178,9 @@ V["review.done"]=function(){
 
 /* ============================== municipality ============================== */
 function zoneBars(){
-  return [["Old Quarter",82],["Zeitouna",78],["Al-Marj",74],["Al-Talleh",70],["Industrial Zone",63],["Al-Dahr",56]]
-   .map(function(z){ return '<div class="meter"><div class="lab"><span>'+h(z[0])+'</span><b>'+z[1]+'%</b></div>'+
-     '<div class="bar"><i style="width:'+z[1]+'%"></i></div></div>'; }).join("");
+  return ZONES.slice().sort(function(a,b){ return b.rate-a.rate; })
+   .map(function(z){ return '<div class="meter"><div class="lab"><span>'+h(S.ar?z.ar:z.en)+'</span><b>'+z.rate+'%</b></div>'+
+     '<div class="bar"><i style="width:'+z.rate+'%"></i></div></div>'; }).join("");
 }
 V["muni.overview"]=function(){
   return '<div class="grid2">'+
@@ -1605,8 +2195,209 @@ V["muni.overview"]=function(){
     '<div class="kv"><span>Collected</span><b>'+money(collected())+'</b></div></div>'+
     '<div class="sect"><span class="eyebrow">Rate by neighbourhood</span></div>'+
     '<div class="card plain">'+zoneBars()+'</div>'+
+    '<div class="sect"><span class="eyebrow">Tools</span></div>'+
+    '<div class="grid2">'+
+      '<button class="stat" data-a="push" data-v="analytics"><b>'+svg("chart","")+'</b><span>Generate analytics</span></button>'+
+      '<button class="stat" data-a="push" data-v="datain"><b>'+svg("db","")+'</b><span>Monthly data entry</span></button>'+
+      '<button class="stat" data-a="push" data-v="participation"><b>'+svg("leaf","")+'</b><span>Recycling and composting by neighbourhood</span></button>'+
+      '<button class="stat" data-a="push" data-v="routeeff" data-x="commingled"><b>'+svg("route","")+'</b><span>Route efficiency</span></button>'+
+    '</div>'+
     '<div class="note"><span>'+svg("info")+'</span><div><b>Tariff and service are separate ledgers</b>'+
     'This screen is the waste tariff coming in. What the municipality pays its collection contractor is under Payouts.</div></div>';
+};
+
+/* ---------------- monthly data entry ---------------- */
+TITLES.datain="Monthly data"; TITLES.analytics="Analytics"; TITLES.routeeff="Route efficiency"; TITLES.subroute="Sub-route";
+
+V["muni.datain"]=function(){
+  var m=S.muniMonth, d=MUNI_DATA[m]||{toCentral:0,recySoldT:0,recySoldUsd:0,organicsToCompost:0,tPaidContractor:0,filed:false};
+  return '<div class="note"><span>'+svg("db")+'</span><div><b>What the municipality files each month</b>'+
+    'Four figures the app cannot observe for itself. They feed the annual report, the cost-recovery line and the analytics.</div></div>'+
+    '<label class="fld"><span>Month</span><select id="mmonth" data-a="mmonth">'+
+      MUNI_MONTHS.map(function(x){ return '<option value="'+h(x)+'"'+(x===m?' selected':'')+'>'+h(x)+'</option>'; }).join("")+
+    '</select></label>'+
+    '<div class="card plain">'+
+    '<label class="fld"><span>Tonnes sent to central treatment and disposal</span><input id="f_central" class="mono" inputmode="decimal" value="'+d.toCentral+'"></label>'+
+    '<label class="fld"><span>Recyclables sold &mdash; tonnes</span><input id="f_recyt" class="mono" inputmode="decimal" value="'+d.recySoldT+'"></label>'+
+    '<label class="fld"><span>Recyclables sold &mdash; revenue (USD)</span><input id="f_recyu" class="mono" inputmode="decimal" value="'+d.recySoldUsd+'"></label>'+
+    '<label class="fld"><span>Organic waste sent to composting (tonnes)</span><input id="f_org" class="mono" inputmode="decimal" value="'+d.organicsToCompost+'"></label>'+
+    '<label class="fld"><span>Tonnes paid to the collection company</span><input id="f_paid" class="mono" inputmode="decimal" value="'+d.tPaidContractor+'"></label>'+
+    '</div>'+
+    '<button class="btn p" data-a="savemuni">'+h(t("Save"))+' '+h(m)+'</button>'+
+    '<div class="card plain"><p class="eyebrow">Filed so far</p>'+
+    '<div class="tw"><table><tr><th>Month</th><th class="ta-e">To central</th><th class="ta-e">Sold</th><th class="ta-e">Compost</th><th class="ta-e">Paid</th></tr>'+
+    MUNI_MONTHS.map(function(x){ var r=MUNI_DATA[x];
+      return '<tr><td>'+h(x)+'</td><td class="ta-e num">'+nf(r.toCentral)+' t</td><td class="ta-e num">'+nf(r.recySoldT)+' t</td>'+
+        '<td class="ta-e num">'+nf(r.organicsToCompost)+' t</td><td class="ta-e num">'+nf(r.tPaidContractor)+' t</td></tr>'; }).join("")+
+    '</table></div></div>'+
+    '<p class="sm">A month stays editable until the report is exported, and every change is written to the audit trail.</p>';
+};
+
+/* ---------------- participation by neighbourhood ---------------- */
+TITLES.participation="Participation"; TITLES.zone="Neighbourhood";
+
+function partChart(){
+  var rows=ZONES.slice().sort(function(a,b){ return (b.recy+b.comp)-(a.recy+a.comp); });
+  return '<div class="lgnd">'+
+    '<span><i style="background:var(--s1)"></i>'+h(t("Recycling"))+'</span>'+
+    '<span><i style="background:var(--s2)"></i>'+h(t("Composting"))+'</span></div>'+
+    '<div class="card plain">'+rows.map(function(z){
+      return '<button class="zrow" data-a="push" data-v="zone" data-x="'+h(z.id)+'">'+
+        '<span class="zhead"><b>'+h(S.ar?z.ar:z.en)+'</b><span>'+nf(z.premises)+' premises &middot; '+h(z.route)+'</span></span>'+
+        '<span class="zb"><span class="ztrack"><i style="width:'+z.recy+'%;background:var(--s1)"></i></span><em>'+z.recy+'%</em></span>'+
+        '<span class="zb"><span class="ztrack"><i style="width:'+z.comp+'%;background:var(--s2)"></i></span><em>'+z.comp+'%</em></span>'+
+        '</button>';
+    }).join("")+'</div>';
+}
+V["muni.participation"]=function(){
+  return '<div class="grid2">'+
+    '<div class="stat"><b>'+partAvg("recy")+'%</b><span>recycling participation, town-wide</span></div>'+
+    '<div class="stat"><b>'+partAvg("comp")+'%</b><span>composting participation, town-wide</span></div></div>'+
+    '<div class="sect"><span class="eyebrow">By neighbourhood</span><span class="sm">tap a row</span></div>'+
+    partChart()+
+    '<div class="sect"><span class="eyebrow">The same figures</span></div>'+
+    '<div class="tw"><table><tr><th>Neighbourhood</th><th class="ta-e">Premises</th><th class="ta-e">Recycling</th><th class="ta-e">Composting</th><th class="ta-e">Bags / month</th></tr>'+
+    ZONES.map(function(z){
+      return '<tr><td>'+h(S.ar?z.ar:z.en)+'</td><td class="ta-e num">'+nf(z.premises)+'</td>'+
+        '<td class="ta-e num">'+z.recy+'%</td><td class="ta-e num">'+z.comp+'%</td><td class="ta-e num">'+nf(z.bags)+'</td></tr>';
+    }).join("")+'</table></div>'+
+    '<button class="btn" data-a="exp" data-v="participation">'+svg("doc","ic")+h(t("Export"))+' participation</button>'+
+    '<p class="sm">Participation is the share of premises in the zone that put out at least one tagged bag of that stream in the month, '+
+    'counted from crew scans. A premises that sorts both counts in both.</p>';
+};
+V["muni.zone"]=function(id){
+  var z=zoneById(id); if(!z) return "";
+  var sorted=ZONES.slice().sort(function(a,b){ return (b.recy+b.comp)-(a.recy+a.comp); });
+  var rank=sorted.map(function(x){ return x.id; }).indexOf(id)+1;
+  return '<div class="card acc"><p class="h">'+h(S.ar?z.ar:z.en)+'</p>'+
+    '<p class="sm">Rank '+rank+' of '+ZONES.length+' on combined participation &middot; route '+h(z.route)+'</p>'+
+    '<div class="kv"><span>Premises</span><b class="num">'+nf(z.premises)+'</b></div>'+
+    '<div class="kv"><span>Recycling participation</span><b>'+z.recy+'%</b></div>'+
+    '<div class="kv"><span>Composting participation</span><b>'+z.comp+'%</b></div>'+
+    '<div class="kv"><span>Tagged bags a month</span><b class="num">'+nf(z.bags)+'</b></div>'+
+    '<div class="kv"><span>Fee collection rate</span><b>'+z.rate+'%</b></div></div>'+
+    '<div class="card plain"><p class="eyebrow">Against the town</p>'+
+    '<div class="lgnd"><span><i style="background:var(--s1)"></i>'+h(t("Recycling"))+'</span>'+
+    '<span><i style="background:var(--s2)"></i>'+h(t("Composting"))+'</span></div>'+
+    '<div class="zb"><span class="ztrack"><i style="width:'+z.recy+'%;background:var(--s1)"></i></span><em>'+z.recy+'%</em></div>'+
+    '<div class="zb"><span class="ztrack"><i style="width:'+partAvg("recy")+'%;background:var(--line)"></i></span><em>'+partAvg("recy")+'%</em></div>'+
+    '<p class="sm" style="margin-top:6px">Recycling here against the town average.</p>'+
+    '<div class="zb"><span class="ztrack"><i style="width:'+z.comp+'%;background:var(--s2)"></i></span><em>'+z.comp+'%</em></div>'+
+    '<div class="zb"><span class="ztrack"><i style="width:'+partAvg("comp")+'%;background:var(--line)"></i></span><em>'+partAvg("comp")+'%</em></div>'+
+    '<p class="sm" style="margin-top:6px">Composting here against the town average.</p></div>'+
+    (z.comp < partAvg("comp")-10
+      ? '<div class="note w"><span>'+svg("alert")+'</span><div><b>Composting is '+(partAvg("comp")-z.comp)+' points below the town</b>'+
+        'The organic round here is '+h(z.route)+'. Low composting with workable recycling usually means the round, not the households.</div></div>' : '')+
+    '<button class="btn" data-a="push" data-v="analytics">'+svg("chart","ic")+'What to do about it</button>';
+};
+
+/* ---------------- generated analytics ---------------- */
+function analytics(){
+  var weak=ZONES.slice().sort(function(a,b){ return a.rate-b.rate; });
+  var worstZone=weak[0], secondZone=weak[1];
+  var worstSub=null, worstPct=101;
+  ROUTEPERF.forEach(function(r){ r.subs.forEach(function(x){ var c=subCompletion(x); if(c<worstPct){ worstPct=c; worstSub=x; worstSub._type=r.en; } }); });
+  var d=MUNI_DATA[S.muniMonth]||MUNI_DATA[MUNI_MONTHS[0]];
+  var divRate=TONNES.divertedTruck/TONNES.total*100;
+  var matVal=0; MATERIALS.forEach(function(m){ matVal+=m.usd; });
+  var haulCost=COST_PER_TONNE*TONNES.total;
+  var costShare=haulCost/Math.max(1,collected())*100;   /* haulage as a share of the tariff collected */
+  return {worstZone:worstZone, secondZone:secondZone, worstSub:worstSub, worstPct:worstPct,
+          d:d, divRate:divRate, matVal:matVal, haulCost:haulCost, costShare:costShare};
+}
+V["muni.analytics"]=function(){
+  var a=analytics();
+  var fines=[
+    ["Open an arrears round in "+a.worstZone.en, a.worstZone.rate+"% collection against a town average of "+(COLLECTION_RATE*100).toFixed(1)+"%. "+
+      nf(Math.round(a.worstZone.premises*(100-a.worstZone.rate)/100))+" premises are behind. The ladder settles 44% of cases at the collector-visit step, so visits before notices."],
+    ["Withhold certificates in "+a.secondZone.en+" only after a notice", "65 certificates are held town-wide and 76% settle within 14 days. It is the strongest step and the one most likely to be contested, so it should follow a dated notice."],
+    ["Fine on evidence, not on suspicion", "Every contamination finding resolves to a scan, a photograph or a weighbridge ticket. A fine that cannot be opened back to one of those will not survive an appeal."],
+    ["Do not fine households below the rebate threshold", "They are the group the rebate is designed to pull in. Penalties here cost more in participation than they raise."]
+  ];
+  var contract=[
+    ["Put completion into the KPI, not just tonnage", a.worstSub.id+" served "+a.worstSub.served+" of "+a.worstSub.planned+" planned stops ("+a.worstPct.toFixed(1)+"%). Paying per tonne alone rewards the heavy routes and leaves the thin ones unserved."],
+    ["Price "+a.worstSub.zone+" as its own lot", "It carries the worst km per tonne ("+subKmPerT(a.worstSub)+" km/t) and the lowest completion. Bidders will either price it honestly or decline it, and both are useful."],
+    ["Collection and transport is "+a.costShare.toFixed(0)+"% of the tariff collected", money(a.haulCost)+" of haulage against "+money(collected())+" of tariff. Treatment and final disposal are not in that figure, so the headroom is smaller than it looks and should not be read as a surplus."],
+    ["Hold the per-tonne rate at "+money(COST_PER_TONNE)+" and move the deductions", "Deductions ran "+money(PAYOUTS[0].ded)+" on "+money(PAYOUTS[0].gross)+" last month — about "+(PAYOUTS[0].ded/PAYOUTS[0].gross*100).toFixed(1)+"%. That is the lever with room in it."],
+    ["Specify the organic route as request-built", "51 stops instead of 214 for the same service. Any bidder pricing a full systematic organic line is pricing work the town does not need."],
+    ["Publish diversion as a contract target", "Diversion is "+a.divRate.toFixed(1)+"% and recyclables are worth "+money(a.matVal)+" at the gate. A contractor with a share of that revenue has a reason to protect it."]
+  ];
+  var comms=[
+    ["Lead with the pot, not the penalty", money(potValue())+" in gold this month and "+nf(DRAW.participants)+" households taking part. Draw participation moves behaviour faster than arrears letters."],
+    ["Target "+a.worstZone.en+" with a street-level number", "People respond to their own street, not the town. The app already shows each household its street's sorted-bag share."],
+    ["Address contamination directly", "Contamination at the pad is "+TONNES.contamination+"%. Three images of what does not belong in the organic bag will do more than a page of rules."],
+    ["Name the saving", "Each household that sorts keeps material out of central treatment. Published per household, that is a number people repeat."],
+    ["Announce schedule changes three days ahead", "Three services now run on three schedules. Missed days are the most common complaint and the cheapest to prevent."]
+  ];
+  function block(title,icon,rows){
+    return '<div class="sect"><span class="eyebrow">'+h(title)+'</span></div>'+
+      '<div class="card plain">'+rows.map(function(r,i){
+        return '<div class="gstep"><span class="gn">'+(i+1)+'</span><div><b>'+h(r[0])+'</b><p class="sm">'+r[1]+'</p></div></div>';
+      }).join("")+'</div>';
+  }
+  return '<div class="note"><span>'+svg("chart")+'</span><div><b>Generated from this month&rsquo;s data</b>'+
+    'Collection by zone, the arrears ladder, route completion, weighbridge tonnage and the figures filed under Monthly data. '+
+    'Advice, not instruction &mdash; every line names the number it came from.</div></div>'+
+    '<div class="grid2">'+
+    '<div class="stat"><b>'+a.divRate.toFixed(1)+'%</b><span>diversion rate</span></div>'+
+    '<div class="stat"><b>'+a.costShare.toFixed(0)+'%</b><span>collection cost as a share of tariff</span></div>'+
+    '<div class="stat"><b>'+a.worstZone.rate+'%</b><span>weakest zone · '+h(a.worstZone.en)+'</span></div>'+
+    '<div class="stat"><b>'+a.worstPct.toFixed(0)+'%</b><span>weakest route · '+h(a.worstSub.id)+'</span></div></div>'+
+    block("Enforcement and fines","alert",fines)+
+    block("Recommendations for the next contract","doc",contract)+
+    block("Public communication and engagement","bell",comms)+
+    '<button class="btn p" data-a="exp" data-v="analytics">'+svg("doc","ic")+h(t("Export"))+' the analysis</button>'+
+    '<p class="sm">Figures move with the month selected under Monthly data. Nothing here is a legal determination; fines follow the municipality&rsquo;s own procedure.</p>';
+};
+
+/* ---------------- route efficiency ---------------- */
+function routeEffSection(){
+  return '<div class="sect"><span class="eyebrow">Route efficiency by service</span><span class="sm">average · tap for sub-routes</span></div>'+
+    '<div class="card plain"><div class="list">'+ROUTEPERF.map(function(r){
+      var a=routeAvg(r);
+      return '<button class="item" data-a="push" data-v="routeeff" data-x="'+h(r.k)+'">'+
+        '<span class="av">'+svg(r.icon)+'</span>'+
+        '<span class="t"><b>'+h(S.ar?r.ar:r.en)+'</b><span>'+a.stopsPerHr+' stops/hr &middot; '+a.kmPerT+' km/t &middot; '+a.onTime+'% on time</span></span>'+
+        '<span class="r"><b>'+a.completion.toFixed(1)+'%</b><span class="pill '+(a.completion>=95?"p-good":(a.completion>=90?"p-warn":"p-crit"))+'"><i></i>completion</span></span>'+
+        '</button>'; }).join("")+'</div></div>';
+}
+V["muni.routeeff"]=function(k){
+  var r=routeByKey(k); if(!r) return "";
+  var a=routeAvg(r);
+  return '<div class="card acc"><p class="h">'+h(S.ar?r.ar:r.en)+'</p>'+
+    '<div class="kv"><span>Stops planned / served</span><b class="num">'+nf(a.planned)+' / '+nf(a.served)+'</b></div>'+
+    '<div class="kv"><span>Completion</span><b>'+a.completion.toFixed(1)+'%</b></div>'+
+    '<div class="kv"><span>Stops per hour</span><b class="num">'+a.stopsPerHr+'</b></div>'+
+    '<div class="kv"><span>Kilometres per tonne</span><b class="num">'+a.kmPerT+'</b></div>'+
+    '<div class="kv"><span>Rounds starting on time</span><b>'+a.onTime+'%</b></div>'+
+    '<div class="kv"><span>Distance / tonnage</span><b class="num">'+a.km+' km &middot; '+a.t+' t</b></div></div>'+
+    '<div class="sect"><span class="eyebrow">Sub-routes</span><span class="sm">tap for detail</span></div>'+
+    '<div class="card plain"><div class="list">'+r.subs.map(function(x){
+      var c=subCompletion(x);
+      return '<button class="item" data-a="push" data-v="subroute" data-x="'+h(x.id)+'">'+
+        '<span class="av">'+svg("route")+'</span>'+
+        '<span class="t"><b class="mono">'+h(x.id)+'</b><span>'+h(x.zone)+' &middot; '+subStopsPerHr(x)+' stops/hr</span></span>'+
+        '<span class="r"><b>'+c.toFixed(1)+'%</b><span class="pill '+(c>=95?"p-good":(c>=90?"p-warn":"p-crit"))+'"><i></i>'+(x.onTime?"on time":"late start")+'</span></span>'+
+        '</button>'; }).join("")+'</div></div>'+
+    '<button class="btn" data-a="exp" data-v="routes">'+svg("doc","ic")+h(t("Export"))+' route efficiency</button>'+
+    '<p class="sm">The average above is the three sub-routes weighted by stops served, not a mean of percentages.</p>';
+};
+V["muni.subroute"]=function(id){
+  var x=subById(id); if(!x) return "";
+  var c=subCompletion(x);
+  return '<div class="card"><p class="h mono">'+h(x.id)+'</p><p class="sm">'+h(x.zone)+'</p>'+
+    '<div class="kv"><span>Stops planned</span><b class="num">'+x.planned+'</b></div>'+
+    '<div class="kv"><span>Stops served</span><b class="num">'+x.served+'</b></div>'+
+    '<div class="kv"><span>Completion</span><b>'+c.toFixed(1)+'%</b></div>'+
+    '<div class="kv"><span>Round duration</span><b class="num">'+x.min+' min</b></div>'+
+    '<div class="kv"><span>Stops per hour</span><b class="num">'+subStopsPerHr(x)+'</b></div>'+
+    '<div class="kv"><span>Distance</span><b class="num">'+x.km+' km</b></div>'+
+    '<div class="kv"><span>Tonnage</span><b class="num">'+x.t+' t</b></div>'+
+    '<div class="kv"><span>Kilometres per tonne</span><b class="num">'+subKmPerT(x)+'</b></div>'+
+    '<div class="kv"><span>Round start</span><b class="'+(x.onTime?"":"")+'" style="color:'+(x.onTime?'var(--good)':'var(--stamp)')+'">'+(x.onTime?"On time":"Late")+'</b></div></div>'+
+    (c<95 ? '<div class="note w"><span>'+svg("alert")+'</span><div><b>'+(x.planned-x.served)+' stops not served</b>'+
+      'Each one resolves to a missed scan and is open to a KPI deduction once the claim is upheld.</div></div>' : '')+
+    '<button class="btn" data-a="exp" data-v="service">'+svg("doc","ic")+h(t("Export"))+' the service events</button>';
 };
 V["muni.fees"]=function(){
   return '<div class="tw"><table><tr><th>Category</th><th class="ta-e">Premises</th><th class="ta-e">Per month</th><th class="ta-e">Billable</th></tr>'+
@@ -1633,6 +2424,12 @@ V["muni.payouts"]=function(){
         '<span class="t"><b>'+h(p.period)+'</b><span>'+h(p.op)+'</span></span>'+
         '<span class="r"><b>'+money(p.net)+'</b><span class="pill '+(p.st==="Paid"?"p-good":"p-warn")+'"><i></i>'+h(p.st)+'</span></span></button>';
     }).join("")+'</div></div>'+
+    '<div class="card plain"><p class="eyebrow">Fee-collection commission</p>'+
+    '<div class="kv" style="border:none"><span>Rate on cash collected</span><b>'+COMMISSION.rate+'%</b></div>'+
+    '<div class="kv"><span>Observation multiplier</span><b>&times;1.00 to &times;'+COMMISSION.tiers[COMMISSION.tiers.length-1].mult.toFixed(2)+'</b></div>'+
+    '<div class="kv"><span>Collectors on a round</span><b class="num">6</b></div>'+
+    '<div class="kv"><span>Paid last month</span><b>'+money(1184.60)+'</b></div>'+
+    '<p class="sm">Paid to the people who take the cash, on what was deposited and reconciled. Separate from the collection contract above, and set under Administrator.</p></div>'+
     '<button class="btn" data-a="exp" data-v="payouts">'+svg("doc","ic")+h(t("Export"))+' payout history</button>';
 };
 V["muni.payout"]=function(id){
@@ -1674,8 +2471,99 @@ V["muni.report"]=function(){
     '<div class="kv"><span>Cost per tonne</span><b>'+money(COST_PER_TONNE)+'</b></div>'+
     '<div class="kv"><span>Tariff collected</span><b>'+money(collected())+'</b></div>'+
     '<div class="kv"><span>Material revenue</span><b>'+money(val)+'</b></div>'+
-    '<div class="kv"><span>Cost recovery</span><b>'+((collected()+val)/(COST_PER_TONNE*TONNES.total)*100).toFixed(0)+'%</b></div></div>'+
-    '<button class="btn p" data-a="exp" data-v="report">'+svg("doc","ic")+h(t("Export"))+' the report</button>';
+    '<div class="kv"><span>Cover against collection and transport</span><b>'+((collected()+val)/(COST_PER_TONNE*TONNES.total)*100).toFixed(0)+'%</b></div>'+
+    '<p class="sm">Treatment and final disposal are not in this line, so it is cover against haulage only, not a surplus.</p></div>'+
+    routeEffSection()+
+    '<div class="card plain"><p class="eyebrow">Filed by the municipality &mdash; '+h(S.muniMonth)+'</p>'+
+    (function(){ var d=MUNI_DATA[S.muniMonth]||MUNI_DATA[MUNI_MONTHS[0]];
+      return '<div class="kv"><span>Sent to central treatment and disposal</span><b>'+nf(d.toCentral)+' t</b></div>'+
+      '<div class="kv"><span>Recyclables sold</span><b>'+nf(d.recySoldT)+' t &middot; '+money(d.recySoldUsd)+'</b></div>'+
+      '<div class="kv"><span>Organics sent to composting</span><b>'+nf(d.organicsToCompost)+' t</b></div>'+
+      '<div class="kv"><span>Tonnes paid to the collection company</span><b>'+nf(d.tPaidContractor)+' t</b></div>'; })()+
+    '<button class="link" data-a="push" data-v="datain" style="text-align:start">Edit the monthly figures &rsaquo;</button></div>'+
+    '<div class="btnrow"><button class="btn" data-a="push" data-v="analytics">'+svg("chart","ic")+'Generate analytics</button>'+
+    '<button class="btn p" data-a="exp" data-v="report">'+svg("doc","ic")+h(t("Export"))+' the report</button></div>';
+};
+
+/* ============================== facility operator ============================== */
+TITLES.load="Load at the gate"; TITLES.inspection="Inspection";
+
+V["facility.gate"]=function(){
+  var waiting=LOADS.filter(function(l){ return l.st==="Awaiting"; }).length;
+  return '<div class="grid2">'+
+    '<div class="stat"><b class="num">'+waiting+'</b><span>loads awaiting acceptance</span></div>'+
+    '<div class="stat"><b>'+TONNES.contamination+'%</b><span>contamination at the pad, month to date</span></div></div>'+
+    '<div class="sect"><span class="eyebrow">At the gate today</span><span class="sm">tap a load</span></div>'+
+    '<div class="card plain"><div class="list">'+LOADS.map(function(l){
+      var p = l.st==="Accepted"?"p-good":(l.st==="Downgraded"?"p-crit":"p-warn");
+      return '<button class="item" data-a="push" data-v="load" data-x="'+h(l.id)+'">'+
+        '<span class="av">'+svg("truck")+'</span>'+
+        '<span class="t"><b class="mono">'+h(l.id)+'</b><span>'+h(l.veh)+' &middot; '+h(l.route)+' &middot; '+h(t(STREAMS[l.stream].en))+'</span></span>'+
+        '<span class="r"><b class="num">'+nf(l.net)+' kg</b><span class="pill '+p+'"><i></i>'+h(l.st)+'</span></span></button>';
+    }).join("")+'</div></div>'+
+    '<button class="btn p" data-a="tab" data-v="inspect">'+svg("scan","ic")+'Draw a random inspection</button>'+
+    '<p class="sm">A load is accepted, downgraded or rejected at the gate. The decision carries into the contractor&rsquo;s monthly deduction, so it resolves to a ticket and a photograph.</p>';
+};
+
+V["facility.load"]=function(id){
+  var l=null; LOADS.forEach(function(x){ if(x.id===id) l=x; });
+  if(!l) return "";
+  return '<div class="card"><p class="h mono">'+h(l.id)+'</p>'+
+    '<div class="kv"><span>Vehicle and round</span><b class="mono">'+h(l.veh)+' &middot; '+h(l.route)+'</b></div>'+
+    '<div class="kv"><span>Stream declared</span><b>'+h(t(STREAMS[l.stream].en))+'</b></div>'+
+    '<div class="kv"><span>Net weight</span><b class="num">'+nf(l.net)+' kg</b></div>'+
+    '<div class="kv"><span>Weighed in</span><b class="mono">'+h(l.at)+'</b></div>'+
+    '<div class="kv"><span>Status</span><b>'+h(l.st)+'</b></div></div>'+
+    '<label class="fld"><span>Visual contamination, %</span><input id="l_cont" class="mono" inputmode="decimal" value="0"></label>'+
+    '<div class="scanbox" style="aspect-ratio:16/7"><div class="scancap">photograph of the tipping face</div></div>'+
+    '<div class="btnrow"><button class="btn" data-a="loadres" data-v="Downgraded" data-x="'+h(l.id)+'">Downgrade</button>'+
+    '<button class="btn p" data-a="loadres" data-v="Accepted" data-x="'+h(l.id)+'">Accept</button></div>'+
+    '<button class="btn d" data-a="loadres" data-v="Rejected" data-x="'+h(l.id)+'">Reject the load</button>'+
+    '<button class="btn" data-a="drawfor" data-v="'+h(l.id)+'">'+svg("scan","ic")+'Inspect a random sample from this load</button>'+
+    '<p class="sm">Rejecting sends the vehicle away loaded and is the most contested decision at the gate. It needs the photograph.</p>';
+};
+
+V["facility.inspect"]=function(){
+  var sam=S.sample, seen=S.sampleSeen||{};
+  var done=sam? sam.filter(function(c){ return seen[c]; }).length : 0;
+  return (sam
+    ? '<div class="card acc"><div style="display:flex;justify-content:space-between;align-items:center">'+
+        '<div><p class="eyebrow">Random sample'+(S.inspectFor?' &middot; '+h(S.inspectFor):'')+'</p>'+
+        '<p class="h">'+done+' of '+sam.length+' scanned</p></div>'+svg("scan","ic")+'</div>'+
+        '<div class="bar"><i style="width:'+Math.round(done/sam.length*100)+'%"></i></div></div>'
+    : '<div class="note"><span>'+svg("scan")+'</span><div><b>Random inspection</b>'+
+      'The app draws the bags, not the operator. Scan each one it names; anything else is logged as outside the sample.</div></div>')+
+    '<label class="fld"><span>Sample size</span>'+
+    '<div class="seg" data-g="samn"><button class="'+(S.sampleN===4?"on":"")+'" data-v="4">4</button>'+
+    '<button class="'+(S.sampleN===6?"on":"")+'" data-v="6">6</button>'+
+    '<button class="'+(S.sampleN===10?"on":"")+'" data-v="10">10</button></div></label>'+
+    '<button class="btn '+(sam?"":"p")+'" data-a="drawsample">'+svg("sync","ic")+(sam?"Draw a new sample":"Draw a random sample")+'</button>'+
+    (sam? scanCard(t("Scan a bag")) : '')+
+    (sam? '<div class="sect"><span class="eyebrow">Bags drawn</span></div>'+
+      '<div class="card plain"><div class="list">'+sam.map(function(c){
+        var ok=!!seen[c];
+        return '<div class="item"><span class="av">'+svg(ok?"check":"bag")+'</span>'+
+          '<span class="t"><b class="mono" style="font-size:12px">'+h(c)+'</b><span>'+(ok?"scanned and checked":"not yet scanned")+'</span></span>'+
+          '<span class="pill '+(ok?"p-good":"p-neut")+'"><i></i>'+(ok?"done":"pending")+'</span></div>';
+      }).join("")+'</div></div>'+
+      '<label class="fld"><span>Contamination found in the sample, %</span><input id="s_cont" class="mono" inputmode="decimal" value="0"></label>'+
+      '<div class="btnrow"><button class="btn" data-a="samres" data-v="Downgraded">Fail the sample</button>'+
+      '<button class="btn p" data-a="samres" data-v="Pass">Pass the sample</button></div>' : '')+
+    '<p class="sm">A sample is drawn from the tags credited on the round. Drawing again discards the current one and is recorded.</p>';
+};
+
+V["facility.findings"]=function(){
+  return '<div class="grid2">'+
+    '<div class="stat"><b class="num">'+INSPECTIONS.length+'</b><span>inspections logged</span></div>'+
+    '<div class="stat"><b class="num">'+INSPECTIONS.filter(function(i){return i.result!=="Pass";}).length+'</b><span>not passed</span></div></div>'+
+    '<div class="card plain"><div class="list">'+INSPECTIONS.map(function(i){
+      return '<div class="item"><span class="av">'+svg(i.result==="Pass"?"check":"alert")+'</span>'+
+        '<span class="t"><b class="mono" style="font-size:12px">'+h(i.id)+'</b><span>'+h(i.kind)+' &middot; '+h(i.ref)+' &middot; '+h(i.at)+
+        (i.note?' &middot; '+h(i.note):'')+'</span></span>'+
+        '<span class="r"><b>'+i.contam+'%</b><span class="pill '+(i.result==="Pass"?"p-good":"p-crit")+'"><i></i>'+h(i.result)+'</span></span></div>';
+    }).join("")+'</div></div>'+
+    '<button class="btn" data-a="exp" data-v="inspections">'+svg("doc","ic")+h(t("Export"))+' the inspection log</button>'+
+    '<p class="sm">Findings feed the contractor&rsquo;s KPI deductions and the contamination line in the annual report.</p>';
 };
 
 /* ============================== administrator ============================== */
@@ -1693,8 +2581,76 @@ V["admin.setup"]=function(){
     }).join("")+'</div></div>'+
     '<div class="card acc"><div class="kv" style="border:none"><span>Gross annual billable</span><b>'+money(grossBillable())+'</b></div>'+
     '<div class="kv"><span>Household per month</span><b>'+money(catMonthly({pct:S.tariff.res}))+'</b></div></div>'+
+    '<div class="sect"><span class="eyebrow">Platform</span></div>'+
+    '<button class="btn row" data-a="push" data-v="apicfg"><span>'+svg("db","ic")+' '+h(t("API configuration"))+'</span><span class="chev">'+svg("chev")+'</span></button>'+
+    '<button class="btn row" data-a="push" data-v="commcfg"><span>'+svg("cash","ic")+' Fee-collection commission</span><span class="chev">'+svg("chev")+'</span></button>'+
     '<button class="btn" data-a="resetTariff">Reset to the adopted schedule</button>';
 };
+
+TITLES.commcfg="Commission";
+V["admin.commcfg"]=function(){
+  return '<div class="card acc"><div class="kv" style="border:none"><span>Rate on cash collected</span><b>'+COMMISSION.rate+'%</b></div>'+
+    '<div class="kv"><span>Multiplier range</span><b>&times;1.00 to &times;'+COMMISSION.tiers[COMMISSION.tiers.length-1].mult.toFixed(2)+'</b></div>'+
+    '<div class="kv"><span>Penalty per rejected observation</span><b>&minus;'+(COMMISSION.rejectedPenalty*100).toFixed(0)+' points</b></div></div>'+
+    '<label class="fld"><span>Rate, % of cash collected</span><input id="cm_rate" class="mono" inputmode="decimal" value="'+COMMISSION.rate+'"></label>'+
+    '<div class="sect"><span class="eyebrow">Multiplier ladder</span></div>'+
+    '<div class="card plain">'+COMMISSION.tiers.map(function(tr){
+      return '<div class="kv"><span>'+h(tr.en)+(tr.obs?' ('+tr.obs+'+ upheld)':'')+'</span><b>&times;'+tr.mult.toFixed(2)+'</b></div>'; }).join("")+
+    '</div>'+
+    '<div class="note"><span>'+svg("info")+'</span><div><b>Upheld, not filed</b>'+
+    'The multiplier counts observations operations accepted, so filing more does not pay more. Each rejected one costs '+
+    (COMMISSION.rejectedPenalty*100).toFixed(0)+' points and the multiplier never falls below &times;1.00.</div></div>'+
+    '<button class="btn p" data-a="savecomm">'+h(t("Save"))+'</button>'+
+    '<p class="sm">Commission is paid on cash deposited and reconciled, from the municipality&rsquo;s own ledger. It is not part of the collection contract.</p>';
+};
+TITLES.apicfg="API configuration";
+var APICFG = {
+  env:"sandbox",
+  base:{sandbox:"https://api-sandbox.baladiservice.com/v1", production:"https://api.baladiservice.com/v1"},
+  services:[
+    {k:"sms",   n:"SMS and one-time codes", ic:"bell",  prov:"Local aggregator", f:[["Sender ID","BALADI"],["Endpoint","/auth/otp"],["Code lifetime","5 minutes"],["Rate limit","3 per number per hour"]], st:"Not connected"},
+    {k:"omt",   n:"OMT counter payments",   ic:"cash",  prov:"OMT",              f:[["Merchant ID","ZEI-0041"],["Callback","/pay/omt/callback"],["Settlement","T+1"]], st:"Sandbox"},
+    {k:"whish", n:"Whish wallet",           ic:"cash",  prov:"Whish Money",      f:[["Merchant ID","not set"],["Callback","/pay/whish/callback"],["Settlement","T+1"]], st:"Not connected"},
+    {k:"bank",  n:"Bank transfer reconciliation", ic:"doc", prov:"Bank file drop", f:[["Format","CAMT.053"],["Drop","/recon/bank"],["Frequency","Daily 02:00"]], st:"Sandbox"},
+    {k:"blob",  n:"Photograph storage",     ic:"cam",   prov:"Object storage",   f:[["Bucket","baladi-evidence"],["Region","eu-central"],["Retention","90 days"]], st:"Sandbox"},
+    {k:"weigh", n:"Weighbridge feed",       ic:"truck", prov:"Site system",      f:[["Mode","Push"],["Endpoint","/service/weighbridge"],["Signature","HMAC header"]], st:"Not connected"},
+    {k:"db",    n:"Register and ledger",    ic:"db",    prov:"Postgres",         f:[["Host","set server-side"],["Pooling","yes"],["Backups","nightly, 30 days"]], st:"Not connected"}
+  ]
+};
+V["admin.apicfg"]=function(){
+  var env=APICFG.env;
+  return '<div class="note c"><span>'+svg("alert")+'</span><div><b>No key is ever stored in the app</b>'+
+    'Everything on this screen is an address, an identifier or a setting. Secrets live on the server and are never sent to a phone &mdash; '+
+    'anything the browser can read, anyone can read.</div></div>'+
+    '<label class="fld"><span>Environment</span>'+
+    '<div class="seg" data-g="apienv"><button class="'+(env==="sandbox"?"on":"")+'" data-v="sandbox">Sandbox</button>'+
+    '<button class="'+(env==="production"?"on":"")+'" data-v="production">Production</button></div></label>'+
+    '<label class="fld"><span>API base URL</span><input id="api_base" class="mono" value="'+h(APICFG.base[env])+'"></label>'+
+    '<div class="sect"><span class="eyebrow">Services</span><span class="sm">tap to configure</span></div>'+
+    '<div class="card plain"><div class="list">'+APICFG.services.map(function(x){
+      var p = x.st==="Live"?"p-good":(x.st==="Sandbox"?"p-warn":"p-neut");
+      return '<button class="item" data-a="apisvc" data-v="'+h(x.k)+'"><span class="av">'+svg(x.ic)+'</span>'+
+        '<span class="t"><b>'+h(x.n)+'</b><span>'+h(x.prov)+'</span></span>'+
+        '<span class="pill '+p+'"><i></i>'+h(x.st)+'</span></button>';
+    }).join("")+'</div></div>'+
+    '<button class="btn" data-a="apitest">'+svg("sync","ic")+'Test every connection</button>'+
+    '<div class="sect"><span class="eyebrow">Webhooks the platform expects</span></div>'+
+    '<div class="card plain">'+
+    [["Payment confirmed","POST /pay/{channel}/callback"],
+     ["SMS delivery receipt","POST /auth/otp/receipt"],
+     ["Weighbridge ticket","POST /service/weighbridge"],
+     ["Contractor KPI export","GET /service/kpi?month="]].map(function(r){
+      return '<div class="kv"><span>'+h(r[0])+'</span><b class="mono" style="font-size:11.5px">'+h(r[1])+'</b></div>'; }).join("")+
+    '</div>'+
+    '<div class="card plain"><p class="eyebrow">Held server-side only</p>'+
+    '<div class="kv"><span>SMS provider key</span><b class="pill p-neut">env var</b></div>'+
+    '<div class="kv"><span>Payment merchant secrets</span><b class="pill p-neut">env var</b></div>'+
+    '<div class="kv"><span>Storage credentials</span><b class="pill p-neut">env var</b></div>'+
+    '<div class="kv"><span>Database URL</span><b class="pill p-neut">env var</b></div>'+
+    '<p class="sm">Set these where the server runs. If a value has to be prefixed to reach the browser, it is public by definition and must not be a secret.</p></div>'+
+    '<button class="btn p" data-a="apisave">'+h(t("Save"))+' the configuration</button>';
+};
+
 V["admin.tariffedit"]=function(id){
   var c=null; CATS.forEach(function(x){ if(x.id===id) c=x; });
   var pct=S.tariff[id];
@@ -1747,17 +2703,51 @@ V["admin.draw"]=function(){
 };
 V["admin.users"]=function(){
   return '<div class="card plain"><div class="list">'+
-   [["+961 70 150 153","Every role · demo clearance","p-acc"],
-    ["+961 3 412 417","Customer · C-2417","p-neut"],
-    ["+961 71 880 543","Collection crew · Crew B","p-neut"],
-    ["+961 76 441 038","Driver · M-04","p-neut"],
-    ["+961 3 244 770","Field collector","p-neut"],
-    ["+961 1 950 220","Municipality · treasurer","p-neut"]]
-   .map(function(u){ return '<div class="item"><span class="av">'+svg("user")+'</span>'+
-     '<span class="t"><b class="mono">'+h(u[0])+'</b><span>'+h(u[1])+'</span></span>'+
-     '<span class="pill '+u[2]+'"><i></i>active</span></div>'; }).join("")+'</div></div>'+
-   '<button class="btn p" data-a="adduser">Add a number</button>'+
+   REGISTER.map(function(u){ return '<div class="item"><span class="av">'+svg("user")+'</span>'+
+     '<span class="t"><b class="mono">+'+h(u.cc)+' '+h(u.n)+'</b><span>'+h(u.name)+' · every role</span></span>'+
+     '<span class="pill '+(u.n===S.phone||u.name===S.who?"p-acc":"p-neut")+'"><i></i>'+(u.name===S.who?"signed in":"active")+'</span></div>'; }).join("")+
+   '</div></div>'+
+   '<p class="sm">Codes are not stored in the app &mdash; only a one-way hash of the number and its code, so the file cannot be read for them. '+
+   'A code is issued to a person directly.</p>'+
+   (S.users.length ? '<div class="sect"><span class="eyebrow">Added this session</span></div>'+
+     '<div class="card plain"><div class="list">'+S.users.map(function(u,i){
+       return '<div class="item"><span class="av">'+svg("user")+'</span>'+
+         '<span class="t"><b class="mono">+961 '+h(u.phone)+'</b><span>'+h(u.roleLabel)+(u.catLabel?' &middot; '+h(u.catLabel):'')+
+         (u.zone?' &middot; '+h(u.zone):'')+'</span></span>'+
+         '<span class="pill p-acc"><i></i>new</span></div>'; }).join("")+'</div></div>' : '')+
+   '<button class="btn p" data-a="push" data-v="newuser">Add a number</button>'+
    '<p class="sm">A number carries one clearance. Changing it is an audited action and takes effect at the next sign-in.</p>';
+};
+
+TITLES.newuser="Add a number";
+V["admin.newuser"]=function(){
+  var defCat=CATS[0];
+  return '<div class="note"><span>'+svg("user")+'</span><div><b>One number, one clearance</b>'+
+    'The number decides which interface opens at sign-in. A customer number also carries a category, a tariff, an address and a service zone.</div></div>'+
+    '<label class="fld"><span>Mobile number</span>'+
+      '<div style="display:flex;gap:8px"><div class="chip" style="padding:11px 12px">+961</div>'+
+      '<input id="u_phone" type="tel" inputmode="numeric" class="mono"></div></label>'+
+    '<label class="fld"><span>Name on the register</span><input id="u_name"></label>'+
+    '<label class="fld"><span>Access</span><select id="u_role" data-a="urole">'+
+      Object.keys(ROLES).map(function(k){ return '<option value="'+k+'">'+h(t(ROLES[k].label))+'</option>'; }).join("")+
+    '</select></label>'+
+    '<div id="custblock">'+
+    '<label class="fld"><span>Customer type</span><select id="u_cat" data-a="ucat">'+
+      CATS.map(function(c){ return '<option value="'+c.id+'">'+h(S.ar?c.ar:c.en)+'</option>'; }).join("")+
+    '</select></label>'+
+    '<label class="fld"><span>Tariff, % of the minimum wage</span>'+
+      '<input id="u_pct" class="mono" inputmode="decimal" value="'+defCat.pct+'"></label>'+
+    '<p class="sm" id="u_pcthint">Adopted band for '+h(defCat.en)+' is '+defCat.min+'&ndash;'+defCat.max+'%. '+
+      'At '+defCat.pct+'% that is '+money(catMonthly({pct:defCat.pct}))+' a month, '+money(catAnnual({pct:defCat.pct}))+' a year. '+
+      'Anything outside the band is recorded as an override.</p>'+
+    '<label class="fld"><span>Address</span><input id="u_addr" placeholder="Building, floor, street"></label>'+
+    '<label class="fld"><span>Collection point</span><input id="u_point" class="mono" placeholder="Z-14-P"></label>'+
+    '<label class="fld"><span>Service zone</span><select id="u_zone">'+
+      ZONES.map(function(z){ return '<option value="'+h(z.en)+'">'+h(S.ar?z.ar:z.en)+'</option>'; }).join("")+
+    '</select></label>'+
+    '</div>'+
+    '<button class="btn p" data-a="savenewuser">Add the number</button>'+
+    '<p class="sm">Nothing is sent to the number here. It becomes active at its first sign-in, and the addition is written to the audit trail.</p>';
 };
 V["admin.data"]=function(){
   return '<div class="card plain"><div class="list">'+
@@ -1774,6 +2764,122 @@ V["admin.data"]=function(){
    '<button class="btn" data-a="exp" data-v="audit">'+svg("doc","ic")+'Export the audit trail</button>';
 };
 
+/* ============================== guides ============================== */
+var GUIDES = {
+ "customer.home":["Your home screen",[
+  ["Amount due","The yearly waste tariff, split into two instalments. Pay now opens the channels; Payment history lists every receipt."],
+  ["Next collection","Three services, three schedules. Each line shows its own next day and time. Full schedule opens the detail."],
+  ["Prizes","Swipe sideways between this month's gold pot and the national grand prize."],
+  ["Impact","Swipe for the rest: trees equivalent, bags sorted for life, tonnes kept out of central treatment."],
+  ["Your street","The share of doors on your street that put out a sorted bag this month."]]],
+ "customer.sorting":["Sorting and scanning",[
+  ["Scan a bag","Open the camera and point it at the tag. A paired handheld scanner works anywhere in the app, and Photograph the code works on every phone, even offline."],
+  ["Request tags","Tags are pre-printed and unique. Request a batch or collect one free from the municipality, an OMT branch or your crew."],
+  ["Drop-off network","Where to take material between collections."],
+  ["Sorting training","Multiple-choice. Finish it once and a bonus draw voucher is issued for life."],
+  ["The rebate","Scan enough bags in a month and the rebate applies to next year's tariff."]]],
+ "customer.rewards":["Draw vouchers",[
+  ["How many you can earn","One voucher per activity type per month — sorting recyclables, sorting organics, paying on time. Three a month, 36 a year."],
+  ["What adds nothing","A second payment in the same month. A fifth sorted bag. The cap is per type, not per action."],
+  ["Serials","Every voucher carries its own serial, printed on the ticket."],
+  ["Two draws","The monthly pot of gold, and the national grand prize drawn in December from every voucher earned this year."]]],
+ "customer.account":["Your account",[
+  ["Who you are on the register","Account number, category, address and collection point. Anything wrong here is fixed by the municipality."],
+  ["Your fee","The annual tariff, the sorting rebate and what is left to pay."],
+  ["Language and currency","Under the gear icon, top right. English or Arabic, USD or LBP."]]],
+ "crew.scan":["Scanning on the round",[
+  ["Two things carry a code","A waste bag and a collection point. The app tells them apart from the code itself."],
+  ["Nothing to log if nothing is wrong","A scanned bag is assumed sorted correctly and a scanned point assumed clear. Rank or comment only when it is not."],
+  ["Handheld scanner","A paired Bluetooth or USB scanner types the code straight in. Storage mode uploads a batch later."],
+  ["Spot checks","One point in three asks for a photograph. It stays on the handset until you are back on Wi-Fi."]]],
+ "crew.route":["Your round",[
+  ["Route type","Commingled, recyclables or organic. The stops change with it."],
+  ["Built from","Organic rounds are built from requests; recyclables are a fixed weekly round; commingled is every point on the line."],
+  ["Exceptions","Anything you cannot serve is logged against the stop and feeds the contractor's monthly KPI."]]],
+ "crew.batch":["Stored scans",[
+  ["What this is","Scans taken with the handheld in storage mode, uploaded from the device when it reconnects."],
+  ["Acknowledging","Leaving a row untouched accepts it as scanned and sorted. Open one only to rank it or add a comment."]]],
+ "driver.shift":["Starting a shift",[
+  ["Vehicle check","Nothing passes by default, and a driver cannot clear his own fault."],
+  ["Route type","Sets the round, the stop count and the disposal site."],
+  ["Start shift","Dispatch releases the vehicle against a named operator."]]],
+ "driver.load":["Closing a load",[
+  ["Weighbridge ticket","Type the ticket number and the net weight, then photograph the ticket."],
+  ["Approved sites only","A load closes only at an approved site. An override needs a reason and appears in the monthly report."]]],
+ "collector.round":["The cash round",[
+  ["Your list","Doors to visit today, with the balance on each."],
+  ["Nobody home","Marking it strikes the door from today's list and it returns on the next round."],
+  ["Receipts","Every cash payment issues a numbered receipt and can be sent by SMS or WhatsApp."],
+  ["Observations","Photograph what you find at a point; it is logged against the service record."]]],
+ "ops.queue":["The dispatch queue",[
+  ["What lands here","Exceptions from crews, customer reports and failed stops."],
+  ["Resolving","Each item resolves to a scan, an exception or a weighbridge ticket, so it can be opened back later."]]],
+ "review.queue":["Sampled claims",[
+  ["Why sampling","Not every claim is reviewed. A sample is, and the result stands for the batch."],
+  ["Names withheld","Reviewers see the evidence, not the household."]]],
+ "muni.overview":["Fee collection at a glance",[
+  ["Collection rate","Against net billable, after sorting rebates."],
+  ["By neighbourhood","Where the money is and is not coming in."],
+  ["Generate analytics","Reads this month's figures and returns advice on fines, the next contract and public communication."],
+  ["Monthly data entry","Four figures only the municipality holds. They feed the report and the analytics."]]],
+ "muni.fees":["The tariff",[
+  ["The table","Every category, how many premises, the monthly fee and what it bills in a year."],
+  ["Basis","Fees are a percentage of the minimum wage, so the whole schedule moves when that does."],
+  ["Arrears ladder","What each enforcement step recovers within fourteen days."]]],
+ "muni.payouts":["Paying the contractor",[
+  ["Separate from the tariff","This is money going out, measured on evidence the crews generate."],
+  ["Deductions","Each one resolves to a scan, an exception or a weighbridge ticket, and the contractor can open it."]]],
+ "muni.report":["The annual report",[
+  ["What it is for","The figures a call for bidders needs: collected, diverted, and what it was worth."],
+  ["Route efficiency","Averages by service. Tap a service for its sub-routes, and a sub-route for its detail."],
+  ["Filed figures","The monthly data the municipality types in. Edit them before exporting."]]],
+ "muni.analytics":["Reading the analytics",[
+  ["Where it comes from","Collection by zone, the arrears ladder, route completion, weighbridge tonnage and the filed monthly figures."],
+  ["Fines","Ordered by what the ladder actually recovers, not by severity."],
+  ["Next contract","Written to be lifted into a call for bidders."],
+  ["Communication","What to say, to whom, and the number behind it."],
+  ["Not a determination","Advice only. Fines follow the municipality's own procedure."]]],
+ "facility.gate":["The gate",[
+  ["Loads arriving","Each line is a weighbridge ticket: vehicle, round, declared stream and net weight."],
+  ["Three decisions","Accept, downgrade or reject. Each one carries into the contractor's monthly deduction, so each needs the photograph."],
+  ["Rejecting","Sends the vehicle away still loaded. It is the most contested decision at the gate."]]],
+ "facility.inspect":["Random inspection",[
+  ["The app draws, not the operator","Choose a sample size and the app picks the bags. That is what makes the result defensible."],
+  ["Scan each one named","A scan that matches ticks the bag off. A scan outside the sample is logged as an extra check, not as part of it."],
+  ["Bags not found","Passing with bags unscanned records how many were missing — it is evidence either way."],
+  ["From a load","Inspect a random sample from this load on the gate screen draws against that ticket."]]],
+ "facility.findings":["The inspection log",[
+  ["What is here","Every load decision and every sample, with the contamination recorded."],
+  ["Where it goes","Findings feed the contractor's KPI deductions and the contamination line in the annual report."]]],
+ "admin.setup":["Tariff and basis",[
+  ["Minimum wage basis","Every fee is a percentage of it. Changing it recomputes the whole schedule."],
+  ["Tap a category","Set its percentage. Outside the adopted band it is recorded as an override."],
+  ["Reset","Returns every category to the adopted schedule."]]],
+ "admin.draw":["Running a draw",[
+  ["Two draws","The monthly pot of gold and the annual national grand prize."],
+  ["The pool","Frozen before the draw and published, so the result can be checked afterwards."]]],
+ "admin.users":["Numbers and clearance",[
+  ["One number, one clearance","The number decides which interface opens at sign-in."],
+  ["Add a number","Sets the clearance and, for a customer, the type, tariff, address and service zone."],
+  ["Audited","Every addition and change is written to the audit trail and takes effect at the next sign-in."]]],
+ "admin.data":["Exports and retention",[
+  ["Exports","Every table downloads as CSV."],
+  ["Retention","Starting positions for legal review, not settled policy."]]]
+};
+function guideSheet(){
+  var c=cur(), key=S.role+"."+(c?c.s:S.tab), g=GUIDES[key];
+  if(!g){
+    sheet(t("Guide"), '<div class="card plain"><div class="gstep"><span class="gn">'+svg("info")+'</span><div>'+
+      '<b>'+h(screenTitle(c?c.s:S.tab))+'</b><p class="sm">No walkthrough is written for this screen yet. '+
+      'Every screen keeps the same shape: the appbar carries back on the left and this guide on the right, and the tabs along the bottom never change.</p></div></div></div>');
+    return;
+  }
+  sheet(g[0], '<div class="card plain">'+g[1].map(function(r,i){
+    return '<div class="gstep"><span class="gn">'+(i+1)+'</span><div><b>'+h(r[0])+'</b><p class="sm">'+h(r[1])+'</p></div></div>';
+  }).join("")+'</div>'+
+  '<p class="sm">Tap the question mark on any screen for its own walkthrough.</p>');
+}
+
 /* ============================== actions ============================== */
 function settingsSheet(){
   sheet(t("Settings"),
@@ -1783,9 +2889,13 @@ function settingsSheet(){
     '<div class="kv"><span>'+h(t("Currency"))+'</span>'+
     '<span class="seg" data-g="cur2" style="width:150px"><button class="'+(!S.lbp?"on":"")+'" data-v="usd">USD</button>'+
     '<button class="'+(S.lbp?"on":"")+'" data-v="lbp">LBP</button></span></div>'+
-    '<div class="kv"><span>'+h(t("Handheld scanner"))+'</span><button class="sw '+(S.hidOn?"on":"")+'" data-a="hid" role="switch"></button></div></div>'+
+    '<div class="kv"><span>'+h(t("Handheld scanner"))+'</span><button class="sw '+(S.hidOn?"on":"")+'" data-a="hid" role="switch"></button></div>'+
+    '<div class="kv"><span>'+h(t("View"))+'</span>'+
+    '<span class="seg" data-g="view" style="width:170px"><button class="'+(!S.wide?"on":"")+'" data-v="phone">'+h(t("Phone"))+'</button>'+
+    '<button class="'+(S.wide?"on":"")+'" data-v="wide">'+h(t("Desktop"))+'</button></span></div></div>'+
     '<div class="card plain"><p class="eyebrow">Signed in</p>'+
-    '<p class="h">'+h(ROLES[S.role].who.n)+'</p><p class="sm">'+h(ROLES[S.role].who.s)+' · <span class="mono">+961 '+h(S.phone)+'</span></p></div>'+
+    '<p class="h">'+h(S.who||ROLES[S.role].who.n)+'</p>'+
+    '<p class="sm">'+h(ROLES[S.role].who.s)+' · <span class="mono">+'+h(S.cc)+' '+h(S.phone)+'</span></p></div>'+
     '<button class="btn" data-a="switch">'+h(t("Switch interface"))+'</button>'+
     '<button class="btn d" data-a="signout">'+h(t("Sign out"))+'</button>');
 }
@@ -1817,10 +2927,38 @@ var EXPORTS = {
   claims:["claim_decisions.csv",[["claim","outcome","reason","reviewer"],
     ["CLM-2026-5501","Credited","",'Reviewer 3'],["CLM-2026-5503","Rejected","photograph reused","Reviewer 3"]]],
   cash:["cash_round.csv",[["receipt","account","amount_usd","time"],["OR-2026-08842","C-3128","119.76","14:26"]]],
+  participation:["participation_by_zone.csv",[["zone","premises","recycling_pct","composting_pct","bags_per_month","fee_collection_pct","route"]]],
+  inspections:["inspections.csv",[["id","at","kind","reference","result","contamination_pct","note"]]],
+  analytics:["analytics_advice.csv",[["area","recommendation","evidence"],
+    ["Enforcement","Open an arrears round in the weakest zone","collection rate by zone; arrears ladder"],
+    ["Enforcement","Fine only where a scan, photograph or ticket exists","service events"],
+    ["Next contract","Put stop completion into the KPI","route completion by sub-route"],
+    ["Next contract","Price the weakest zone as its own lot","km per tonne by sub-route"],
+    ["Communication","Lead with the draw, not the penalty","draw participation"],
+    ["Communication","Target the weakest zone at street level","sorted-bag share by street"]]],
+  routes:["route_efficiency.csv",[["service","sub_route","zone","planned","served","completion_pct","minutes","stops_per_hour","km","tonnes","km_per_tonne","on_time"]]],
   audit:["audit_trail.csv",[["at","actor","action","object"],
     ["2026-10-09T09:12","admin","tariff.set","res 3.2%"],["2026-10-09T09:40","Rima Saab","payout.approve","PO-2026-09"]]]
 };
-function doExport(k){ var e=EXPORTS[k]; if(!e){ toast("Nothing to export"); return; } csv(e[0], e[1]); }
+function doExport(k){
+  var e=EXPORTS[k]; if(!e){ toast("Nothing to export"); return; }
+  var rows=e[1];
+  if(k==="participation"){
+    rows=[rows[0]];
+    ZONES.forEach(function(z){ rows.push([z.en,z.premises,z.recy,z.comp,z.bags,z.rate,z.route]); });
+  }
+  if(k==="inspections"){
+    rows=[rows[0]];
+    INSPECTIONS.forEach(function(i){ rows.push([i.id,i.at,i.kind,i.ref,i.result,i.contam,i.note]); });
+  }
+  if(k==="routes"){
+    rows=[rows[0]];
+    ROUTEPERF.forEach(function(r){ r.subs.forEach(function(x){
+      rows.push([r.en,x.id,x.zone,x.planned,x.served,subCompletion(x).toFixed(1),x.min,subStopsPerHr(x),x.km,x.t,subKmPerT(x),x.onTime?"yes":"no"]);
+    }); });
+  }
+  csv(e[0], rows);
+}
 
 var DRAW_POOL = ["C-2417 · N.H.","C-3128 · S.A.","C-8140 · M.C.","C-9021 · K.D.","B-0455 · T.B.","C-8802 · Z.M.","C-6104 · E.B.","C-7730 · R.A."];
 function runDraw(){
@@ -1843,6 +2981,10 @@ document.addEventListener("click", function(ev){
     if(g==="lang"){ S.ar = v==="ar"; closeSheet(); paint(); }
     if(g==="cur2"){ S.lbp = v==="lbp"; closeSheet(); paint(); }
     if(g==="dk"){ S.drawKind=v; S.drawWinner=null; paint(); }
+    if(g==="samn"){ S.sampleN=+v; }
+    if(g==="ibx"){ S.inboxTab=v; paint(); }
+    if(g==="apienv"){ APICFG.env=v; paint(); }
+    if(g==="view"){ S.wide = v==="wide"; closeSheet(); paint(); }
     return;
   }
   var b = ev.target.closest("[data-a]"); if(!b) return;
@@ -1851,15 +2993,24 @@ document.addEventListener("click", function(ev){
   switch(a){
     case "sendotp":
       S.phone = ($("ph")&&$("ph").value||"").trim();
-      if(!phoneOk(S.phone)){ toast("That number is not on the register"); return; }
-      S.step="otp"; paintLogin(); return;
-    case "checkotp":
+      S.cc = ($("cc")&&$("cc").value) || S.cc || "961";
+      if(!digits(S.phone)){ S.loginErr="Enter a mobile number"; paintLogin(); return; }
+      if(!phoneOk(S.phone)){ S.loginErr="That number is not on the register"; paintLogin(); return; }
+      S.loginErr=""; S.otpErr=""; S.otpTries=0; S.step="otp"; paintLogin(); return;
+    case "checkotp": {
       var code=digits($("otp")&&$("otp").value);
-      if(code.length<4){ toast("Enter the six-digit code"); return; }
-      S.step="role"; paintLogin(); return;
-    case "backphone": S.step="phone"; paintLogin(); return;
+      if(code.length!==6){ S.otpErr="The code is six digits"; paintLogin(); return; }
+      var ent=findNumber(S.cc, S.phone);
+      if(!codeOk(ent, code)){
+        S.otpTries++;
+        S.otpErr = S.otpTries>=3 ? "That code is not right \u2014 ask for it again" : "That code is not right";
+        paintLogin(); return;
+      }
+      S.who=ent.name; S.otpErr=""; S.otpTries=0; S.step="role"; paintLogin(); return;
+    }
+    case "backphone": S.step="phone"; S.loginErr=""; S.otpErr=""; paintLogin(); return;
     case "role":
-      S.role=v; S.tab=ROLES[v].tabs[0][0]; S.stack=[];
+      S.role=v; S.tab=ROLES[v].tabs[0][0]; S.stack=[]; S.hist=[];
       $("view").className="view"; closeSheet(); paint();
       toast("Signed in as "+t(ROLES[v].label)); return;
     case "switch": closeSheet(); S.role=null; S.step="role"; $("view").className="login"; paintLogin(); return;
@@ -1868,6 +3019,120 @@ document.addEventListener("click", function(ev){
     case "push": push(v, x); return;
     case "back": back(); return;
     case "menu": settingsSheet(); return;
+    case "guide": guideSheet(); return;
+
+    case "apisvc": {
+      var sv=null; APICFG.services.forEach(function(x){ if(x.k===v) sv=x; });
+      if(!sv) return;
+      sheet(sv.n, '<div class="card plain"><div class="kv" style="border:none"><span>Provider</span><b>'+h(sv.prov)+'</b></div>'+
+        sv.f.map(function(r){ return '<div class="kv"><span>'+h(r[0])+'</span><b class="mono" style="font-size:12px">'+h(r[1])+'</b></div>'; }).join("")+
+        '<div class="kv"><span>Status</span><b>'+h(sv.st)+'</b></div></div>'+
+        '<p class="sm">Credentials for this service are set where the server runs, never here.</p>');
+      return;
+    }
+    case "apitest": toast("Sandbox endpoints answered \u00b7 production not configured"); return;
+    case "apisave": toast("Configuration saved \u00b7 "+APICFG.env); return;
+    case "savecomm": {
+      var cr=$("cm_rate"), nv=cr? (parseFloat(cr.value)||0) : COMMISSION.rate;
+      if(nv<=0 || nv>5){ toast("A rate outside 0 to 5% is refused"); return; }
+      COMMISSION.rate=Math.round(nv*100)/100; back(); toast("Commission set to "+COMMISSION.rate+"%"); return;
+    }
+    case "readnotif": S.readIds[v]=true; paint(); return;
+    case "readall": NOTIFS.forEach(function(x){ S.readIds[x.id]=true; }); paint(); toast("All marked as read"); return;
+    case "sendmsg": {
+      var mi=$("msgin"), txt=mi? mi.value.trim() : "";
+      if(!txt){ toast("Type a message first"); return; }
+      MSGS.push({me:true, t:txt, d:"Just now"});
+      MSGS.push({me:false, t:"Received. The office will reply during opening hours, Monday to Friday 08:00 to 14:00.", d:"Just now"});
+      paint(); toast("Message sent to the municipal office"); return;
+    }
+    case "chatq": case "chatsend": {
+      var q = a==="chatq" ? v : (($("chatin")&&$("chatin").value)||"").trim();
+      if(!q){ toast("Type a question first"); return; }
+      if(!S.chat) S.chat=[];
+      S.chat.push({b:false, t:q});
+      S.chat.push({b:true,  t:botAnswer(q)});
+      paint(); return;
+    }
+    case "chatclear": S.chat=null; paint(); return;
+    case "fbscore": S.fbScore=+v; paint(); return;
+    case "fbsend": {
+      if(!S.fbScore){ toast("Pick a score from 1 to 5"); return; }
+      var ft=$("fbtext"); var extra = ft && ft.value.trim();
+      S.fbScore=0; if(ft) ft.value="";
+      paint(); toast(extra? "Feedback sent, with your note" : "Feedback sent"); return;
+    }
+
+    case "pickscan": S.pickScan=!S.pickScan; paint(); if(S.pickScan) setTimeout(startCam,40); else stopCam(); return;
+    case "pickrescan": S.pickTag=""; S.pickScan=true; S.pickCamTried=false; paint(); setTimeout(startCam,40); return;
+
+    case "photocam":
+      if(S.camOn){ stopCam(); S.camPhoto=false; paint(); }
+      else { S.camPhoto=true; S.photoShot=""; S.camErr=""; paint(); setTimeout(startCam,40); }
+      return;
+    case "photosnap": S.camErr=""; S.camPhoto=true; var ps=$("snap"); if(ps){ ps.value=""; ps.click(); } return;
+    case "shoot": {
+      var vv=$("camvid"), cc=$("camcan");
+      if(!vv || !vv.videoWidth){ toast("The camera is still starting"); return; }
+      var W=Math.min(1024, vv.videoWidth), H=Math.round(vv.videoHeight/vv.videoWidth*W);
+      cc.width=W; cc.height=H;
+      cc.getContext("2d").drawImage(vv,0,0,W,H);
+      try{ S.photoShot=cc.toDataURL("image/jpeg",0.7); }catch(e){ S.photoShot=""; }
+      stopCam(); S.camPhoto=false; paint();
+      toast(S.photoShot? "Photograph taken" : "Could not read the frame");
+      return;
+    }
+    case "reshoot": S.photoShot=""; S.camPhoto=true; paint(); setTimeout(startCam,40); return;
+
+    case "drawsample":
+      S.sample=sampleDraw(S.sampleN); S.sampleSeen={}; paint();
+      toast(S.sample.length+" bags drawn at random \u00b7 scan each one"); return;
+    case "drawfor":
+      S.inspectFor=v; S.sample=sampleDraw(S.sampleN); S.sampleSeen={};
+      S.stack=[]; S.tab="inspect"; paint();
+      toast("Sample drawn from "+v); return;
+    case "samres": {
+      var cEl=$("s_cont"), cv=cEl?(parseFloat(cEl.value)||0):0;
+      var n=S.sample?S.sample.length:0;
+      var seenN=S.sample?S.sample.filter(function(c){ return S.sampleSeen[c]; }).length:0;
+      INSPECTIONS.unshift({id:"INS-2026-"+(415+INSPECTIONS.length), at:"today", kind:"Sample",
+        ref:(S.inspectFor||(n+" bags")), result:(v==="Pass"?"Pass":"Downgraded"), contam:cv,
+        note:(seenN<n? (n-seenN)+" of the sample not found":"")});
+      S.sample=null; S.sampleSeen={}; S.inspectFor=null;
+      S.tab="findings"; S.stack=[]; paint();
+      toast(v==="Pass"?"Sample passed and logged":"Sample failed \u00b7 logged against the round"); return;
+    }
+    case "loadres": {
+      LOADS.forEach(function(l){ if(l.id===x) l.st=v; });
+      var ce=$("l_cont"), cvv=ce?(parseFloat(ce.value)||0):0;
+      INSPECTIONS.unshift({id:"INS-2026-"+(415+INSPECTIONS.length), at:"today", kind:"Load", ref:x,
+        result:(v==="Accepted"?"Pass":v), contam:cvv, note:""});
+      back(); toast(x+" "+v.toLowerCase()); return;
+    }
+
+    case "savemuni": {
+      var m=($("mmonth")&&$("mmonth").value)||S.muniMonth;
+      var num=function(id){ var e=$(id); return e? (parseFloat(String(e.value).replace(/[^0-9.\-]/g,""))||0) : 0; };
+      MUNI_DATA[m]={toCentral:num("f_central"), recySoldT:num("f_recyt"), recySoldUsd:num("f_recyu"),
+                    organicsToCompost:num("f_org"), tPaidContractor:num("f_paid"), filed:true};
+      S.muniMonth=m; paint(); toast(m+" filed · the report and the analytics now use it"); return;
+    }
+    case "savenewuser": {
+      var ph=digits($("u_phone")&&$("u_phone").value);
+      if(ph.length<7){ toast("Enter a mobile number"); return; }
+      var rk=($("u_role")&&$("u_role").value)||"customer";
+      var ci=($("u_cat")&&$("u_cat").value)||"res";
+      var cat=null; CATS.forEach(function(x){ if(x.id===ci) cat=x; });
+      var pct=parseFloat(($("u_pct")&&$("u_pct").value)||"0")||0;
+      var out = cat && (pct<cat.min || pct>cat.max);
+      S.users.push({phone:ph, name:($("u_name")&&$("u_name").value)||"", role:rk, roleLabel:t(ROLES[rk].label),
+        catLabel: rk==="customer"&&cat ? (S.ar?cat.ar:cat.en) : "", pct:pct,
+        addr:($("u_addr")&&$("u_addr").value)||"", point:($("u_point")&&$("u_point").value)||"",
+        zone:($("u_zone")&&$("u_zone").value)||"", override:out});
+      back();
+      toast(out ? "Number added · tariff outside the band, recorded as an override" : "Number added against one clearance, and audited");
+      return;
+    }
     case "closesheet": closeSheet(); return;
     case "hid": S.hidOn=!S.hidOn; b.classList.toggle("on",S.hidOn);
       toast(S.hidOn?"Handheld scanner listening":"Handheld scanner off"); return;
@@ -1913,7 +3178,7 @@ document.addEventListener("click", function(ev){
     case "exp": doExport(v); return;
 
     /* crew */
-    case "outcome": toast(v+" recorded · queued offline"); S.queued++; back(); return;
+    case "outcome": S.scanOutcome=v; S.scanTouched=true; toast(v+" recorded · queued offline"); S.queued++; back(); return;
     case "cmt":
       Array.prototype.forEach.call(b.parentNode.children,function(c){ c.classList.remove("on"); });
       b.classList.add("on");
@@ -1979,7 +3244,7 @@ document.addEventListener("click", function(ev){
       if(!BATCH[ix].o) BATCH[ix].o = BATCH[ix].q ? (RANKS.filter(function(r){return r.id===BATCH[ix].q;})[0]||{en:"reviewed"}).en : "presence acknowledged";
       closeSheet(); toast("Scan reviewed"); paint(); return;
     case "rank":
-      Array.prototype.forEach.call(b.parentNode.children,function(c){ c.classList.remove("on"); }); b.classList.add("on");
+      S.scanRank=v; S.scanTouched=true; paint();
       toast("Bag ranked "+(RANKS.filter(function(r){return r.id===v;})[0]||{en:""}).en.toLowerCase()); return;
 
     /* ops + review */
@@ -2007,11 +3272,36 @@ document.addEventListener("click", function(ev){
 });
 $("snap").addEventListener("change", function(e){
   var f=e.target.files && e.target.files[0];
-  if(f){ toast("Reading the photograph"); decodeImageFile(f); }
+  if(!f) return;
+  if(S.camPhoto){
+    var rd=new FileReader();
+    rd.onload=function(){ S.photoShot=rd.result; S.camPhoto=false; paint(); toast("Photograph attached"); };
+    rd.readAsDataURL(f);
+    return;
+  }
+  toast("Reading the photograph"); decodeImageFile(f);
 });
 document.addEventListener("input", function(e){
   if(e.target && e.target.id==="tpct"){
     var p=parseFloat(e.target.value)||0, el=$("tprev"); if(el) el.textContent=money(MINWAGE*p/100);
+  }
+});
+document.addEventListener("change", function(ev){
+  var el=ev.target; if(!el || !el.id) return;
+  if(el.id==="mmonth"){ S.muniMonth=el.value; paint(); return; }
+  if(el.id==="u_role"){
+    var cb=$("custblock"); if(cb) cb.style.display = (el.value==="customer") ? "" : "none";
+    return;
+  }
+  if(el.id==="u_cat"){
+    var c=null; CATS.forEach(function(x){ if(x.id===el.value) c=x; });
+    if(!c) return;
+    var pe=$("u_pct"); if(pe) pe.value=c.pct;
+    var hint=$("u_pcthint");
+    if(hint) hint.innerHTML='Adopted band for '+h(S.ar?c.ar:c.en)+' is '+c.min+'&ndash;'+c.max+'%. '+
+      'At '+c.pct+'% that is '+money(catMonthly({pct:c.pct}))+' a month, '+money(catAnnual({pct:c.pct}))+' a year. '+
+      'Anything outside the band is recorded as an override.';
+    return;
   }
 });
 $("scrim").addEventListener("click", closeSheet);
