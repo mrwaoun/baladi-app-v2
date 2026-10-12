@@ -384,6 +384,18 @@ a.btn{text-decoration:none}
 .carou.drag{cursor:grab}
 .carou.dragging{cursor:grabbing;scroll-snap-type:none}
 /* illustrations */
+/* the two rates the council is judged on: twice the size of anything else */
+.heros{display:flex;flex-direction:column;gap:10px}
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:13px 15px 14px;
+  display:flex;flex-direction:column;gap:5px}
+.hero .hv{font-family:"Archivo",sans-serif;font-size:44px;font-weight:700;line-height:1;letter-spacing:-.02em;
+  color:var(--accent-ink);display:flex;align-items:baseline;gap:2px}
+.hero .hv span{font-size:20px;font-weight:600;color:var(--muted)}
+.hero .hbar{height:9px;border-radius:5px;background:var(--surface-2);overflow:hidden}
+.hero .hbar i{display:block;height:100%;border-radius:5px;background:var(--accent)}
+.hero p.sm{margin:0}
+@media(min-width:620px){ .heros{flex-direction:row} .heros>*{flex:1} }
+.page.wide .heros{flex-direction:row}
 .gmap{display:block;width:100%;height:auto;border-radius:12px;background:var(--surface-2);border:1px solid var(--line-soft)}
 .mapwrap{padding:9px 9px 10px;gap:8px}
 .mpin:hover circle,.mpin:hover rect{filter:brightness(.94)}
@@ -499,6 +511,23 @@ function userStats(id){
           thisMonth:1+(k%9), since:["Feb","Mar","Apr"][(k%3)]+" 2026",
           qual:62+(k%36), flags:d?d.flags:0, rebate:(1+(k%9))>=REBATE_BAGS};
 }
+var SKIP_REASONS = ["Access blocked \u2014 vehicle cannot reach",
+                    "Nothing out at the point",
+                    "Road works or a parked lorry",
+                    "Unsafe to stop here now",
+                    "Out of time on this round"];
+var SKIP_REASONS_AR = ["الوصول مسدود — لا يمكن للمركبة",
+                       "لا شيء عند النقطة",
+                       "أشغال أو شاحنة متوقفة",
+                       "غير آمن للتوقف الآن",
+                       "نفد وقت الجولة"];
+/* anything reported faulty lands here, with its comment and its photograph */
+var FAULTS = [
+  {id:"FT-1042", where:"R-14-P", what:"Bin lid broken off", by:"Crew B", at:"9 Oct, 07:12", photo:true,
+   note:"Hinge sheared. Bags are going on the ground beside it."},
+  {id:"FT-1039", where:"M-17-P", what:"Pad cracked, bin tilting", by:"Driver M-04", at:"6 Oct, 06:48", photo:true,
+   note:"Concrete pad has split. It will tip in a storm."}
+];
 var AUDIT = [
   {at:"14 Sep, 09:41", who:"Marc Aoun", what:"Clearance changed \u00b7 +961 3 946 984 \u00b7 Customer \u2192 Facility operator"},
   {at:"2 Sep, 16:08",  who:"Marc Aoun", what:"Tariff set \u00b7 Restaurants 30.6% \u00b7 within the band"}
@@ -1300,7 +1329,9 @@ var S = {
   wide:(typeof window!=="undefined" && window.matchMedia && window.matchMedia("(min-width:1100px)").matches),
   cc:"961", who:null, otpErr:"", otpTries:0,
   sample:null, sampleSeen:{}, sampleN:6, inspectFor:null, session:null, nuRole:"customer", clrEdit:null,
-  liveBusy:false, liveNote:"", served:{}, issues:{}, stopOpenedAt:{}, lastReceipt:null
+  liveBusy:false, liveNote:"", served:{}, issues:{}, stopOpenedAt:{}, lastReceipt:null,
+  skipped:{}, shiftOpen:false, shiftStart:null, faultFor:null, notified:{},
+  exemptFor:null, lastMissed:null, loads:0, roundOpen:false, otpSendLink:""
 };
 /* ?live=1 opens the session against the municipality's database instead of this file */
 try{ if(typeof location!=="undefined" && /[?&]live=1/.test(location.search)) LIVE.on=true; }catch(e){}
@@ -1604,17 +1635,22 @@ var ROLES = {
 /* ---------------- navigation ---------------- */
 function snap(){ return {tab:S.tab, stack:S.stack.slice()}; }
 function remember(){ if(S.hist.length>40) S.hist.shift(); S.hist.push(snap()); }
-function go(tab){ if(tab===S.tab && !S.stack.length) return; remember(); S.tab=tab; S.stack=[]; pushHist(); paint(); }
-function push(screen,arg){ remember(); S.stack.push({s:screen,a:arg}); pushHist(); paint(); }
-function canBack(){ return !!(S.role && (S.stack.length || S.hist.length)); }
+function go(tab){ if(tab===S.tab && !S.stack.length) return; S.tab=tab; S.stack=[]; S.hist=[]; pushHist(); paint(); }
+function push(screen,arg){ S.stack.push({s:screen,a:arg}); pushHist(); paint(); }
+function canBack(){ return !!(S.role || S.step==="role"); }
+/* Back means "up a level", not "undo". From a screen it returns to the tab it
+   was opened from; from a tab it returns to the interface chooser; from the
+   chooser it returns to sign-in. It never replays a trail of visited tabs,
+   which is what made it behave like an undo button. */
 function back(){
-  if(S.stack.length && !S.hist.length){ S.stack.pop(); paint(); return; }
-  if(S.hist.length){ var p=S.hist.pop(); S.tab=p.tab; S.stack=p.stack; paint(); return; }
-  /* nothing left inside the role: the only place further back is the interface chooser */
-  if(S.role){ S.role=null; S.step="role"; S.stack=[]; S.hist=[]; $("view").className="login"; paintLogin(); return; }
+  if(S.stack.length){ S.stack.pop(); S.hist=[]; paint(); return; }
+  if(S.role){
+    S.role=null; S.step="role"; S.stack=[]; S.hist=[];
+    $("view").className="login"; paintLogin(); return;
+  }
+  if(S.step==="role"){ S.step="phone"; S.who=null; S.phone=""; paintLogin(); return; }
   paint();
 }
-/* the phone's own back button navigates inside the app instead of leaving it */
 function pushHist(){ try{ history.pushState({b:1}, ""); }catch(e){} }
 window.addEventListener("popstate", function(){
   if(canBack() || S.role){ back(); pushHist(); }
@@ -2094,10 +2130,47 @@ function bindCustomer(ent){
   ME.msisdn=d.msisdn; ME.cat = d.id.charAt(0)==="B" ? "bak" : "res";
   ME.exempt = d.st==="exempt";
 }
-/* The number is the gate. Any six digits confirm it, as a real one-time code would
-   once an SMS provider is wired in. */
-function codeOk(entry, code){
-  return !!entry && digits(code).length===6;
+/* ---- the one-time code, when the app is running self-contained ----
+   A code is generated here, shown to nobody, and checked against what is typed.
+   It expires, it is rate limited, and it is wrong three times before it locks.
+   What it CANNOT do in a page with no server is deliver itself privately: the
+   code has to leave the device to reach WhatsApp, and only a provider can do
+   that. So self-contained mode hands the sending to the person signing in,
+   over their own WhatsApp, and the screen says exactly that. Real sign-in is
+   the live path, where the provider generates and checks the code server-side
+   and the browser never learns it. */
+var OTP_TTL_MS = 5*60*1000, OTP_MAX_TRIES = 3, OTP_WINDOW_MS = 60*60*1000, OTP_MAX_SENDS = 3;
+var otpState = {code:null, forNum:"", issued:0, tries:0, sends:[]};
+function otpRateLimited(){
+  var now=Date.now();
+  otpState.sends = otpState.sends.filter(function(x){ return now-x < OTP_WINDOW_MS; });
+  return otpState.sends.length >= OTP_MAX_SENDS;
+}
+function otpIssue(num){
+  var a = new Uint32Array(1);
+  if(window.crypto && crypto.getRandomValues) crypto.getRandomValues(a);
+  else a[0] = Math.floor(Math.random()*4294967296);
+  otpState.code = String(a[0] % 1000000).padStart(6,"0");
+  otpState.forNum = num; otpState.issued = Date.now(); otpState.tries = 0;
+  otpState.sends.push(otpState.issued);
+  return otpState.code;
+}
+function otpCheck(num, code){
+  if(!otpState.code || otpState.forNum !== num) return {ok:false, why:"Ask for a code first"};
+  if(Date.now() - otpState.issued > OTP_TTL_MS){ otpState.code=null; return {ok:false, why:"That code has expired \u2014 ask for a new one"}; }
+  otpState.tries++;
+  if(otpState.tries > OTP_MAX_TRIES){ otpState.code=null; return {ok:false, why:"Too many attempts \u2014 ask for a new code"}; }
+  var burn = (otpState.tries >= OTP_MAX_TRIES);
+  /* compare every character, so timing says nothing about how close it was */
+  var a=String(otpState.code), b=digits(code), diff = a.length ^ b.length;
+  for(var i=0;i<a.length;i++) diff |= a.charCodeAt(i) ^ (b.charCodeAt(i)||0);
+  if(diff !== 0){
+    /* three wrong guesses and the code is gone, not merely discouraged */
+    if(burn) otpState.code = null;
+    return {ok:false, why: burn ? "That code is not right \u2014 ask for it again" : "That code is not right"};
+  }
+  otpState.code = null;                       /* one use, then it is gone */
+  return {ok:true};
 }
 /* One line that says which register is answering. Silent when self-contained,
    because that is the normal state and nobody needs telling. */
@@ -2178,6 +2251,14 @@ function paintLogin(){
       '<input id="otp" class="mono" inputmode="numeric" maxlength="6" placeholder="------" style="text-align:center;font-size:26px;letter-spacing:.3em"></label>'+
     '<button class="btn p"'+(S.liveBusy?' disabled':'')+' data-a="checkotp">'+
       h(S.liveBusy? t("Checking") : t("Continue"))+'</button>'+
+    (!LIVE.on && S.otpSendLink
+      ? '<a class="btn p" target="_blank" rel="noopener" href="'+h(S.otpSendLink)+'">'+
+          svg("bell","ic")+h(t("Send the code to that number on WhatsApp"))+'</a>'+
+        '<div class="note"><span>'+svg("info")+'</span><div><b>How this works without a provider</b>'+
+        'The code was generated on this device, never shown here, and expires in five minutes. '+
+        'Opening WhatsApp sends it to the number being signed in. Once the municipality has a WhatsApp '+
+        'sender, the code is generated and checked on the server instead and this step disappears.</div></div>'
+      : '')+
     '<div class="btnrow"><button class="btn" data-a="backphone">'+h(t("Back"))+'</button>'+
     '<button class="btn" data-a="support">'+svg("help","ic")+h(t("Help"))+'</button></div>'+
     (S.otpErr? '<div class="note w"><span>'+svg("alert")+'</span><div><b>'+h(S.otpErr)+'</b>Check the code you were given and try again.</div></div>' : '')+
@@ -2570,13 +2651,22 @@ V["customer.dropoff"]=function(){
   return ill("point","s")+
   '<p class="b2">Drop-off stations take sorted material outside collection hours. Station use counts towards your sorting rebate.</p>'+
   '<div class="card plain"><div class="list">'+
-   [["ST-01 · Dayaa","Daily 06:00–20:00","Organic · Recyclables","p-good","Open"],
-    ["ST-02 · Al-Mrouj","Daily 06:00–20:00","Recyclables","p-good","Open"],
-    ["ST-04 · Tariq Harissa","Daily 06:00–20:00","Organic · Recyclables","p-good","Open"],
-    ["ST-03 · Sahel Zaytouna","Closed for repair","Organic · Recyclables","p-warn","Out of service"]]
-   .map(function(r){ return '<div class="item"><span class="av">'+svg("map")+'</span>'+
-     '<span class="t"><b>'+h(r[0])+'</b><span>'+h(r[1])+' · '+h(r[2])+'</span></span>'+
-     '<span class="pill '+r[3]+'"><i></i>'+h(r[4])+'</span></div>'; }).join("")+'</div></div>';
+   [["ST-01","Daily 06:00–20:00","Organic · Recyclables","p-good","Open"],
+    ["ST-02","Daily 06:00–20:00","Recyclables","p-good","Open"],
+    ["ST-04","Daily 06:00–20:00","Organic · Recyclables","p-good","Open"],
+    ["ST-03","Closed for repair","Organic · Recyclables","p-warn","Out of service"]]
+   .map(function(r){
+     var pl=placeById(r[0]);
+     var d = (S.geo && pl) ? km(S.geo.lat,S.geo.lon,pl.lat,pl.lon) : null;
+     return '<div class="item"><span class="av">'+svg("map")+'</span>'+
+     '<span class="t"><b>'+h(pl? (S.ar?pl.ar:pl.en) : r[0])+'</b><span>'+h(r[1])+' · '+h(r[2])+
+       (d!=null? ' · '+fmtDist(d) : '')+'</span></span>'+
+     '<span class="r"><span class="pill '+r[3]+'"><i></i>'+h(r[4])+'</span>'+
+       (pl? '<a class="btn sm" target="_blank" rel="noopener" href="'+h(mapOut(pl.lat,pl.lon))+'">'+
+          svg("map")+h(t("Maps"))+'</a>' : '')+'</span></div>'; }).join("")+'</div></div>'+
+   mapCard(PLACES.filter(function(x){ return x.type==="dop"; }).map(function(x){
+     return {id:x.id, lat:x.lat, lon:x.lon, label:S.ar?x.ar:x.en, kind:"dop", state:"dop", n:""};
+   }), {me:S.geo, legend:false, note:"Every station in the village."});
 };
 
 V["customer.training"]=function(){
@@ -2821,6 +2911,9 @@ function mapProject(pts){
   return {
     x:function(lon){ return ox + (lon-lo0)*kx*sc; },
     y:function(lat){ return MAPH - (oy + (lat-la0)*sc); },
+    /* the inverse, so a terrain model can be sampled per pixel */
+    lon:function(x){ return lo0 + (x-ox)/(kx*sc); },
+    lat:function(y){ return la0 + ((MAPH-y)-oy)/sc; },
     scale:sc, kx:kx,
     /* metres per pixel, for an honest scale bar */
     mpp:function(){ return 111320/sc; }
@@ -2834,6 +2927,72 @@ var PINCOL = {
   dop:   {fill:"var(--gold-soft)",   line:"var(--gold)",      txt:"var(--gold)"},
   me:    {fill:"var(--accent-ink)",  line:"var(--surface)",   txt:"var(--surface)"}
 };
+/* ---- the ground itself ----
+   Zaytouna sits on a slope: the lower road near the highway is around 90 m, the
+   saha 230 m, the Harissa road climbs past 330 m, and Wadi al-Karm cuts a
+   valley through the south-east. That is a model, not a survey, but it is the
+   real shape of the place and it is what makes a route map legible: a crew can
+   see which stops are uphill.                                                */
+function elevAt(lat, lon){
+  var e = 230 + (lat - 33.9500)*111320*0.129 - (lon - 35.6334)*92000*0.045;
+  /* the wadi */
+  var dw = Math.hypot((lat-33.9442)*111320, (lon-35.6344)*92000);
+  e -= 46 * Math.exp(-(dw*dw)/(2*330*330));
+  /* the knoll above the church */
+  var dk = Math.hypot((lat-33.9538)*111320, (lon-35.6338)*92000);
+  e += 24 * Math.exp(-(dk*dk)/(2*240*240));
+  return e;
+}
+/* marching squares over the model, so the lines are computed rather than drawn */
+function contourPaths(pr, lo, hi, step, cols, rows){
+  var segs={}, g=[], i, j;
+  for(j=0;j<=rows;j++){
+    g[j]=[];
+    for(i=0;i<=cols;i++){
+      var x=i*(MAPW/cols), y=j*(MAPH/rows);
+      g[j][i]={x:x, y:y, v:elevAt(pr.lat(y), pr.lon(x))};
+    }
+  }
+  function ip(a,b,lv){
+    var t=(lv-a.v)/((b.v-a.v)||1e-9);
+    return [a.x+(b.x-a.x)*t, a.y+(b.y-a.y)*t];
+  }
+  for(var lv=Math.ceil(lo/step)*step; lv<=hi; lv+=step){
+    var d="";
+    for(j=0;j<rows;j++) for(i=0;i<cols;i++){
+      var tl=g[j][i], tr=g[j][i+1], br=g[j+1][i+1], bl=g[j+1][i];
+      var k=(tl.v>lv?8:0)|(tr.v>lv?4:0)|(br.v>lv?2:0)|(bl.v>lv?1:0);
+      if(k===0||k===15) continue;
+      var a=null,b=null;
+      var T=ip(tl,tr,lv), R=ip(tr,br,lv), B=ip(bl,br,lv), L=ip(tl,bl,lv);
+      if(k===1||k===14){a=L;b=B;} else if(k===2||k===13){a=B;b=R;}
+      else if(k===3||k===12){a=L;b=R;} else if(k===4||k===11){a=T;b=R;}
+      else if(k===6||k===9){a=T;b=B;}  else if(k===7||k===8){a=L;b=T;}
+      else if(k===5){a=L;b=T;} else if(k===10){a=T;b=R;}
+      if(a&&b) d+="M"+a[0].toFixed(1)+" "+a[1].toFixed(1)+"L"+b[0].toFixed(1)+" "+b[1].toFixed(1);
+    }
+    if(d) segs[lv]=d;
+  }
+  return segs;
+}
+var contourStep = 25;
+function contourLayer(pr){
+  var lo=1e9, hi=-1e9;
+  [[0,0],[MAPW,0],[0,MAPH],[MAPW,MAPH],[MAPW/2,MAPH/2]].forEach(function(q){
+    var e=elevAt(pr.lat(q[1]), pr.lon(q[0]));
+    if(e<lo) lo=e; if(e>hi) hi=e;
+  });
+  var span=hi-lo, step = span>700 ? 50 : (span>280 ? 25 : (span>120 ? 20 : 10));
+  contourStep = step;
+  var segs=contourPaths(pr, lo, hi, step, 48, 34), out='';
+  Object.keys(segs).forEach(function(lv){
+    var major = (Number(lv) % (step*4) === 0);
+    out += '<path d="'+segs[lv]+'" fill="none" stroke="var(--ink-2)" '+
+           'stroke-opacity="'+(major?".26":".13")+'" stroke-width="'+(major?1.6:1)+'" '+
+           'stroke-linecap="round"/>';
+  });
+  return '<g class="contours">'+out+'</g>';
+}
 function mapScaleBar(pr){
   var target=120, metres=target*pr.mpp();
   var nice=[50,100,200,250,500,1000,2000], pick=nice[0];
@@ -2855,11 +3014,7 @@ function mapSvg(stops, opts){
   var pr = mapProject(all), out='';
 
   out += '<rect width="'+MAPW+'" height="'+MAPH+'" fill="var(--surface-2)"/>';
-  /* a graticule, so distance is readable without inventing streets we do not hold */
-  for(var gx=MAPPAD; gx<MAPW; gx+=64)
-    out += '<path d="M'+gx+' 0v'+MAPH+'" stroke="var(--line-soft)" stroke-width="1"/>';
-  for(var gy=MAPPAD; gy<MAPH; gy+=64)
-    out += '<path d="M0 '+gy+'h'+MAPW+'" stroke="var(--line-soft)" stroke-width="1"/>';
+  out += contourLayer(pr);
 
   /* the route, in the order it will be worked */
   if(opts.route && stops.length>1){
@@ -2898,11 +3053,19 @@ function mapSvg(stops, opts){
     out += '</g>';
   });
 
+  /* where you are, as a pin rather than a dot, with its accuracy drawn honestly */
   if(opts.me){
     var mx=pr.x(opts.me.lon), my=pr.y(opts.me.lat);
-    out += '<circle cx="'+mx.toFixed(1)+'" cy="'+my.toFixed(1)+'" r="22" fill="var(--accent)" opacity=".16"/>'+
-           '<circle cx="'+mx.toFixed(1)+'" cy="'+my.toFixed(1)+'" r="8" fill="'+PINCOL.me.fill+
-           '" stroke="'+PINCOL.me.line+'" stroke-width="3"/>';
+    if(opts.me.acc){
+      var ar = Math.max(10, Math.min(90, opts.me.acc / pr.mpp()));
+      out += '<circle cx="'+mx.toFixed(1)+'" cy="'+my.toFixed(1)+'" r="'+ar.toFixed(0)+
+             '" fill="var(--accent)" opacity=".12" stroke="var(--accent)" stroke-opacity=".3" stroke-width="1.5"/>';
+    }
+    out += '<g transform="translate('+mx.toFixed(1)+','+my.toFixed(1)+')">'+
+      '<path d="M0 4c0 0 13-12 13-21A13 13 0 0 0-13-17c0 9 13 21 13 21z" fill="'+PINCOL.me.fill+
+        '" stroke="'+PINCOL.me.line+'" stroke-width="2.5" stroke-linejoin="round"/>'+
+      '<circle cx="0" cy="-17" r="4.5" fill="'+PINCOL.me.line+'"/>'+
+      '<ellipse cx="0" cy="6" rx="6" ry="2.2" fill="var(--ink-2)" opacity=".25"/></g>';
   }
   out += mapScaleBar(pr);
   return '<svg class="gmap" viewBox="0 0 '+MAPW+' '+MAPH+'" role="img" aria-label="'+
@@ -2916,16 +3079,31 @@ function mapLegend(items){
       (it[0]==="dop"?"border-radius:3px":"border-radius:50%")+'"></i>'+h(it[1])+'</span>';
   }).join("")+'</div>';
 }
-/* turn-by-turn belongs to the phone's own map, which costs nothing and is already installed */
-function mapOut(lat, lon, label){
-  return "https://www.google.com/maps/dir/?api=1&destination="+lat+","+lon+
-         "&travelmode=driving"+(label?"&destination_place_id=":"");
+/* Turn-by-turn belongs to the phone's own map, which costs nothing and is
+   already installed. A single destination for one pin; the whole rest of the
+   round, in order, when the driver wants the lot. Google takes nine waypoints
+   plus a destination, so the run is capped at ten stops and says so. */
+var MAPS_MAX_STOPS = 10;
+function mapOut(lat, lon){
+  return "https://www.google.com/maps/dir/?api=1&destination="+lat+","+lon+"&travelmode=driving";
+}
+function mapOutRoute(stops, from){
+  var list = stops.slice(0, MAPS_MAX_STOPS);
+  if(!list.length) return "";
+  var dest = list[list.length-1], mid = list.slice(0, -1);
+  var u = "https://www.google.com/maps/dir/?api=1"+
+          (from ? "&origin="+from.lat+","+from.lon : "")+
+          "&destination="+dest.lat+","+dest.lon+"&travelmode=driving";
+  if(mid.length) u += "&waypoints="+mid.map(function(p){ return p.lat+","+p.lon; }).join("%7C");
+  return u;
 }
 function mapCard(stops, opts){
   opts=opts||{};
   return '<div class="card plain mapwrap">'+mapSvg(stops, opts)+
     (opts.legend===false ? '' : mapLegend(opts.legendItems ||
-      [["todo","to do"],["done","serviced"],["issue","problem"],["dop","drop-off"]]))+
+      [["todo","to do"],["done","serviced"],["issue","problem"],["dop","drop-off"],["me","you"]]))+
+    (opts.legend===false ? '' : '<p class="sm" style="margin-top:-2px">Contours every '+
+      contourStep+' m. The village climbs from the lower road to the Harissa side.</p>')+
     (opts.note? '<p class="sm">'+h(opts.note)+'</p>' : '')+'</div>';
 }
 
@@ -3057,8 +3235,7 @@ function scanCard(label){
     '<div class="scancap">'+h(label)+'</div></div>'+
     (S.camErr? '<div class="note w"><span>'+svg("info")+'</span><div><b>Live camera unavailable</b>'+h(S.camErr)+'</div></div>' : '')+
     '<div class="btnrow"><button class="btn p" data-a="cam">'+svg("cam","ic")+h(S.camOn?t("Stop camera"):t("Open camera"))+'</button>'+
-    '<button class="btn" data-a="snap">'+svg("cam","ic")+h(t("Photograph the code"))+'</button></div>'+
-    '<button class="btn" data-a="manual">'+h(t("Enter the code by hand"))+'</button></div>';
+    '<button class="btn" data-a="manual">'+svg("doc","ic")+h(t("Enter the code"))+'</button></div></div>';
 }
 function streamSeg(group){
   return '<div class="seg" data-g="'+group+'">'+Object.keys(STREAMS).map(function(k){
@@ -3262,6 +3439,29 @@ function routeHeader(role, stops){
     '<button class="link" data-a="push" data-v="optimiser" style="text-align:start">'+
       h(t("What the optimiser has learned"))+' \u203a</button></div>';
 }
+/* The rest of the round, in order, with the whole run handed to the phone's
+   map in one tap. A stop can be skipped, which is a decision and is recorded,
+   not the same thing as servicing it. */
+function nextStopsRoll(role, stops, n){
+  var left = stops.filter(function(p){ return p.state!=="done" && !S.skipped[p.id]; });
+  var run  = left.slice(0, n || 6);
+  if(!run.length) return '';
+  return '<div class="sect"><span class="eyebrow">'+h(t("Next stops"))+'</span>'+
+      '<span class="sm">'+left.length+' '+h(t("left"))+'</span></div>'+
+    '<div class="card plain"><div class="list">'+run.map(function(r){
+      return '<div class="item"><span class="av"><b class="mono">'+r.n+'</b></span>'+
+        '<span class="t"><b>'+h(r.label)+'</b><span class="mono">'+h(r.id)+' \u00b7 '+
+          fmtMin(svcMin(role,r))+' \u00b7 '+Math.round(elevAt(r.lat,r.lon))+' m</span></span>'+
+        '<span class="r">'+
+          '<a class="btn sm" target="_blank" rel="noopener" href="'+h(mapOut(r.lat,r.lon))+'">'+svg("map")+'</a>'+
+          '<button class="btn sm" data-a="skipstop" data-v="'+h(r.id)+'">'+h(t("Skip"))+'</button>'+
+        '</span></div>'; }).join("")+'</div></div>'+
+    '<a class="btn p" target="_blank" rel="noopener" href="'+h(mapOutRoute(run, S.geo))+'">'+
+      svg("map","ic")+h(t("Open the next"))+' '+run.length+' '+h(t("stops in maps"))+'</a>'+
+    (left.length>MAPS_MAX_STOPS? '<p class="sm">Maps takes ten stops at a time, so the rest follows once these are done.</p>' : '')+
+    (Object.keys(S.skipped).length? '<p class="sm">'+Object.keys(S.skipped).length+
+      ' skipped this round, with a reason against each.</p>' : '');
+}
 function nextStopCard(role, stops){
   var nxt = stops.filter(function(p){ return p.state!=="done"; })[0];
   if(!nxt) return '<div class="card acc" style="text-align:center"><p class="h">Round complete</p>'+
@@ -3338,6 +3538,10 @@ V["crew.route"]=function(){
       '<span class="t"><b>'+h(r.label)+'</b><span class="mono">'+h(r.id)+' \u00b7 '+h(TAGKIND[r.kind].en)+'</span></span>'+
       '<span class="pill '+(r.state==="done"?"p-good":(r.state==="issue"?"p-crit":"p-neut"))+'"><i></i>'+
       (r.state==="done"?"serviced":(r.state==="issue"?"problem":fmtMin(svcMin("crew",r))))+'</span></button>'; }).join("")+'</div>')+
+    nextStopsRoll("crew", stops, 4)+
+    '<div class="btnrow"><button class="btn d" data-a="fault" data-v="'+h((stops[0]||{}).id||"")+'">'+
+      svg("alert","ic")+h(t("Report a fault"))+'</button>'+
+    '<button class="btn" data-a="push" data-v="obs">'+svg("cam","ic")+h(t("Observation"))+'</button></div>'+
     '<p class="sm">'+h(S.ar?st.howAr:st.howEn)+'</p>';
 };
 
@@ -3409,8 +3613,16 @@ V["driver.shift"]=function(){
     VCHECK.map(function(v,i){
       return '<button class="btn row" data-a="vchk" data-v="'+i+'"><span>'+h(v[0])+'</span>'+
       '<span class="pill '+(v[1]?"p-good":"p-crit")+'"><i></i>'+(v[1]?"Pass":"Fault")+'</span></button>'; }).join("")+
-    '<button class="btn p" data-a="startshift">'+(S.shiftOn?"Shift running":"Start shift")+'</button>'+
-    '<p class="sm">No item passes by default, and a driver cannot clear his own fault. Dispatch releases a vehicle against a named operator.</p>';
+    (S.shiftOn
+      ? '<div class="card acc"><div class="kv" style="border:none"><span>'+h(t("Shift running since"))+'</span>'+
+          '<b class="mono">'+h(S.shiftStart||"06:10")+'</b></div>'+
+        '<div class="kv"><span>'+h(t("Stops worked"))+'</span><b class="num">'+Object.keys(S.served).length+'</b></div>'+
+        '<div class="kv"><span>'+h(t("Loads tipped"))+'</span><b class="num">'+(S.loads||0)+'</b></div>'+
+        '<div class="kv"><span>'+h(t("Stops skipped"))+'</span><b class="num">'+Object.keys(S.skipped).length+'</b></div></div>'+
+        '<button class="btn d" data-a="endshift">'+svg("sync","ic")+h(t("Close the shift"))+'</button>'
+      : '<button class="btn p" data-a="startshift">'+h(t("Start shift"))+'</button>')+
+    '<p class="sm">No item passes by default, and a driver cannot clear his own fault. Dispatch releases a vehicle against a named operator. '+
+    'A shift closes against the odometer and the loads tipped, and nothing can be logged to it afterwards.</p>';
 };
 V["driver.route"]=function(){
   var st=STREAMS[S.stream], stops=roundStops("driver");
@@ -3420,10 +3632,61 @@ V["driver.route"]=function(){
       note:"Turn-by-turn opens in your phone\u2019s own map."})+
     routeHeader("driver", stops)+
     nextStopCard("driver", stops)+
-    '<div class="btnrow"><button class="btn d" data-a="problem">Problem</button>'+
-    '<button class="btn p" data-a="arrived">Arrived</button></div>'+
-    '<button class="btn" data-a="tab" data-v="load">To disposal</button>';
+    '<div class="btnrow"><button class="btn d" data-a="fault" data-v="'+h((stops[0]||{}).id||"")+'">'+
+      svg("alert","ic")+h(t("Report a fault"))+'</button>'+
+    '<button class="btn p" data-a="arrived">'+h(t("Arrived"))+'</button></div>'+
+    '<button class="btn" data-a="push" data-v="obs">'+svg("cam","ic")+h(t("Report an observation"))+'</button>'+
+    '<button class="btn" data-a="tab" data-v="load">'+svg("truck","ic")+h(t("To disposal"))+'</button>'+
+    nextStopsRoll("driver", stops, 5);
 };
+var FAULT_KINDS = ["Bin or container damaged","Pad or stand broken","Tag or sticker unreadable",
+                   "Point obstructed","Vehicle fault","Site or weighbridge problem","Other"];
+TITLES.fault="Report a fault"; TITLES.loadclosed="Load closed"; TITLES.obs="Report an observation";
+/* A fault without a note cannot be acted on, and without a picture it is one
+   person's word. The note is required; the picture is asked for every time. */
+function faultView(){
+  var where = S.faultFor || "";
+  var pl = placeById(where);
+  return '<div class="note"><span>'+svg("alert")+'</span><div><b>What is wrong, and a picture of it</b>'+
+    'The note is what operations acts on. The photograph is what settles it when the contractor disagrees.</div></div>'+
+    '<div class="card plain"><div class="kv" style="border:none"><span>'+h(t("Where"))+'</span>'+
+      '<b class="mono">'+h(where||"\u2014")+'</b></div>'+
+    (pl? '<div class="kv"><span>'+h(t("Point"))+'</span><b>'+h(S.ar?pl.ar:pl.en)+'</b></div>' : '')+
+    '<div class="kv"><span>'+h(t("Reported by"))+'</span><b>'+h(S.who||t(ROLES[S.role].label))+'</b></div></div>'+
+    '<label class="fld"><span>'+h(t("What is wrong"))+'</span><select id="fkind">'+
+      FAULT_KINDS.map(function(k){ return '<option>'+h(k)+'</option>'; }).join("")+'</select></label>'+
+    '<label class="fld"><span>'+h(t("Comment"))+'</span>'+
+      '<textarea id="fnote" placeholder="what you can see, in your own words"></textarea></label>'+
+    photoCard(t("photograph the fault"), "faultphoto", t("Attach the photograph"))+
+    '<button class="btn p" data-a="faultsend">'+h(t("Send it to operations"))+'</button>'+
+    '<p class="sm">It reaches operations with your name, the point and the time attached, and it is counted against the contractor if upheld.</p>';
+}
+V["driver.fault"]=faultView; V["crew.fault"]=faultView; V["collector.fault"]=faultView;
+V["facility.fault"]=faultView;
+
+/* The truck is empty again. The only question worth asking is what it moves next. */
+function loadClosedView(){
+  var left = roundStops(S.role==="driver"?"driver":"crew").filter(function(p){
+    return p.state!=="done" && !S.skipped[p.id]; });
+  return '<div class="card acc" style="text-align:center">'+
+      '<span class="av" style="margin:0 auto 6px">'+svg("check")+'</span>'+
+      '<p class="h">'+h(t("Load closed"))+'</p>'+
+      '<p class="sm">3,180 kg on '+h(STREAMS[S.stream].route)+' \u00b7 ticket WB-2026-11408</p></div>'+
+    '<div class="card"><div class="kv" style="border:none"><span>'+h(t("Loads tipped today"))+'</span>'+
+      '<b class="num">'+(S.loads||0)+'</b></div>'+
+    '<div class="kv"><span>'+h(t("Stops left on this round"))+'</span><b class="num">'+left.length+'</b></div></div>'+
+    '<div class="sect"><span class="eyebrow">'+h(t("What next"))+'</span></div>'+
+    (left.length
+      ? '<button class="btn p" data-a="tab" data-v="route">'+svg("route","ic")+
+          h(t("Back to the round"))+' \u00b7 '+left.length+' '+h(t("left"))+'</button>'
+      : '')+
+    '<label class="fld"><span>'+h(t("Take a different stream"))+'</span>'+streamSeg("stream")+'</label>'+
+    '<button class="btn" data-a="tab" data-v="route">'+svg("truck","ic")+h(t("Start that round"))+'</button>'+
+    '<button class="btn" data-a="tab" data-v="shift">'+svg("sync","ic")+h(t("Back to the shift"))+'</button>'+
+    '<p class="sm">Changing the stream here rebuilds the round for the new one. The shift stays open until you close it.</p>';
+}
+V["driver.loadclosed"]=loadClosedView; V["crew.loadclosed"]=loadClosedView;
+
 V["driver.load"]=function(){
   return '<div class="card"><div class="kv" style="border:none"><span>Site</span><b>'+
     h(S.stream==="organic"?"Organic pad":(S.stream==="recycle"?"Sorting facility":"Landfill"))+' · location confirmed</b></div>'+
@@ -3432,8 +3695,10 @@ V["driver.load"]=function(){
     '<label class="fld"><span>Weighbridge ticket</span><input class="mono" value="WB-2026-11408"></label>'+
     '<label class="fld"><span>Net weight (kg)</span><input class="mono" value="3,180"></label>'+
     '<div class="scanbox" style="aspect-ratio:16/7"><div class="scancap">photograph of the ticket</div></div>'+
-    '<button class="btn p" data-a="closeload">Close the load</button>'+
-    '<p class="sm">A load closes only at an approved site. An override needs a reason and appears in the monthly report.</p>';
+    '<button class="btn p" data-a="closeload">'+h(t("Close the load"))+'</button>'+
+    '<button class="btn" data-a="fault" data-v="disposal">'+svg("alert","ic")+h(t("Report a fault here"))+'</button>'+
+    '<p class="sm">A load closes only at an approved site. An override needs a reason and appears in the monthly report.</p>'+
+    nextStopsRoll("driver", roundStops("driver"), 4);
 };
 V["driver.sync"]=V["crew.sync"];
 
@@ -3457,9 +3722,22 @@ V["collector.round"]=function(){
     (left.length? fold(t("The round")+" \u00b7 "+left.length+" doors left", '<div class="list">'+left.map(function(d){
       return '<button class="item" data-a="push" data-v="door" data-x="'+h(d.id)+'"><span class="av">'+(S.ar?"":h(d.n[0]))+'</span>'+
         '<span class="t"><b>'+h(S.ar?d.ar:d.n)+'</b><span class="mono">+'+h(d.msisdn)+' · '+h(d.id)+'</span></span>'+
-        '<span class="r">'+(d.due?'<b>'+money(d.due)+'</b><span style="color:var(--stamp)">'+d.days+'d</span>':'<span class="pill p-neut">exempt</span>')+'</span></button>';
-     }).join("")+'</div>', true)
+        '<span class="r">'+(d.due?'<b>'+money(d.due)+'</b><span style="color:var(--stamp)">'+d.days+'d</span>'
+          :'<span class="pill p-neut">exempt</span>')+'</span></button>'+
+        '<div class="item" style="padding-top:0;border:none"><span class="av"></span>'+
+          '<span class="t"></span><span class="r">'+
+          '<a class="btn sm" target="_blank" rel="noopener" href="'+
+            h(mapOut((placeById(d.point)||{lat:33.95}).lat,(placeById(d.point)||{lon:35.63}).lon))+'">'+svg("map")+'</a>'+
+          '<button class="btn sm" data-a="skipstop" data-v="'+h(d.id)+'">'+h(t("Skip"))+'</button></span></div>';
+     }).join("")+'</div>', true)+
+       '<a class="btn p" target="_blank" rel="noopener" href="'+
+         h(mapOutRoute(roundStops("collector").filter(function(x){ return x.state!=="done" && !S.skipped[x.id]; }), S.geo))+
+         '">'+svg("map","ic")+h(t("Open the next doors in maps"))+'</a>'
      : '<div class="card acc" style="text-align:center"><p class="h">Round complete</p><p class="sm">Every door visited. Deposit the cash before 17:00.</p></div>')+
+    (S.roundOpen
+      ? '<div class="note g"><span>'+svg("check")+'</span><div><b>'+h(t("The round is open"))+'</b>'+
+        Object.keys(S.notified).length+' households were told this morning that you would be calling today.</div></div>'
+      : '<button class="btn p" data-a="openround">'+svg("bell","ic")+h(t("Open the round and tell the households"))+'</button>')+
     '<button class="btn" data-a="resetround">Reset the round</button>';
 };
 V["collector.door"]=function(id){
@@ -3473,6 +3751,8 @@ V["collector.door"]=function(id){
     '<div class="kv"><span>Days overdue</span><b class="num">'+d.days+'</b></div></div>'+
     '<button class="btn p" data-a="push" data-v="cashtake" data-x="'+h(d.id)+'">'+h(t("Take cash payment"))+'</button>'+
     '<button class="btn" data-a="nobody" data-v="'+h(d.id)+'">'+h(t("Nobody home"))+'</button>'+
+    '<button class="btn" data-a="exempt" data-v="'+h(d.id)+'">'+svg("doc","ic")+h(t("Propose an exemption"))+'</button>'+
+    '<button class="btn" data-a="fault" data-v="'+h(d.point)+'">'+svg("alert","ic")+h(t("Report a fault"))+'</button>'+
     '<button class="btn" data-a="obsfor" data-v="'+h(d.id)+'">'+svg("cam","ic")+
       (needsEvidence(d.id)? 'Report a problem \u2014 photograph required' : 'Report a problem')+'</button>'+
     '<div class="sect"><span class="eyebrow">'+h(t("Comment"))+'</span></div>'+
@@ -3519,6 +3799,91 @@ V["collector.scanned"]=function(code){
     '<div class="chips">'+SCAN_COMMENTS.map(function(c,i){
       return '<button class="chip'+(i===0?" on":"")+'" data-a="cmt" data-v="'+c.id+'">'+h(S.ar?c.ar:c.en)+'</button>'; }).join("")+'</div><div id="cmtbox"></div>';
 };
+var EXEMPT_REASONS = ["Registered hardship","Premises empty or closed",
+                      "Already settled elsewhere","Duplicate on the register",
+                      "Death in the household","Dispute \u2014 referred to the municipality"];
+TITLES.exempt="Propose an exemption"; TITLES.missed="Nobody home";
+var EXEMPTIONS = [
+  {id:"EX-2198", prem:"C-6712", name:"Wael Zmerly", reason:"Registered hardship",
+   note:"Social services letter seen, dated 4 March.", by:"Walid Assaf", at:"4 Mar 2026",
+   photo:true, state:"granted"},
+  {id:"EX-2203", prem:"C-2056", name:"Antoine Sfeir", reason:"Premises empty or closed",
+   note:"Shuttered since January, neighbour confirms the family is abroad.", by:"Walid Assaf",
+   at:"18 Aug 2026", photo:true, state:"granted"}
+];
+
+/* A collector cannot grant an exemption. He can see one, evidence it and propose
+   it; the municipality decides. That split is the whole point of the screen. */
+V["collector.exempt"]=function(){
+  var d = doorById(S.exemptFor);
+  return '<div class="note w"><span>'+svg("alert")+'</span><div><b>You propose, the municipality decides</b>'+
+    'Nothing comes off this account today. The proposal goes to the municipality with your name on it, '+
+    'and the balance stands until they rule.</div></div>'+
+    (d? '<div class="card plain"><div class="kv" style="border:none"><span>'+h(t("Household"))+'</span><b>'+h(d.n)+'</b></div>'+
+      '<div class="kv"><span>'+h(t("Account"))+'</span><b class="mono">'+h(d.id)+'</b></div>'+
+      '<div class="kv"><span>'+h(t("Balance"))+'</span><b>'+money(d.due)+'</b></div>'+
+      '<div class="kv"><span>'+h(t("Address"))+'</span><b style="font-size:12.5px">'+h(d.a)+'</b></div></div>' : '')+
+    '<label class="fld"><span>'+h(t("Reason"))+'</span><select id="exreason">'+
+      EXEMPT_REASONS.map(function(r){ return '<option>'+h(r)+'</option>'; }).join("")+'</select></label>'+
+    '<label class="fld"><span>'+h(t("What you saw or were shown"))+'</span>'+
+      '<textarea id="exnote" placeholder="the document, who confirmed it, what the premises looked like"></textarea></label>'+
+    photoCard(t("photograph the document or the premises"), "exemptphoto", t("Attach it")) +
+    '<button class="btn p" data-a="exemptsend">'+h(t("Send the proposal"))+'</button>'+
+    '<div class="sect"><span class="eyebrow">'+h(t("Already granted on this round"))+'</span></div>'+
+    '<div class="card plain"><div class="list">'+EXEMPTIONS.map(function(e){
+      return '<div class="item"><span class="av">'+svg("doc")+'</span>'+
+        '<span class="t"><b>'+h(e.name)+' \u00b7 '+h(e.reason)+'</b><span>'+h(e.at)+' \u00b7 '+h(e.by)+
+        (e.photo?' \u00b7 photographed':'')+'</span></span>'+
+        '<span class="pill '+(e.state==="granted"?"p-good":"p-warn")+'"><i></i>'+h(e.state)+'</span></div>';
+    }).join("")+'</div></div>';
+};
+
+TITLES.tellthem="Telling the round";
+/* A collector who turns up unannounced finds nobody in. One message at the
+   start of the round is the difference between a wasted morning and a paid one. */
+V["collector.tellthem"]=function(){
+  var left = ROUTE_DOORS.filter(function(d){ return !S.visited[d.id]; });
+  return '<div class="note"><span>'+svg("bell")+'</span><div><b>Tell them before you walk</b>'+
+    'Every household on today\u2019s round gets one message saying you will call, with their balance and '+
+    'their payment reference. The ones who would rather transfer can, and you knock on fewer empty doors.</div></div>'+
+    '<div class="card acc"><div class="kv" style="border:none"><span>'+h(t("On the round today"))+'</span>'+
+      '<b class="num">'+left.length+'</b></div>'+
+    '<div class="kv"><span>'+h(t("Told so far"))+'</span><b class="num">'+Object.keys(S.notified).length+'</b></div></div>'+
+    '<div class="card plain"><div class="list">'+left.map(function(d){
+      var msg = "Baladi \u2014 "+TOWN+"\n\nOur collector is on your round today and will call at "+d.a+".\n"+
+        "Account "+d.id+(d.due? "\nBalance "+money(d.due) : "\nNothing outstanding")+
+        "\nReference "+payRef(d.id,2026,2)+
+        "\n\nIf it suits you better, pay by transfer with that reference instead \u2014 allow up to "+
+        PAY_SETTLE_HOURS+" hours for it to show. A receipt follows either way.\n\nbaladiservice.com";
+      return '<div class="item"><span class="av">'+svg("user")+'</span>'+
+        '<span class="t"><b>'+h(d.n)+'</b><span class="mono">+'+h(d.msisdn)+' \u00b7 '+
+          (d.due? money(d.due) : "nothing due")+'</span></span>'+
+        '<span class="r">'+(S.notified[d.id]
+          ? '<span class="pill p-good"><i></i>told</span>'
+          : '<a class="btn sm p" target="_blank" rel="noopener" data-a="toldthem" data-v="'+h(d.id)+'" href="'+
+            h(waLink(d.msisdn, msg))+'">'+svg("bell")+'</a>')+'</span></div>';
+    }).join("")+'</div></div>'+
+    '<button class="btn" data-a="tab" data-v="round">'+h(t("Start the round"))+'</button>'+
+    '<p class="sm">One message each, carrying the balance and the reference. Nothing automatic goes out: you send them, '+
+    'from your own number, so a household can reply to a person.</p>';
+};
+
+V["collector.missed"]=function(){
+  var m = S.lastMissed;
+  if(!m) return '<p class="sm">Nothing to send.</p>';
+  return '<div class="card acc" style="text-align:center">'+
+      '<span class="av" style="margin:0 auto 6px">'+svg("bell")+'</span>'+
+      '<p class="h">'+h(t("Tell them you called"))+'</p>'+
+      '<p class="sm">'+h(m.name)+' \u00b7 <span class="mono">+'+h(m.msisdn)+'</span></p></div>'+
+    '<div class="note"><span>'+svg("info")+'</span><div><b>Why this matters</b>'+
+    'A household that is never told gets a bigger bill and no warning. One message turns a missed call '+
+    'into a reference they can pay against tonight.</div></div>'+
+    '<a class="btn p" target="_blank" rel="noopener" href="'+h(m.link)+'">'+
+      svg("bell","ic")+h(t("Send it on WhatsApp"))+'</a>'+
+    '<button class="btn" data-a="tab" data-v="round">'+h(t("Next door"))+'</button>'+
+    '<p class="sm">It carries the account, the balance and the payment reference, so they can settle without waiting for the next round.</p>';
+};
+
 V["collector.cash"]=function(){
   return '<div class="card plain"><div class="kv" style="border:none"><span>Handheld scanner</span><b>'+(S.hidOn?"Paired · live mode":"Paired · off")+'</b></div>'+
     '<div class="kv"><span>Storage mode</span><b class="num">'+BATCH.length+' scans held</b></div></div>'+
@@ -3539,6 +3904,8 @@ function needsEvidence(id){
      has to show the thing rather than assert it */
   return flagsFor(id) >= FLAG_EVIDENCE_AT || COLLECTOR.obsRejected >= 2;
 }
+V["driver.obs"]=function(){ return V["collector.obs"](); };
+V["crew.obs"]=function(){ return V["collector.obs"](); };
 V["collector.obs"]=function(){
   var repeat=ROUTE_DOORS.filter(function(d){ return (d.flags||0)>=FLAG_EVIDENCE_AT; });
   return '<div class="card flat"><div class="kv" style="border:none"><span>Upheld this month</span><b class="num">'+COLLECTOR.obsUpheld+'</b></div>'+
@@ -3715,10 +4082,34 @@ function zoneBars(){
    .map(function(z){ return '<div class="meter"><div class="lab"><span>'+h(S.ar?z.ar:z.en)+'</span><b>'+z.rate+'%</b></div>'+
      '<div class="bar"><i style="width:'+z.rate+'%"></i></div></div>'; }).join("");
 }
+/* The two numbers a council is judged on. Everything else on this screen
+   explains them, so they lead and they are twice the size of anything else. */
+function headlineRate(label, pct, sub, prev, invert){
+  var delta = pct - prev, up = delta >= 0;
+  var good = invert ? !up : up;
+  return '<div class="hero">'+
+    '<p class="eyebrow">'+h(label)+'</p>'+
+    '<div class="hv">'+pct.toFixed(1)+'<span>%</span></div>'+
+    '<div class="hbar"><i style="width:'+Math.max(0,Math.min(100,pct)).toFixed(0)+'%"></i></div>'+
+    '<p class="sm">'+h(sub)+'</p>'+
+    '<p class="sm" style="color:'+(good?"var(--good)":"var(--stamp)")+'">'+
+      (up?"\u25b2 ":"\u25bc ")+Math.abs(delta).toFixed(1)+' points on last cycle</p>'+
+  '</div>';
+}
+function townParticipation(){
+  var b=0, n=0;
+  ZONES.forEach(function(z){ b += z.recy*z.premises; n += z.premises; });
+  return n? b/n : 0;
+}
 V["muni.overview"]=function(){
-  return '<div class="grid2">'+
-    '<div class="stat"><b>'+(COLLECTION_RATE*100).toFixed(1)+'%</b><span>collection rate on net billable</span></div>'+
-    '<div class="stat"><b>'+money(collected())+'</b><span>collected this cycle</span></div>'+
+  return ''+
+  '<div class="heros">'+
+    headlineRate("Fee payment rate", COLLECTION_RATE*100,
+      money(collected())+" of "+money(netBillable())+" net billable", 69.4, false)+
+    headlineRate("Recycling participation", townParticipation(),
+      "share of premises putting out a sorted bag", 58.1, false)+
+  '</div>'+
+  '<div class="grid2">'+
     '<div class="stat"><b>'+money(outstanding())+'</b><span>outstanding · 1,884 accounts</span></div>'+
     '<div class="stat"><b>'+nf(premises())+'</b><span>premises on the register</span></div></div>'+
     '<div class="card"><p class="eyebrow">Billed against collected</p>'+
@@ -4793,6 +5184,15 @@ document.addEventListener("click", function(ev){
         return;
       }
       if(!phoneOk(S.phone)){ S.loginErr="That number is not on the register"; paintLogin(); return; }
+      if(otpRateLimited()){
+        S.loginErr="Three codes have gone to that number this hour. Wait, or ask the municipality for help.";
+        paintLogin(); return;
+      }
+      var e164 = S.cc + localPart(S.cc, S.phone);
+      var code = otpIssue(e164);
+      S.otpSendLink = waLink(e164,
+        "Baladi \u2014 "+TOWN+"\n\nYour sign-in code is "+code+
+        "\n\nIt is valid for five minutes and can be used once. Nobody from the municipality will ever ask you for it.");
       S.loginErr=""; S.otpErr=""; S.otpTries=0; S.step="otp"; paintLogin(); return;
     case "checkotp": {
       var code=digits($("otp")&&$("otp").value);
@@ -4822,9 +5222,10 @@ document.addEventListener("click", function(ev){
         return;
       }
       var ent=findNumber(S.cc, S.phone);
-      if(!codeOk(ent, code)){
+      var vr = otpCheck(S.cc + localPart(S.cc, S.phone), code);
+      if(!ent || !vr.ok){
         S.otpTries++;
-        S.otpErr = S.otpTries>=3 ? "That code is not right \u2014 ask for it again" : "That code is not right";
+        S.otpErr = vr.why || "That code is not right";
         paintLogin(); return;
       }
       S.who=ent.name; S.otpErr=""; S.otpTries=0;
@@ -4884,6 +5285,27 @@ document.addEventListener("click", function(ev){
       back(); return;
     }
     case "serveLearnNoop": return;
+    case "skipstop": {
+      var sid=v;
+      sheet(t("Skip this stop"),
+        '<p class="b2">A skipped stop is not a serviced stop. It is recorded with a reason, '+
+        'and it stays on the round for the next pass.</p>'+
+        SKIP_REASONS.map(function(r,ix){
+          return '<button class="btn row" data-a="skipdone" data-v="'+h(sid)+'" data-x="'+ix+'">'+
+            '<span>'+h(S.ar?SKIP_REASONS_AR[ix]:r)+'</span><span class="chev">'+svg("chev")+'</span></button>';
+        }).join(""));
+      return;
+    }
+    case "skipdone": {
+      var rs = SKIP_REASONS[+x] || SKIP_REASONS[0];
+      S.skipped[v] = rs;
+      if(S.role==="crew" || S.role==="driver" || S.role==="collector"){
+        FAULTS.unshift({id:"SK-"+(1000+Object.keys(S.skipped).length), where:v, what:"Stop skipped \u00b7 "+rs,
+                        by:S.who||t(ROLES[S.role].label), at:"just now", photo:false, note:""});
+      }
+      closeSheet(); paint(); toast("Skipped \u00b7 "+rs);
+      return;
+    }
     case "servestop": {
       var role=S.role, now=Date.now();
       if(S.served[v] || S.visited[v]){ toast("Already serviced"); return; }
@@ -5173,13 +5595,70 @@ document.addEventListener("click", function(ev){
     case "startshift":
       var bad=-1; VCHECK.forEach(function(c,i){ if(!c[1]&&bad<0) bad=i; });
       if(bad>-1){ toast("Fault on "+VCHECK[bad][0].toLowerCase()+" · dispatch must release the vehicle"); return; }
-      S.shiftOn=true; go("route"); toast("Shift open · load L-2274"); return;
+      S.shiftOn=true; S.shiftStart=new Date().toTimeString().slice(0,5);
+      go("route"); toast("Shift open · load L-2274"); return;
     case "arrived": toast("Stop recorded"); return;
     case "problem": toast("Sent to operations"); return;
-    case "closeload": toast("Load closed · 3,180 kg on "+STREAMS[S.stream].route); go("shift"); return;
+    case "closeload":
+      S.loads = (S.loads||0)+1;
+      push("loadclosed");
+      toast("Load closed · 3,180 kg on "+STREAMS[S.stream].route);
+      return;
+    case "endshift":
+      sheet(t("Close the shift"),
+        '<p class="b2">Nothing can be logged to a shift once it is closed. '+
+        Object.keys(S.served).length+' stops worked, '+(S.loads||0)+' loads tipped.</p>'+
+        '<label class="fld"><span>'+h(t("Closing odometer"))+'</span><input id="odo" class="mono" value="184,261"></label>'+
+        '<label class="fld"><span>'+h(t("Anything to flag"))+'</span><textarea id="shnote" placeholder="left blank if nothing"></textarea></label>'+
+        '<button class="btn p" data-a="endshiftdone">'+h(t("Close it"))+'</button>');
+      return;
+    case "endshiftdone":
+      S.shiftOn=false; S.loads=0; S.served={}; S.skipped={}; S.stopOpenedAt={};
+      closeSheet(); go("shift"); toast("Shift closed · recorded against the vehicle"); return;
+    case "fault": S.faultFor = v || ""; S.photoShot=""; push("fault"); return;
+    case "faultsend": {
+      var nt = $("fnote") ? $("fnote").value : "";
+      if(!nt.trim()){ toast("Say what is wrong — a fault without a note cannot be acted on"); return; }
+      FAULTS.unshift({id:"FT-"+(1050+FAULTS.length), where:S.faultFor||"—",
+        what:(($("fkind")&&$("fkind").value)||FAULT_KINDS[0]), by:S.who||t(ROLES[S.role].label),
+        at:"just now", photo:!!S.photoShot, note:nt});
+      S.photoShot=""; back(); toast("Fault logged"+(FAULTS[0].photo?" with a photograph":" — add a photograph when you can"));
+      return;
+    }
 
     /* collector */
-    case "nobody": serveLearn(v); S.visited[v]=true; S.stack=[]; toast("Nobody home · struck off the round as visited"); paint(); return;
+    case "nobody": {
+      var dn = doorById(v);
+      serveLearn(v); S.visited[v]=true;
+      /* the household should hear it from us before they hear nothing at all */
+      if(dn){
+        var msg = "Baladi \u2014 "+TOWN+"\n\nWe called at "+dn.a+" today for the waste fee and could not find you.\n"+
+          "Account "+dn.id+(dn.due? "\nBalance "+money(dn.due) : "")+
+          "\nReference "+payRef(dn.id,2026,2)+
+          "\n\nYou can pay without waiting for us \u2014 put that reference in the transfer note, or come to the counter. "+
+          "Allow up to "+PAY_SETTLE_HOURS+" hours for it to show.\n\nbaladiservice.com";
+        S.lastMissed = {id:dn.id, name:dn.n, msisdn:dn.msisdn, link:waLink(dn.msisdn, msg)};
+        push("missed");
+      } else { S.stack=[]; paint(); }
+      toast("Nobody home \u00b7 the household is being told");
+      return;
+    }
+    /* an exemption is a decision about somebody's money, so it is evidenced and audited */
+    case "openround": S.roundOpen=true; push("tellthem"); return;
+    case "toldthem": S.notified[v]=true; paint(); return;
+    case "exempt": S.exemptFor = v; S.photoShot=""; push("exempt"); return;
+    case "exemptsend": {
+      var rsn = ($("exreason")&&$("exreason").value) || EXEMPT_REASONS[0];
+      var nte = ($("exnote")&&$("exnote").value) || "";
+      if(!nte.trim()){ toast("An exemption needs a note \u2014 it is somebody\u2019s money"); return; }
+      var dd2 = doorById(S.exemptFor);
+      EXEMPTIONS.unshift({id:"EX-"+(2200+EXEMPTIONS.length), prem:S.exemptFor,
+        name:dd2?dd2.n:"", reason:rsn, note:nte, by:S.who||t(ROLES[S.role].label),
+        at:"just now", photo:!!S.photoShot, state:"proposed"});
+      S.photoShot="";
+      back(); toast("Exemption proposed \u00b7 the municipality decides, not the collector");
+      return;
+    }
     case "markpaid": serveLearn(v); S.visited[v]=true; S.stack=[]; toast("Payment banked against "+v); paint(); return;
     case "resetround": S.visited={}; toast("Round reset"); paint(); return;
     case "deposit": toast("Deposit recorded · cash on hand reset"); return;
