@@ -385,6 +385,24 @@ a.btn{text-decoration:none}
 .carou.dragging{cursor:grabbing;scroll-snap-type:none}
 /* illustrations */
 /* the two rates the council is judged on: twice the size of anything else */
+/* the round is a list someone scrolls on a doorstep: one line per door */
+.drow{display:flex;align-items:stretch;border-top:1px solid var(--line-soft)}
+.drow:first-child{border-top:none}
+.dmain{flex:1;min-width:0;display:flex;align-items:center;gap:9px;padding:7px 2px;text-align:start;background:none;border:0}
+.dav{width:26px;height:26px;border-radius:8px;background:var(--surface-2);color:var(--accent-ink);
+  display:grid;place-items:center;font-size:12px;font-weight:600;flex:none}
+.dt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden}
+.dt b{font-size:13px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dt span{font-size:10.5px;color:var(--muted);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dr{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex:none;text-align:end}
+.dr b{font-size:13px;font-weight:600}
+.dr span{font-size:10.5px;color:var(--muted)}
+.dr span.late{color:var(--stamp)}
+.dact{width:34px;flex:none;display:grid;place-items:center;border:0;border-inline-start:1px solid var(--line-soft);
+  background:none;color:var(--ink-2);text-decoration:none}
+.dact svg{width:17px;height:17px}
+.dact:active{background:var(--surface-2)}
+.dact.skip{width:40px;font-size:9.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .heros{display:flex;flex-direction:column;gap:10px}
 .hero{background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:13px 15px 14px;
   display:flex;flex-direction:column;gap:5px}
@@ -2130,47 +2148,15 @@ function bindCustomer(ent){
   ME.msisdn=d.msisdn; ME.cat = d.id.charAt(0)==="B" ? "bak" : "res";
   ME.exempt = d.st==="exempt";
 }
-/* ---- the one-time code, when the app is running self-contained ----
-   A code is generated here, shown to nobody, and checked against what is typed.
-   It expires, it is rate limited, and it is wrong three times before it locks.
-   What it CANNOT do in a page with no server is deliver itself privately: the
-   code has to leave the device to reach WhatsApp, and only a provider can do
-   that. So self-contained mode hands the sending to the person signing in,
-   over their own WhatsApp, and the screen says exactly that. Real sign-in is
-   the live path, where the provider generates and checks the code server-side
-   and the browser never learns it. */
-var OTP_TTL_MS = 5*60*1000, OTP_MAX_TRIES = 3, OTP_WINDOW_MS = 60*60*1000, OTP_MAX_SENDS = 3;
-var otpState = {code:null, forNum:"", issued:0, tries:0, sends:[]};
-function otpRateLimited(){
-  var now=Date.now();
-  otpState.sends = otpState.sends.filter(function(x){ return now-x < OTP_WINDOW_MS; });
-  return otpState.sends.length >= OTP_MAX_SENDS;
-}
-function otpIssue(num){
-  var a = new Uint32Array(1);
-  if(window.crypto && crypto.getRandomValues) crypto.getRandomValues(a);
-  else a[0] = Math.floor(Math.random()*4294967296);
-  otpState.code = String(a[0] % 1000000).padStart(6,"0");
-  otpState.forNum = num; otpState.issued = Date.now(); otpState.tries = 0;
-  otpState.sends.push(otpState.issued);
-  return otpState.code;
-}
-function otpCheck(num, code){
-  if(!otpState.code || otpState.forNum !== num) return {ok:false, why:"Ask for a code first"};
-  if(Date.now() - otpState.issued > OTP_TTL_MS){ otpState.code=null; return {ok:false, why:"That code has expired \u2014 ask for a new one"}; }
-  otpState.tries++;
-  if(otpState.tries > OTP_MAX_TRIES){ otpState.code=null; return {ok:false, why:"Too many attempts \u2014 ask for a new code"}; }
-  var burn = (otpState.tries >= OTP_MAX_TRIES);
-  /* compare every character, so timing says nothing about how close it was */
-  var a=String(otpState.code), b=digits(code), diff = a.length ^ b.length;
-  for(var i=0;i<a.length;i++) diff |= a.charCodeAt(i) ^ (b.charCodeAt(i)||0);
-  if(diff !== 0){
-    /* three wrong guesses and the code is gone, not merely discouraged */
-    if(burn) otpState.code = null;
-    return {ok:false, why: burn ? "That code is not right \u2014 ask for it again" : "That code is not right"};
-  }
-  otpState.code = null;                       /* one use, then it is gone */
-  return {ok:true};
+/* ---- the gate, when the app is running self-contained ----
+   There is no honest one-time code without a server. A code this device
+   generates is a code this device already knows, so checking it proves nothing
+   about who holds the number \u2014 it is friction wearing a security badge.
+   So self-contained mode does not pretend: the REGISTER is the gate, any six
+   digits pass, and the screen says so. Real verification is the live path,
+   where the provider issues and checks the code and the browser never sees it.  */
+function codeOk(entry, code){
+  return !!entry && digits(code).length === 6;
 }
 /* One line that says which register is answering. Silent when self-contained,
    because that is the normal state and nobody needs telling. */
@@ -2243,21 +2229,21 @@ function paintLogin(){
     v.innerHTML =
     '<div class="mark">&#1576;</div>'+
     '<h2 style="font-size:21px;font-weight:600">Confirm your number</h2>'+
-    '<p class="b2">'+h(t("Enter the six-digit code sent on WhatsApp to"))+' <b class="mono">'+
+    '<p class="b2">'+h(LIVE.on? t("Enter the six-digit code sent on WhatsApp to")
+                              : t("Confirming"))+' <b class="mono">'+
       h(maskNum(S.cc, S.phone))+'</b>'+
       (findNumber(S.cc,S.phone)? ', '+h(t("the number on the register for"))+' <b>'+h(findNumber(S.cc,S.phone).name)+'</b>' : '')+
       '.</p>'+
-    '<label class="fld"><span>WhatsApp confirmation code</span>'+
+    '<label class="fld"><span>'+h(LIVE.on? t("WhatsApp confirmation code") : t("Six digits"))+'</span>'+
       '<input id="otp" class="mono" inputmode="numeric" maxlength="6" placeholder="------" style="text-align:center;font-size:26px;letter-spacing:.3em"></label>'+
     '<button class="btn p"'+(S.liveBusy?' disabled':'')+' data-a="checkotp">'+
       h(S.liveBusy? t("Checking") : t("Continue"))+'</button>'+
-    (!LIVE.on && S.otpSendLink
-      ? '<a class="btn p" target="_blank" rel="noopener" href="'+h(S.otpSendLink)+'">'+
-          svg("bell","ic")+h(t("Send the code to that number on WhatsApp"))+'</a>'+
-        '<div class="note"><span>'+svg("info")+'</span><div><b>How this works without a provider</b>'+
-        'The code was generated on this device, never shown here, and expires in five minutes. '+
-        'Opening WhatsApp sends it to the number being signed in. Once the municipality has a WhatsApp '+
-        'sender, the code is generated and checked on the server instead and this step disappears.</div></div>'
+    (!LIVE.on
+      ? '<div class="note"><span>'+svg("info")+'</span><div><b>No code has been sent yet</b>'+
+        'Until the municipality\u2019s WhatsApp sender is connected, the register is the gate: '+
+        'only a number already on it can get in, and any six digits will pass. '+
+        'Once the sender is live the code is issued and checked on the server, and the number '+
+        'itself is what proves who you are.</div></div>'
       : '')+
     '<div class="btnrow"><button class="btn" data-a="backphone">'+h(t("Back"))+'</button>'+
     '<button class="btn" data-a="support">'+svg("help","ic")+h(t("Help"))+'</button></div>'+
@@ -3720,15 +3706,19 @@ V["collector.round"]=function(){
     routeHeader("collector", roundStops("collector"))+
     nextStopCard("collector", roundStops("collector"))+
     (left.length? fold(t("The round")+" \u00b7 "+left.length+" doors left", '<div class="list">'+left.map(function(d){
-      return '<button class="item" data-a="push" data-v="door" data-x="'+h(d.id)+'"><span class="av">'+(S.ar?"":h(d.n[0]))+'</span>'+
-        '<span class="t"><b>'+h(S.ar?d.ar:d.n)+'</b><span class="mono">+'+h(d.msisdn)+' · '+h(d.id)+'</span></span>'+
-        '<span class="r">'+(d.due?'<b>'+money(d.due)+'</b><span style="color:var(--stamp)">'+d.days+'d</span>'
-          :'<span class="pill p-neut">exempt</span>')+'</span></button>'+
-        '<div class="item" style="padding-top:0;border:none"><span class="av"></span>'+
-          '<span class="t"></span><span class="r">'+
-          '<a class="btn sm" target="_blank" rel="noopener" href="'+
-            h(mapOut((placeById(d.point)||{lat:33.95}).lat,(placeById(d.point)||{lon:35.63}).lon))+'">'+svg("map")+'</a>'+
-          '<button class="btn sm" data-a="skipstop" data-v="'+h(d.id)+'">'+h(t("Skip"))+'</button></span></div>';
+      var pl = placeById(d.point) || {lat:33.95, lon:35.63};
+      return '<div class="drow">'+
+        '<button class="dmain" data-a="push" data-v="door" data-x="'+h(d.id)+'">'+
+          '<span class="dav">'+(S.ar?"":h(d.n[0]))+'</span>'+
+          '<span class="dt"><b>'+h(S.ar?d.ar:d.n)+'</b>'+
+            '<span class="mono">+'+h(d.msisdn)+' \u00b7 '+h(d.id)+'</span></span>'+
+          '<span class="dr">'+(d.due
+            ? '<b>'+money(d.due)+'</b><span'+(d.days>60?' class="late"':'')+'>'+d.days+'d</span>'
+            : '<span class="pill p-neut">exempt</span>')+'</span></button>'+
+        '<a class="dact" target="_blank" rel="noopener" aria-label="Open in maps" href="'+
+          h(mapOut(pl.lat, pl.lon))+'">'+svg("map")+'</a>'+
+        '<button class="dact skip" data-a="skipstop" data-v="'+h(d.id)+'">'+h(t("Skip"))+'</button>'+
+      '</div>';
      }).join("")+'</div>', true)+
        '<a class="btn p" target="_blank" rel="noopener" href="'+
          h(mapOutRoute(roundStops("collector").filter(function(x){ return x.state!=="done" && !S.skipped[x.id]; }), S.geo))+
@@ -5184,15 +5174,6 @@ document.addEventListener("click", function(ev){
         return;
       }
       if(!phoneOk(S.phone)){ S.loginErr="That number is not on the register"; paintLogin(); return; }
-      if(otpRateLimited()){
-        S.loginErr="Three codes have gone to that number this hour. Wait, or ask the municipality for help.";
-        paintLogin(); return;
-      }
-      var e164 = S.cc + localPart(S.cc, S.phone);
-      var code = otpIssue(e164);
-      S.otpSendLink = waLink(e164,
-        "Baladi \u2014 "+TOWN+"\n\nYour sign-in code is "+code+
-        "\n\nIt is valid for five minutes and can be used once. Nobody from the municipality will ever ask you for it.");
       S.loginErr=""; S.otpErr=""; S.otpTries=0; S.step="otp"; paintLogin(); return;
     case "checkotp": {
       var code=digits($("otp")&&$("otp").value);
@@ -5222,10 +5203,9 @@ document.addEventListener("click", function(ev){
         return;
       }
       var ent=findNumber(S.cc, S.phone);
-      var vr = otpCheck(S.cc + localPart(S.cc, S.phone), code);
-      if(!ent || !vr.ok){
+      if(!codeOk(ent, code)){
         S.otpTries++;
-        S.otpErr = vr.why || "That code is not right";
+        S.otpErr = "The code is six digits";
         paintLogin(); return;
       }
       S.who=ent.name; S.otpErr=""; S.otpTries=0;
