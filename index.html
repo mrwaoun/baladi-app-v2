@@ -13,6 +13,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="application-name" content="Baladi">
 <meta name="description" content="Baladi municipal waste platform">
+<!-- Where Baladi is served as a folder, these two small files beside index.html
+     let Android and desktop browsers offer a one-tap Install. Served as a single
+     file on its own they simply are not found, and the button falls back to the
+     written steps for that phone \u2014 which is all iPhone ever needed. -->
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&display=swap">
@@ -91,6 +96,33 @@ a{color:var(--accent-ink)}
   border-radius:34px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;position:relative}
 .statusbar{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 4px;font-size:calc(11.5px*var(--ts2));
   color:var(--muted);font-family:"IBM Plex Mono",monospace;flex:none}
+/* The strip across the top of the front page that puts Baladi on the phone's
+   own home screen. It is the first thing on the screen and the first thing
+   gone once it is used or waved away, and it never appears again inside the
+   installed app \u2014 there is nothing left to add there. */
+.addbar{display:flex;align-items:center;gap:8px;padding:8px 12px 8px 14px;margin:2px 10px 0;flex:none;
+  background:var(--accent-soft);border:1px solid var(--accent);border-radius:13px;z-index:6}
+.addbar>.ai{display:grid;place-items:center;width:30px;height:30px;min-width:30px;border-radius:9px;
+  background:var(--accent);color:#FBF7F2;flex:none}
+.addbar>.ai svg{width:18px;height:18px;stroke-width:2.4}
+.addbar .at{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.addbar .at b{font-size:calc(13px*var(--ts2));font-weight:700;color:var(--accent-ink)}
+.addbar .at span{font-size:calc(11px*var(--ts2));color:var(--accent-ink);opacity:.82}
+.addbar .at b,.addbar .at span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.addbar .ago{flex:none;padding:7px 11px;border-radius:10px;background:var(--accent);border:1px solid var(--accent);
+  color:#FBF7F2;font-size:calc(12px*var(--ts2));font-weight:700;min-height:34px;display:flex;align-items:center;gap:5px}
+.addbar .ago svg{width:14px;height:14px;stroke-width:2.4}
+.addbar .ax{flex:none;display:grid;place-items:center;width:28px;height:28px;min-width:28px;border-radius:9px;
+  color:var(--accent-ink);opacity:.72}
+.addbar .ax svg{width:14px;height:14px;stroke-width:2.4}
+.addbar>.sayi{flex:none}
+.device[data-ts="3"] .addbar{padding:9px 12px}
+.howstep{display:flex;align-items:center;gap:11px;padding:9px 11px;background:var(--surface-3);
+  border:1px solid var(--line);border-radius:12px}
+.howstep>.n{display:grid;place-items:center;width:24px;height:24px;min-width:24px;border-radius:50%;
+  background:var(--accent);color:#FBF7F2;font-weight:700;font-size:12px;flex:none}
+.howstep>.ic{width:24px;height:24px;flex:none;stroke-width:2.6;color:var(--accent-ink)}
+.howstep>span{font-size:calc(13px*var(--ts2));line-height:1.35}
 .appbar{display:flex;align-items:center;gap:10px;padding:6px 16px 12px;flex:none;border-bottom:1px solid var(--line-soft);background:var(--surface);z-index:5}
 .appbar .ttl{font-family:"Archivo",sans-serif;font-size:calc(19px*var(--ts));font-weight:600;line-height:1.2;flex:1;min-width:0}
 .appbar .sub{font-size:calc(11.5px*var(--ts2));color:var(--muted);font-weight:400;display:block;letter-spacing:0}
@@ -164,14 +196,24 @@ svg.icXL{width:34px;height:34px;flex:none}
 .sayi.on{color:var(--accent-ink);background:var(--accent-soft)}
 .hc .sayi{color:#E9E4DC;background:rgba(255,255,255,.14)}
 .btn .sayi,.bigrow .sayi{margin-inline-start:auto}
-.seg button .sayi{width:22px;height:22px;min-width:22px;margin-inline-start:4px;border-radius:7px}
-.seg button .sayi svg{width:13px;height:13px}
+.seg button>.sayi{position:absolute;inset-inline-end:2px;top:50%;transform:translateY(-50%);
+  width:19px;height:19px;min-width:19px;margin:0;border-radius:6px}
+.seg button>.sayi svg{width:12px;height:12px;stroke-width:2.4}
+/* a choice and its own speaker, side by side: the speaker is a sibling of the
+   chip and not inside it, so a tap meant for the choice never lands on it */
+.choice{display:inline-flex;align-items:center;gap:3px;max-width:100%}
+.choice>.sayi{width:26px;height:26px;min-width:26px;border-radius:9px}
+.choice>.sayi svg{width:15px;height:15px}
 .item .sayi{margin-inline-start:6px}
 .fldsay{display:flex;align-items:center;gap:6px}
 .segsay{display:flex;align-items:center;gap:6px;width:100%}
 .segsay>.seg{flex:1;min-width:0}
 .fldsay>select,.fldsay>input,.fldsay>textarea{flex:1;min-width:0}
 /* at the largest size the speaker grows with everything else */
+.device[data-ts="2"] .chip .ic{width:17px;height:17px}
+.device[data-ts="3"] .chip .ic{width:19px;height:19px}
+.device[data-ts="3"] .choice>.sayi{width:30px;height:30px;min-width:30px}
+.device[data-ts="3"] .choice>.sayi svg{width:17px;height:17px}
 .device[data-ts="3"] .sayi{width:34px;height:34px;min-width:34px}
 .device[data-ts="3"] .sayi svg{width:19px;height:19px}
 /* a row whose whole point is one icon, one word, one tap */
@@ -235,10 +277,20 @@ label.fld{display:flex;flex-direction:column;gap:5px}
 #custblock{display:flex;flex-direction:column;gap:12px}
 label.fld>span{font-size:calc(11.5px*var(--ts2));color:var(--muted);font-weight:600}
 .seg{display:flex;background:var(--surface-2);border-radius:11px;padding:3px;gap:2px}
-.seg button{flex:1;padding:8px 4px;font-size:calc(12.5px*var(--ts2));font-weight:600;border-radius:9px;color:var(--ink-2)}
+.seg button{position:relative;flex:1;padding:8px 4px;font-size:calc(12.5px*var(--ts2));font-weight:600;border-radius:9px;color:var(--ink-2)}
+.seg button.hassay{padding-inline-end:23px}
 .seg button.on{background:var(--surface);color:var(--accent-ink);box-shadow:0 1px 2px rgba(0,0,0,.07)}
 .chips{display:flex;gap:7px;flex-wrap:wrap}
-.chip{padding:7px 11px;border-radius:20px;border:1px solid var(--line);font-size:calc(12.5px*var(--ts2));font-weight:600;color:var(--ink-2);background:var(--surface)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:20px;border:1px solid var(--line);font-size:calc(12.5px*var(--ts2));font-weight:600;color:var(--ink-2);background:var(--surface)}
+.chip .ic{width:16px;height:16px;flex:none;stroke-width:2.4}
+/* the pictogram belongs beside the words it stands for, not at the far edge of
+   the row, so one reads as a single thing and the status pill keeps its corner */
+.rl{display:flex;align-items:center;gap:9px;min-width:0;text-align:start}
+.rl .ic{flex:none}
+.okm{color:var(--good)}
+.badm{color:var(--crit)}
+.picks{display:flex;flex-direction:column;gap:8px}
+.picks .btn.row{width:100%}
 .chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
 .sw{width:46px;height:27px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);position:relative;flex:none;transition:.16s}
 .sw:after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:21px;height:21px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.16s}
@@ -527,6 +579,7 @@ svg.mico{width:34px;height:34px;flex:none;stroke-width:1.5}
 <div class="page">
   <div class="device" id="device">
     <div class="statusbar"><span id="clock">07:12</span><span id="netstate">baladiservice.com</span></div>
+    <div class="addbar" id="addbar" hidden></div>
     <header class="appbar" id="appbar" hidden></header>
     <main class="view" id="view"></main>
     <nav class="tabbar" id="tabbar" hidden></nav>
@@ -614,6 +667,8 @@ var SKIP_REASONS_AR = ["الوصول مسدود — لا يمكن للمركبة
                        "أشغال أو شاحنة متوقفة",
                        "غير آمن للتوقف الآن",
                        "نفد وقت الجولة"];
+/* one pictogram per reason, in the same order, so the list can be read by shape */
+var SKIP_ICONS = ["blocked","empty","roadworks","alert","clock"];
 /* anything reported faulty lands here, with its comment and its photograph */
 var FAULTS = [
   {id:"FT-1042", where:"R-14-P", what:"Bin lid broken off", by:"Crew B", at:"9 Oct, 07:12", photo:true,
@@ -806,9 +861,9 @@ var BATCH = [
   {c:"baladi:bag:00042318",    at:"07:19", r:false, o:"", q:""}
 ];
 var RANKS = [
-  {id:"ok",   en:"Sorted correctly",  ar:"فرز سليم",       p:"p-good"},
-  {id:"mix",  en:"Partly mixed",      ar:"مختلط جزئياً",   p:"p-warn"},
-  {id:"rej",  en:"Rejected at the door", ar:"مرفوض عند الباب", p:"p-crit"}
+  {id:"ok",   en:"Sorted correctly",  ar:"فرز سليم",       p:"p-good", ic:"yes"},
+  {id:"mix",  en:"Partly mixed",      ar:"مختلط جزئياً",   p:"p-warn", ic:"mixed"},
+  {id:"rej",  en:"Rejected at the door", ar:"مرفوض عند الباب", p:"p-crit", ic:"no"}
 ];
 /* A collection point and a drop-off station are not the same job, so they do
    not get the same question. */
@@ -818,6 +873,12 @@ var DOP_OUTCOMES = ["Emptied — all bins","Emptied — some bins full","Station
 var DOP_OUTCOMES_AR = ["أُفرغت كل الحاويات","أُفرغ البعض والباقي ممتلئ","المحطة فائضة","حمولة ملوّثة","الوصول مسدود"];
 var BAG_OUTCOMES = ["Collected","Left — not properly sorted","Left — not at the point"];
 var BAG_OUTCOMES_AR = ["مرفوع","مُترك — الفرز غير سليم","مُترك — ليس عند النقطة"];
+/* A pictogram for every outcome, in the order of the list above it. Nobody has
+   to read "Access blocked" to know which one it is \u2014 the circle with a bar
+   through it is in a different shape from the empty bin beside it. */
+var POINT_ICONS = ["empty","dump","blocked","doc"];
+var DOP_ICONS   = ["yes","half","overflow","contam","blocked"];
+var BAG_ICONS   = ["truck","unsorted","offpoint"];
 
 /* the town's own collection points, so a location can be turned into a recommendation */
 /* ===================== what a tag can be =====================
@@ -1025,12 +1086,12 @@ var PENDING_PAY = [
 ];
 
 var OBJ_GROUNDS = [
-  ["category",     "The category on the register is wrong",        "تصنيف العقار على السجل خطأ"],
-  ["floor_area",   "The floor area bracket is wrong",              "شريحة المساحة خطأ"],
-  ["empty_month",  "The premises was empty for part of the year",  "العقار كان فارغاً جزءاً من السنة"],
-  ["closed_month", "The business was closed for part of the year", "العمل كان مقفلاً جزءاً من السنة"],
-  ["sorting",      "A sorting assessment is wrong",                "تقييم الفرز خطأ"],
-  ["other",        "Something else",                               "سبب آخر"]
+  ["category",     "The category on the register is wrong",        "تصنيف العقار على السجل خطأ",    "tag"],
+  ["floor_area",   "The floor area bracket is wrong",              "شريحة المساحة خطأ",             "ruler"],
+  ["empty_month",  "The premises was empty for part of the year",  "العقار كان فارغاً جزءاً من السنة", "nohome"],
+  ["closed_month", "The business was closed for part of the year", "العمل كان مقفلاً جزءاً من السنة", "lock"],
+  ["sorting",      "A sorting assessment is wrong",                "تقييم الفرز خطأ",               "scales"],
+  ["other",        "Something else",                               "سبب آخر",                       "help"]
 ];
 var MY_OBJECTIONS = [
   {ref:"OBJ-2026-000118", prem:"C-2417", ground:"category", st:"under_review",
@@ -1080,28 +1141,28 @@ function doorByCode(code){
 }
 
 var SCAN_COMMENTS = [
-  {id:"none",  en:"No comment",                     ar:"بلا ملاحظة"},
-  {id:"notat", en:"Waste not at collection point",  ar:"النفايات ليست عند نقطة الجمع"},
-  {id:"nowaste",en:"Not waste — pickup not needed", ar:"ليست نفايات — لا حاجة للرفع"},
-  {id:"unsorted",en:"Not properly sorted",          ar:"الفرز غير سليم"},
-  {id:"other", en:"Other — add a comment",          ar:"أخرى — أضف ملاحظة"}
+  {id:"none",  en:"No comment",                     ar:"بلا ملاحظة",                 ic:"check"},
+  {id:"notat", en:"Waste not at collection point",  ar:"النفايات ليست عند نقطة الجمع", ic:"offpoint"},
+  {id:"nowaste",en:"Not waste — pickup not needed", ar:"ليست نفايات — لا حاجة للرفع",  ic:"nobin"},
+  {id:"unsorted",en:"Not properly sorted",          ar:"الفرز غير سليم",              ic:"unsorted"},
+  {id:"other", en:"Other — add a comment",          ar:"أخرى — أضف ملاحظة",           ic:"doc"}
 ];
 
 var EXCEPTIONS = [
-  {en:"Access blocked", ar:"الوصول محجوب", photo:true},
-  {en:"Bag torn or spilled", ar:"كيس ممزّق أو مسكوب", photo:true},
-  {en:"Contaminated organic", ar:"عضوي ملوّث", photo:true},
-  {en:"Bin or pad fault", ar:"عطل حاوية أو منصة", photo:true},
-  {en:"Sticker unreadable", ar:"ملصق غير مقروء", photo:false},
-  {en:"Vehicle or crew problem", ar:"مشكلة آلية أو طاقم", photo:false}
+  {en:"Access blocked", ar:"الوصول محجوب", photo:true, ic:"blocked"},
+  {en:"Bag torn or spilled", ar:"كيس ممزّق أو مسكوب", photo:true, ic:"torn"},
+  {en:"Contaminated organic", ar:"عضوي ملوّث", photo:true, ic:"contam"},
+  {en:"Bin or pad fault", ar:"عطل حاوية أو منصة", photo:true, ic:"broken"},
+  {en:"Sticker unreadable", ar:"ملصق غير مقروء", photo:false, ic:"noscan"},
+  {en:"Vehicle or crew problem", ar:"مشكلة آلية أو طاقم", photo:false, ic:"truck"}
 ];
 
 var OBS = [
-  {en:"Illegal dumping", ar:"رمي عشوائي", p:"p-crit"},
-  {en:"Damaged or missing bin", ar:"حاوية متضرّرة أو مفقودة", p:"p-warn"},
-  {en:"Blocked access", ar:"وصول محجوب", p:"p-warn"},
-  {en:"Overflowing station", ar:"محطة فائضة", p:"p-warn"},
-  {en:"Sticker missing at a point", ar:"ملصق مفقود عند نقطة", p:"p-neut"}
+  {en:"Illegal dumping", ar:"رمي عشوائي", p:"p-crit", ic:"dump"},
+  {en:"Damaged or missing bin", ar:"حاوية متضرّرة أو مفقودة", p:"p-warn", ic:"broken"},
+  {en:"Blocked access", ar:"وصول محجوب", p:"p-warn", ic:"blocked"},
+  {en:"Overflowing station", ar:"محطة فائضة", p:"p-warn", ic:"overflow"},
+  {en:"Sticker missing at a point", ar:"ملصق مفقود عند نقطة", p:"p-neut", ic:"noscan"}
 ];
 
 var QUIZ = [
@@ -1551,6 +1612,7 @@ var S = {
   hist:[], loginErr:"", muniMonth:"September 2026", routeOpen:null, newUser:null,
   scanRank:null, scanOutcome:null, scanTouched:false, users:[], camPhoto:false, photoShot:"",
   pickScan:false, pickTag:"", pickCamTried:false, obsSubject:"", obsKind:null,
+  picked:{},
   geo:null, geoErr:"", geoBusy:false, pickPoint:"", photoCtx:false,
   readIds:{}, inboxTab:"notifs", chat:null, fbScore:0,
   wide:(typeof window!=="undefined" && window.matchMedia && window.matchMedia("(min-width:1100px)").matches),
@@ -1654,7 +1716,30 @@ var AR = {
   "Name":"الاسم",
   "Note":"ملاحظة",
   "Open":"فتح",
-  "Pass":"سليم",
+  "Pass":"سليم","Fault":"عطل","chosen":"مختار","Reason":"السبب",
+  "Add to home screen":"أضف إلى الشاشة الرئيسية","Add":"أضف","Not now":"ليس الآن","Done":"تمّ",
+  "What you saw or were shown":"ما رأيته أو ما عُرض عليك",
+  "the document, who confirmed it, what the premises looked like":"المستند، من أكّده، وكيف بدا العقار",
+  "photograph the document or the premises":"صوّر المستند أو العقار",
+  "Attach it":"أرفقه","Send the proposal":"أرسل الاقتراح",
+  "Already granted on this round":"ممنوحة على هذه الجولة",
+  "Add the number":"أضف الرقم","Transfer the account":"نقل الحساب","Transfer to":"نقل إلى",
+  "Name":"الاسم","optional":"اختياري","Note":"ملاحظة","Priority":"الأولوية",
+  "Routine":"عادي","Urgent":"عاجل","Location":"الموقع","Nearest point":"أقرب نقطة",
+  "One tap, like any app":"لمسة واحدة، مثل أي تطبيق",
+  "Open it without the browser":"افتحه بلا متصفّح",
+  "Press the share button at the bottom of the screen":"اضغط زرّ المشاركة أسفل الشاشة",
+  "Scroll down the list and press Add to Home Screen":"انزل في القائمة واضغط إضافة إلى الشاشة الرئيسية",
+  "Press Add. Baladi joins your other apps.":"اضغط إضافة. يصبح بلدي مع باقي تطبيقاتك.",
+  "Press the three dots at the top of the browser":"اضغط النقاط الثلاث أعلى المتصفّح",
+  "Press Add to Home screen, or Install app":"اضغط إضافة إلى الشاشة الرئيسية أو تثبيت التطبيق",
+  "Press the install button at the end of the address bar":"اضغط زرّ التثبيت في آخر شريط العنوان",
+  "Press Install. Baladi opens in its own window.":"اضغط تثبيت. يفتح بلدي في نافذته الخاصة.",
+  "Open Baladi in Safari first":"افتح بلدي في سفاري أولاً",
+  "Only Safari can add a page to an iPhone home screen. Open baladiservice.com in Safari, then press share and Add to Home Screen.":"سفاري وحده يضيف صفحة إلى شاشة الآيفون. افتح baladiservice.com في سفاري، ثم اضغط المشاركة وإضافة إلى الشاشة الرئيسية.",
+  "It takes three presses and nothing is downloaded. Baladi becomes an icon on your phone and opens straight to your account.":"ثلاث ضغطات ولا شيء يُنزَّل. يصبح بلدي أيقونة على هاتفك تفتح مباشرة على حسابك.",
+  "Vehicle check":"فحص الآلية","What is wrong":"ما هو الخطأ",
+  "Add an affiliate number":"إضافة رقم تابع","Mobile number":"رقم الموبايل",
   "Rate":"النسبة",
   "Sent":"أُرسل",
   "Site":"الموقع",
@@ -2185,7 +2270,40 @@ var I = {
   phone:'<path d="M6.4 3h3L11 7.2 8.9 8.8a12.4 12.4 0 0 0 6.3 6.3L16.8 13 21 14.6v3.1a2 2 0 0 1-2.2 2A17.2 17.2 0 0 1 4.3 5.2 2 2 0 0 1 6.4 3z"/>',
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7.2V12l3.6 2.1"/>',
   camoff:'<path d="M4 18V9a2 2 0 0 1 2-2h2l1.4-2h5.2L16 7h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4.4 3.6 19.6 20.4"/>',
-  hand:'<path d="M8.6 12V6.2a1.6 1.6 0 0 1 3.2 0V12"/><path d="M11.8 12V5.2a1.6 1.6 0 0 1 3.2 0V12"/><path d="M15 12V7.4a1.6 1.6 0 0 1 3.2 0V14a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3.6a1.6 1.6 0 0 1 3.2 0V12"/>'
+  hand:'<path d="M8.6 12V6.2a1.6 1.6 0 0 1 3.2 0V12"/><path d="M11.8 12V5.2a1.6 1.6 0 0 1 3.2 0V12"/><path d="M15 12V7.4a1.6 1.6 0 0 1 3.2 0V14a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3.6a1.6 1.6 0 0 1 3.2 0V12"/>',
+  /* ---- pictograms for the choices a crew member, a driver or an operator
+     is asked to pick between. One shape per option, so the list can be told
+     apart by its pictures and not only by its words. ---- */
+  empty:'<path d="M4.5 7h15"/><path d="M6.5 7l1 13.2h9L17.5 7"/><path d="M9.4 7V4.4h5.2V7"/>',
+  half:'<path d="M4.5 7h15"/><path d="M6.5 7l1 13.2h9L17.5 7"/><path d="M9.4 7V4.4h5.2V7"/><path d="M7.1 14.2h9.8"/>',
+  overflow:'<path d="M4.5 9h15"/><path d="M6.5 9l1 11.4h9L17.5 9"/><path d="M8.6 6.6 9.9 3.9M12 6.2V3.2M15.4 6.6 14.1 3.9"/>',
+  contam:'<path d="M7 7.6h10l-1 12.9H8z"/><path d="M9.6 7.6V5.6a2.4 2.4 0 0 1 4.8 0v2"/><path d="M12 11.2 15 17H9z"/>',
+  mixed:'<circle cx="9.2" cy="12" r="5.4"/><circle cx="14.8" cy="12" r="5.4"/>',
+  unsorted:'<path d="M7 7.6h10l-1 12.9H8z"/><path d="M9.6 7.6V5.6a2.4 2.4 0 0 1 4.8 0v2"/><path d="m9.9 12 4.2 5M14.1 12l-4.2 5"/>',
+  offpoint:'<path d="M12 20.6c3.9-4.5 5.8-7.7 5.8-9.8a5.8 5.8 0 1 0-11.6 0c0 2.1 1.9 5.3 5.8 9.8z"/><path d="M4.6 4 19.4 19.4"/>',
+  dump:'<path d="M3 19.6h18"/><path d="M6.2 19.6c.6-3.6 2.7-5.6 5.8-5.6s5.2 2 5.8 5.6z"/><path d="M9 10.8 10.4 8.2M12 10.2V7.4M15 10.8 13.6 8.2"/>',
+  roadworks:'<path d="M12 3.6 5.2 20.4h13.6z"/><path d="M9.3 12.4h5.4M8 16.4h8"/>',
+  torn:'<path d="M7 7.6h10l-1 12.9H8z"/><path d="M9.6 7.6V5.6a2.4 2.4 0 0 1 4.8 0v2"/><path d="m9.6 10.8 2.2 2.2-2.2 2.2 2.2 2.2"/>',
+  broken:'<path d="M4.5 8h15"/><path d="M6.5 8l1 12.4h9L17.5 8"/><path d="m13.4 10.6-3.2 4.2h3.2l-2.6 4.2"/>',
+  noscan:'<path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M4.6 4 19.4 20"/>',
+  nobin:'<path d="M4.5 7h15"/><path d="M6.5 7l1 13.2h9L17.5 7"/><path d="M9.4 7V4.4h5.2V7"/><path d="M4.6 4.4 19.4 20.2"/>',
+  ruler:'<rect x="3.4" y="3.4" width="17.2" height="17.2" rx="2.2"/><path d="M3.4 9h3M3.4 15h3M9 20.6v-3M15 20.6v-3"/>',
+  lock:'<rect x="5" y="10.6" width="14" height="9.6" rx="2.2"/><path d="M8.4 10.6V8.2a3.6 3.6 0 0 1 7.2 0v2.4"/>',
+  fuel:'<path d="M4 20.4V5.8A1.8 1.8 0 0 1 5.8 4h5.4A1.8 1.8 0 0 1 13 5.8v14.6"/><path d="M2.8 20.4h11.4"/><path d="M4 10.8h9"/><path d="M13 8.2h3.2a2.2 2.2 0 0 1 2.2 2.2v5.4a1.6 1.6 0 0 0 3.2 0v-4.2"/>',
+  lifter:'<path d="M5.2 11h13.6"/><path d="M7 11l1 9.4h8l1-9.4"/><path d="M12 8.2V2.8"/><path d="m8.9 5.6 3.1-2.8 3.1 2.8"/>',
+  tyre:'<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="3.4"/><path d="M12 3.4v5.2M12 15.4v5.2M3.4 12h5.2M15.4 12h5.2"/>',
+  light:'<path d="M9.2 20.8h5.6"/><path d="M12 3.2a6 6 0 0 1 3.4 10.9v3.1H8.6v-3.1A6 6 0 0 1 12 3.2z"/>',
+  drop:'<path d="M12 3.4c3.3 4.1 5.6 6.9 5.6 9.9a5.6 5.6 0 1 1-11.2 0c0-3 2.3-5.8 5.6-9.9z"/>',
+  key:'<circle cx="8.4" cy="13.6" r="3.8"/><path d="m11.2 10.8 8-8"/><path d="m16.4 5.6 2.2 2.2M18.8 3.2 21 5.4"/>',
+  heart:'<path d="M12 20.4S3.6 15.4 3.6 9.8A4.6 4.6 0 0 1 12 7.2a4.6 4.6 0 0 1 8.4 2.6c0 5.6-8.4 10.6-8.4 10.6z"/>',
+  copy:'<rect x="8" y="3.4" width="12.2" height="14" rx="2.1"/><path d="M15.6 20.6H6.2a2.1 2.1 0 0 1-2.1-2.1V7.4"/>',
+  tag:'<path d="M12.6 3.4h8v8L11.4 20.6 3.4 12.6z"/><circle cx="16.9" cy="7.1" r="1.4"/>',
+  /* the three controls a phone's own browser shows, drawn as the phone draws
+     them, so the written steps can be followed by matching the shapes */
+  share:'<path d="M12 15.4V3.6"/><path d="m8.2 7.2 3.8-3.6 3.8 3.6"/><path d="M6.4 11H5a1.6 1.6 0 0 0-1.6 1.6v6.6A1.6 1.6 0 0 0 5 20.8h14a1.6 1.6 0 0 0 1.6-1.6v-6.6A1.6 1.6 0 0 0 19 11h-1.4"/>',
+  plus:'<rect x="3.4" y="3.4" width="17.2" height="17.2" rx="4.2"/><path d="M12 8.2v7.6M8.2 12h7.6"/>',
+  dots:'<circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>',
+  install:'<path d="M12 3.6v11"/><path d="m8.2 10.8 3.8 3.8 3.8-3.8"/><path d="M4.4 18.4v1.2a1.6 1.6 0 0 0 1.6 1.6h12a1.6 1.6 0 0 0 1.6-1.6v-1.2"/>'
 };
 function svg(name,cls){ return '<svg class="'+(cls||"")+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+I[name]+'</svg>'; }
 
@@ -2590,6 +2708,17 @@ function translateDom(root){
     if(to) hits.push([n, raw.replace(key, to)]);
   }
   hits.forEach(function(x){ x[0].nodeValue = x[1]; });
+  /* the words that are not text nodes: what a box says before it is filled in,
+     and what a control tells a screen reader it is */
+  ["placeholder","aria-label","title"].forEach(function(at){
+    Array.prototype.forEach.call(v.querySelectorAll("["+at+"]"), function(el){
+      var raw = el.getAttribute(at) || "";
+      var key = raw.replace(/\s+/g, " ").trim();
+      if(key.length < 2 || !/[A-Za-z]/.test(key)) return;
+      var to = AR[key] || arUnits(key);
+      if(to) el.setAttribute(at, to);
+    });
+  });
 }
 
 /* Put a speaker on everything that can be pressed.
@@ -2620,13 +2749,11 @@ function decorateSpeakers(root){
   if(!canSpeak()) return;
   var v = root || $("view"); if(!v) return;
 
-  /* every pressable control.
-     Segmented choices are deliberately NOT in this list. They are narrow, and a
-     speaker inside one covers the middle of the button \u2014 so the tap that
-     should pick the option only reads it out instead, and the setting never
-     changes. They get one speaker for the whole group, below. */
+  /* every pressable control. Segmented choices and chips are not in this list
+     \u2014 they are narrow, and a speaker added inside one would sit on top of
+     the tap that selects it. They get their own treatment further down. */
   Array.prototype.forEach.call(
-    v.querySelectorAll(".btn, .bigrow, .item, .chip.tap"),
+    v.querySelectorAll(".btn, .bigrow, .item, .chip.tap, .howstep"),
     function(el){
       if(el.querySelector(":scope > .sayi")) return;
       if(el.querySelector(".sayb")) return;          /* already has its own, bigger one */
@@ -2640,9 +2767,37 @@ function decorateSpeakers(root){
       el.appendChild(sayIcon(txt));
     });
 
-  /* One speaker for a whole segmented choice, reading every option in order:
-     "English, or Arabic". A person hears the entire set from one tap, without
-     selecting anything and without a target sitting on top of the buttons. */
+  /* Every choice in a chip row gets a speaker of its own, placed BESIDE the
+     chip rather than inside it: the chip keeps its whole surface for the tap
+     that selects it, and the speaker beside it says which one it is. */
+  Array.prototype.forEach.call(v.querySelectorAll(".chips > .chip"), function(ch){
+    if(ch.classList.contains("tap")) return;      /* those carry their own, inside */
+    if(!ch.getAttribute("data-a")) return;        /* not a choice \u2014 a label, a prefix */
+    if(ch.parentNode && ch.parentNode.classList.contains("choice")) return;
+    var txt = ownText(ch) || ch.getAttribute("aria-label") || "";
+    if(!txt || txt.length < 2 || txt.length > 160) return;
+    var wrap = document.createElement("span");
+    wrap.className = "choice";
+    ch.parentNode.insertBefore(wrap, ch);
+    wrap.appendChild(ch);
+    wrap.appendChild(sayIcon(txt));
+  });
+
+  /* Every segment of a segmented choice gets a speaker of its own too. It is
+     pinned to the end of the button and the button is given room for it, so
+     the words and the middle of the button \u2014 where a thumb lands \u2014 still
+     belong to the choice itself. */
+  Array.prototype.forEach.call(v.querySelectorAll(".seg[data-g] button"), function(b){
+    if(b.querySelector(":scope > .sayi")) return;
+    var txt = ownText(b);
+    if(!txt || txt.length < 2 || txt.length > 160) return;
+    b.classList.add("hassay");
+    b.appendChild(sayIcon(txt));
+  });
+
+  /* and one more for the group, which reads the whole set in order \u2014
+     "English, or Arabic" \u2014 so the options can be heard before any of them
+     is touched. */
   Array.prototype.forEach.call(v.querySelectorAll(".seg[data-g]"), function(seg){
     if(seg.parentNode && seg.parentNode.classList.contains("segsay")) return;
     var opts = Array.prototype.map.call(seg.querySelectorAll("button"), function(x){
@@ -2690,6 +2845,122 @@ function decorateSpeakers(root){
   });
 }
 
+/* ---------------- putting Baladi on the phone's home screen ----------------
+   A household that has to find a browser, remember an address and type it is a
+   household that pays at the counter instead. One tap from the home screen is
+   the difference, so the offer to put it there is the first thing on the front
+   page \u2014 and the first thing gone once it is taken or waved away. */
+var ADD = { prompt:null, hidden:false, offered:false };
+var ADD_HIDE_DAYS = 30;
+function addRead(){ try{ return +(localStorage.getItem("baladi.addhome") || 0); }catch(e){ return 0; } }
+function addKeep(){ try{ localStorage.setItem("baladi.addhome", String(Date.now())); }catch(e){} }
+function standalone(){
+  try{
+    return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches)
+           || navigator.standalone === true;
+  }catch(e){ return false; }
+}
+function addWaved(){
+  var at = addRead();
+  return !!at && (Date.now() - at) < ADD_HIDE_DAYS * 86400000;
+}
+/* Which set of steps to show. The browser will not tell us, so this reads the
+   user agent \u2014 the one place it is the right tool, because what is being
+   described is that browser's own menu. */
+function phoneKind(){
+  var ua = navigator.userAgent || "";
+  var ios = /iPad|iPhone|iPod/.test(ua) ||
+            (/Macintosh/.test(ua) && (navigator.maxTouchPoints||0) > 1);
+  if(ios) return /CriOS|FxiOS|EdgiOS|OPiOS/.test(ua) ? "ios-other" : "ios";
+  if(/Android/.test(ua)) return "android";
+  return "desktop";
+}
+function addLine(){
+  return phoneKind()==="desktop" ? t("Open it without the browser")
+                                 : t("One tap, like any app");
+}
+function showAdd(){
+  var bar = $("addbar"); if(!bar) return;
+  var want = !standalone() && !ADD.hidden && !addWaved();
+  bar.hidden = !want;
+  if(!want){ bar.innerHTML = ""; return; }
+  var said = t("Add to home screen") + ". " + addLine();
+  bar.innerHTML =
+    '<span class="ai">'+svg("home")+'</span>'+
+    '<span class="at"><b>'+h(t("Add to home screen"))+'</b><span>'+h(addLine())+'</span></span>'+
+    (canSpeak() ? '<span class="sayi" data-a="say" role="button" data-say="'+h(said)+'" '+
+      'aria-label="'+h(t("Read this out loud"))+'">'+svg("speak")+'</span>' : '')+
+    '<button class="ago" data-a="addhome">'+svg(ADD.prompt?"install":"plus")+h(t("Add"))+'</button>'+
+    '<button class="ax" data-a="addno" aria-label="'+h(t("Not now"))+'">'+svg("no")+'</button>';
+  translateDom(bar);
+  markSaying();
+}
+function addStep(n, ic, text){
+  return '<div class="howstep"><span class="n">'+n+'</span>'+svg(ic,"ic")+'<span>'+h(text)+'</span></div>';
+}
+/* The written steps, for every phone that has no install prompt of its own \u2014
+   which is every iPhone. Each step carries the shape of the control it names, so
+   it can be followed by matching the picture rather than reading the words. */
+function addHow(){
+  var k = phoneKind(), body;
+  if(k === "ios"){
+    body = addStep(1, "share", t("Press the share button at the bottom of the screen"))+
+           addStep(2, "plus",  t("Scroll down the list and press Add to Home Screen"))+
+           addStep(3, "home",  t("Press Add. Baladi joins your other apps."));
+  } else if(k === "ios-other"){
+    body = '<div class="note w"><span>'+svg("info")+'</span><div><b>'+h(t("Open Baladi in Safari first"))+'</b>'+
+             h(t("Only Safari can add a page to an iPhone home screen. Open baladiservice.com in Safari, then press share and Add to Home Screen."))+
+           '</div></div>';
+  } else if(k === "android"){
+    body = addStep(1, "dots",  t("Press the three dots at the top of the browser"))+
+           addStep(2, "plus",  t("Press Add to Home screen, or Install app"))+
+           addStep(3, "home",  t("Press Add. Baladi joins your other apps."));
+  } else {
+    body = addStep(1, "install", t("Press the install button at the end of the address bar"))+
+           addStep(2, "home",    t("Press Install. Baladi opens in its own window."));
+  }
+  sheet(t("Add to home screen"),
+    '<p class="b2">'+h(t("It takes three presses and nothing is downloaded. Baladi becomes an icon on your phone and opens straight to your account."))+'</p>'+
+    '<div style="display:flex;flex-direction:column;gap:8px">'+body+'</div>'+
+    '<button class="btn" data-a="addno">'+svg("yes","ic")+h(t("Done"))+'</button>');
+}
+function addHome(){
+  if(ADD.prompt){
+    var p = ADD.prompt; ADD.prompt = null;
+    try{
+      p.prompt();
+      if(p.userChoice && p.userChoice.then){
+        p.userChoice.then(function(c){
+          if(c && c.outcome === "accepted"){ ADD.hidden = true; addKeep(); }
+          showAdd();
+        }, function(){ showAdd(); });
+      }
+      return;
+    }catch(e){ /* no prompt after all \u2014 the written steps work everywhere */ }
+  }
+  addHow();
+}
+/* Chrome and Edge hand over their own install prompt. Take it and use it for the
+   Add button, so one press installs instead of opening a page of instructions. */
+try{
+  window.addEventListener("beforeinstallprompt", function(ev){
+    ev.preventDefault(); ADD.prompt = ev; showAdd();
+  });
+  window.addEventListener("appinstalled", function(){
+    ADD.hidden = true; addKeep(); showAdd();
+  });
+}catch(e){}
+/* The service worker beside index.html, where there is one. It is what makes the
+   install prompt possible on Android, and it keeps the app opening with no
+   signal \u2014 which is most of a round. Missing, nothing breaks. */
+try{
+  if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){});
+    });
+  }
+}catch(e){}
+
 /* ---------------- navigation ---------------- */
 function snap(){ return {tab:S.tab, stack:S.stack.slice()}; }
 function remember(){ if(S.hist.length>40) S.hist.shift(); S.hist.push(snap()); }
@@ -2722,6 +2993,7 @@ function paint(){
   var pg=document.querySelector(".page"); if(pg) pg.classList.toggle("wide", !!S.wide);
   document.documentElement.setAttribute("dir", S.ar?"rtl":"ltr");
   document.documentElement.setAttribute("lang", S.ar?"ar":"en");
+  showAdd();
   if(!S.role){ paintLogin(); return; }
   var R=ROLES[S.role], c=cur();
   var key = c ? S.role+"."+c.s : S.role+"."+S.tab;
@@ -2745,11 +3017,14 @@ function paint(){
   $("view").scrollTop = 0;
   layoutWide();
   translateDom();            translateDom($("appbar"));   translateDom($("tabbar"));
-  decorateSpeakers();        decorateSpeakers($("tabbar"));
+  decorateSpeakers();
   wireCarou();
   $("tabbar").innerHTML = R.tabs.map(function(x){
     return '<button data-a="tab" data-v="'+x[0]+'" class="'+(x[0]===S.tab&&!c?"on":"")+'">'+svg(x[2])+'<span>'+h(t(x[1]))+'</span></button>';
   }).join("");
+  /* after the tab bar is drawn, not before \u2014 or its speakers are drawn and
+     then thrown away with the markup that held them */
+  translateDom($("tabbar"));  decorateSpeakers($("tabbar"));
   sidecard();
   var wantsCam = (key===S.role+".scan" || key===S.role+".sorting" || key==="facility.inspect"
                   || key==="customer.pickup" || S.camPhoto || S.pickScan);
@@ -2877,6 +3152,28 @@ function layoutWide(){
   /* an empty column reads as a mistake */
   for(var j=cols.length-1;j>=0;j--){ if(!cols[j].children.length) v.removeChild(cols.splice(j,1)[0]); }
   if(!cols.length) v.classList.remove("cols");
+}
+/* A dropdown is the worst control on this app for somebody who cannot read:
+   the options are invisible until it is open, there is no room for a picture,
+   and no room for a speaker either. Everywhere the operator, the driver or a
+   household is asked to pick a REASON, the dropdown is drawn as a list of rows
+   instead \u2014 one pictogram, the words, and a speaker of its own on each row.
+   A hidden input of the same id carries the value, so everything that read
+   that dropdown still reads it unchanged. */
+function pickVal(id, dflt){ return (S.picked[id] != null) ? S.picked[id] : dflt; }
+function pickList(id, items){
+  var cur = pickVal(id, items.length? items[0].v : "");
+  var ok = false, i;
+  for(i=0;i<items.length;i++) if(items[i].v===cur) ok=true;
+  if(!ok && items.length) cur = items[0].v;
+  return '<input type="hidden" id="'+h(id)+'" value="'+h(cur)+'">'+
+    '<div class="picks">'+items.map(function(it){
+      return '<button class="btn row'+(it.v===cur?" on":"")+'" data-a="pick" data-v="'+h(id)+'" data-x="'+h(it.v)+'">'+
+        '<span class="rl">'+svg(it.ic,"ic icL ic3")+h(it.label)+'</span>'+
+        (it.v===cur ? '<span class="pill p-acc"><i></i>'+h(t("chosen"))+'</span>'
+                    : '<span class="chev">'+svg("chev")+'</span>')+
+        '</button>';
+    }).join("")+'</div>';
 }
 function fold(title, body, open){
   return '<details class="fold"'+(open?' open':'')+'><summary>'+h(title)+'</summary><div class="fb">'+body+'</div></details>';
@@ -3442,6 +3739,8 @@ var CONTACTS = [
   {prem:"C-2417", msisdn:"96171445208", name:"Rania Haddad",  rel:"Family", primary:false}
 ];
 var RELATIONS = ["Owner","Family","Tenant","Building manager","Accountant"];
+var RELATIONS_AR = ["مالك","من العائلة","مستأجر","ناطور البناية","محاسب"];
+var RELATION_ICONS = ["user","users","home","key","cash"];
 function contactsOf(prem){ return CONTACTS.filter(function(c){ return c.prem===prem; }); }
 
 function contactsView(prem, canAdmin){
@@ -3461,8 +3760,9 @@ function contactsView(prem, canAdmin){
       '<div style="display:flex;gap:8px"><div class="chip" style="padding:11px 12px">+961</div>'+
       '<input id="ct_ph" type="tel" inputmode="numeric" class="mono"></div></label>'+
     '<label class="fld"><span>Name</span><input id="ct_name"></label>'+
-    '<label class="fld"><span>Relation</span><select id="ct_rel">'+
-      RELATIONS.map(function(r){ return '<option>'+h(r)+'</option>'; }).join("")+'</select></label>'+
+    '<div class="sect"><span class="eyebrow">'+h(t("Relation"))+'</span></div>'+
+    pickList("ct_rel", RELATIONS.map(function(r,ix){
+      return {v:r, label:(S.ar?RELATIONS_AR[ix]:r), ic:RELATION_ICONS[ix]}; }))+
     '<button class="btn p" data-a="addcontact" data-v="'+h(prem)+'">'+svg("users","ic ic3")+'Add the number</button>'+
     '<div class="sect"><span class="eyebrow">Transfer the account</span></div>'+
     (list.filter(function(c){ return !c.primary; }).length
@@ -4037,9 +4337,9 @@ V["customer.objections"]=function(){
 };
 V["customer.object"]=function(){
   return '<div class="card"><p class="h">'+h(t("What is wrong?"))+'</p>'+
-    '<label class="lab" for="objg">'+h(t("Ground"))+'</label>'+
-    '<select id="objg" class="inp">'+OBJ_GROUNDS.map(function(g){
-      return '<option value="'+h(g[0])+'">'+h(S.ar?g[2]:g[1])+'</option>'; }).join("")+'</select>'+
+    '<label class="lab">'+h(t("Ground"))+'</label>'+
+    pickList("objg", OBJ_GROUNDS.map(function(g){
+      return {v:g[0], label:(S.ar?g[2]:g[1]), ic:g[3]}; }))+
     '<label class="lab" for="objt">'+h(t("Tell the panel why"))+'</label>'+
     '<textarea id="objt" class="inp" rows="5" placeholder="'+
       h(t("At least twenty characters. Say what the register has wrong and what it should say."))+'"></textarea>'+
@@ -4512,11 +4812,11 @@ V["crew.scanned"]=function(code){
                         : "Nothing to do if that is right \u2014 walk on. Log something below only when it is not.")+'</div></div>'+
       '<div class="sect"><span class="eyebrow">'+h(t("Rank the bag"))+'</span></div><div class="chips">'+
       RANKS.map(function(r){ return '<button class="chip'+(S.scanRank===r.id?" on":"")+'" data-a="rank" data-v="'+r.id+'">'+
-        h(S.ar?r.ar:r.en)+'</button>'; }).join("")+'</div>'+
+        svg(r.ic,"ic")+h(S.ar?r.ar:r.en)+'</button>'; }).join("")+'</div>'+
       '<div class="sect"><span class="eyebrow">'+h(t("What happened to the bag"))+'</span></div>'+
       BAG_OUTCOMES.map(function(o,ix){
-        return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+svg("yes","ic ic3")+
-          '<span>'+h(S.ar?BAG_OUTCOMES_AR[ix]:o)+'</span>'+
+        return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+
+          '<span class="rl">'+svg(BAG_ICONS[ix],"ic icL ic3")+h(S.ar?BAG_OUTCOMES_AR[ix]:o)+'</span>'+
           (S.scanOutcome===o?'<span class="pill p-acc"><i></i>'+h(t("logged"))+'</span>':'<span class="chev">'+svg("chev")+'</span>')+
           '</button>'; }).join("")+
       commentBlock()+
@@ -4534,8 +4834,8 @@ V["crew.scanned"]=function(code){
                         : "A station is assumed cleared. Log something below only when it is not.")+'</div></div>'+
       '<div class="sect"><span class="eyebrow">'+h(t("What was at the station"))+'</span></div>'+
       DOP_OUTCOMES.map(function(o,ix){
-        return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+svg("yes","ic ic3")+
-          '<span>'+h(S.ar?DOP_OUTCOMES_AR[ix]:o)+'</span>'+
+        return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+
+          '<span class="rl">'+svg(DOP_ICONS[ix],"ic icL ic3")+h(S.ar?DOP_OUTCOMES_AR[ix]:o)+'</span>'+
           (S.scanOutcome===o?'<span class="pill p-acc"><i></i>'+h(t("logged"))+'</span>':'<span class="chev">'+svg("chev")+'</span>')+
           '</button>'; }).join("")+
       commentBlock()+
@@ -4554,8 +4854,8 @@ V["crew.scanned"]=function(code){
                       : "Nothing to do if that is right \u2014 walk on. Log something below only when it is not.")+'</div></div>'+
     '<div class="sect"><span class="eyebrow">'+h(t("What was at the point"))+'</span></div>'+
     POINT_OUTCOMES.map(function(o,ix){
-      return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+svg("yes","ic ic3")+
-        '<span>'+h(S.ar?POINT_OUTCOMES_AR[ix]:o)+'</span>'+
+      return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+
+        '<span class="rl">'+svg(POINT_ICONS[ix],"ic icL ic3")+h(S.ar?POINT_OUTCOMES_AR[ix]:o)+'</span>'+
         (S.scanOutcome===o?'<span class="pill p-acc"><i></i>'+h(t("logged"))+'</span>':'<span class="chev">'+svg("chev")+'</span>')+
         '</button>'; }).join("")+
     commentBlock()+
@@ -4577,7 +4877,7 @@ function placeRow(pl){
 function commentBlock(){
   return '<div class="sect"><span class="eyebrow">'+h(t("Comment"))+'</span></div>'+
     '<div class="chips">'+SCAN_COMMENTS.map(function(c,i){
-      return '<button class="chip'+(i===0?" on":"")+'" data-a="cmt" data-v="'+c.id+'">'+h(S.ar?c.ar:c.en)+'</button>';
+      return '<button class="chip'+(i===0?" on":"")+'" data-a="cmt" data-v="'+c.id+'">'+svg(c.ic,"ic")+h(S.ar?c.ar:c.en)+'</button>';
     }).join("")+'</div><div id="cmtbox"></div>';
 }
 function spotBlock(){
@@ -4597,7 +4897,7 @@ V["crew.spot"]=function(){
 
 V["crew.exception"]=function(){
   return EXCEPTIONS.map(function(e,i){
-    return '<button class="btn row" data-a="excp" data-v="'+i+'"><span>'+h(S.ar?e.ar:e.en)+'</span>'+
+    return '<button class="btn row" data-a="excp" data-v="'+i+'"><span class="rl">'+svg(e.ic,"ic icL ic3")+h(S.ar?e.ar:e.en)+'</span>'+
       (e.photo?'<span class="pill p-warn">photo</span>':'<span class="chev">'+svg("chev")+'</span>')+'</button>'; }).join("")+
     '<p class="sm">There is no free-text &ldquo;other&rdquo; category. A box that collects everything routes nothing.</p>';
 };
@@ -4821,7 +5121,9 @@ V["crew.sync"]=function(){
 };
 
 /* ============================== driver ============================== */
-var VCHECK=[["Fuel",1],["Lifter and compactor",1],["Tyres",1],["Lights and indicators",1],["Leaks",1]];
+var VCHECK=[["Fuel",1,"fuel"],["Lifter and compactor",1,"lifter"],["Tyres",1,"tyre"],
+            ["Lights and indicators",1,"light"],["Leaks",1,"drop"]];
+var VCHECK_AR=["الوقود","الرافعة والضاغطة","الدواليب","الأضواء والإشارات","التسريبات"];
 V["driver.shift"]=function(){
   var st=STREAMS[S.stream];
   return '<div class="card"><div class="kv" style="border:none"><span>Vehicle</span><b class="mono">M-04 · 340 128</b></div>'+
@@ -4835,8 +5137,9 @@ V["driver.shift"]=function(){
     '<p class="sm">'+h(S.ar?st.howAr:st.howEn)+'</p>'+
     '<div class="sect"><span class="eyebrow">Vehicle check</span></div>'+
     VCHECK.map(function(v,i){
-      return '<button class="btn row" data-a="vchk" data-v="'+i+'"><span>'+svg(v[1]?"yes":"no","ic ic3")+' '+h(v[0])+'</span>'+
-      '<span class="pill '+(v[1]?"p-good":"p-crit")+'"><i></i>'+(v[1]?"Pass":"Fault")+'</span></button>'; }).join("")+
+      return '<button class="btn row" data-a="vchk" data-v="'+i+'"><span class="rl">'+
+      svg(v[2],"ic icL ic3")+svg(v[1]?"yes":"no","ic ic3 "+(v[1]?"okm":"badm"))+' '+h(S.ar?VCHECK_AR[i]:v[0])+'</span>'+
+      '<span class="pill '+(v[1]?"p-good":"p-crit")+'"><i></i>'+h(t(v[1]?"Pass":"Fault"))+'</span></button>'; }).join("")+
     (S.shiftOn
       ? '<div class="card acc"><div class="kv" style="border:none"><span>'+h(t("Shift running since"))+'</span>'+
           '<b class="mono">'+h(S.shiftStart||"06:10")+'</b></div>'+
@@ -5030,11 +5333,15 @@ V["collector.scanned"]=function(code){
     '<button class="btn p" data-a="push" data-v="cashtake" data-x="C-3128">'+svg("cash","ic ic3")+h(t("Take cash payment"))+'</button>'+
     '<div class="sect"><span class="eyebrow">'+h(t("Comment"))+'</span></div>'+
     '<div class="chips">'+SCAN_COMMENTS.map(function(c,i){
-      return '<button class="chip'+(i===0?" on":"")+'" data-a="cmt" data-v="'+c.id+'">'+h(S.ar?c.ar:c.en)+'</button>'; }).join("")+'</div><div id="cmtbox"></div>';
+      return '<button class="chip'+(i===0?" on":"")+'" data-a="cmt" data-v="'+c.id+'">'+svg(c.ic,"ic")+h(S.ar?c.ar:c.en)+'</button>'; }).join("")+'</div><div id="cmtbox"></div>';
 };
 var EXEMPT_REASONS = ["Registered hardship","Premises empty or closed",
                       "Already settled elsewhere","Duplicate on the register",
                       "Death in the household","Dispute \u2014 referred to the municipality"];
+var EXEMPT_REASONS_AR = ["عوز مسجَّل","العقار فارغ أو مقفل",
+                         "سُدِّد في مكان آخر","مكرَّر على السجل",
+                         "وفاة في المنزل","خلاف — محوَّل إلى البلدية"];
+var EXEMPT_ICONS = ["hand","nohome","cash","copy","heart","scales"];
 TITLES.exempt="Propose an exemption"; TITLES.missed="Nobody home";
 var EXEMPTIONS = [
   {id:"EX-2198", prem:"C-6712", name:"Wael Zmerly", reason:"Registered hardship",
@@ -5056,8 +5363,9 @@ V["collector.exempt"]=function(){
       '<div class="kv"><span>'+h(t("Account"))+'</span><b class="mono">'+h(d.id)+'</b></div>'+
       '<div class="kv"><span>'+h(t("Balance"))+'</span><b>'+money(d.due)+'</b></div>'+
       '<div class="kv"><span>'+h(t("Address"))+'</span><b style="font-size:12.5px">'+h(d.a)+'</b></div></div>' : '')+
-    '<label class="fld"><span>'+h(t("Reason"))+'</span><select id="exreason">'+
-      EXEMPT_REASONS.map(function(r){ return '<option>'+h(r)+'</option>'; }).join("")+'</select></label>'+
+    '<div class="sect"><span class="eyebrow">'+h(t("Reason"))+'</span></div>'+
+    pickList("exreason", EXEMPT_REASONS.map(function(r,ix){
+      return {v:r, label:(S.ar?EXEMPT_REASONS_AR[ix]:r), ic:EXEMPT_ICONS[ix]}; }))+
     '<label class="fld"><span>'+h(t("What you saw or were shown"))+'</span>'+
       '<textarea id="exnote" placeholder="the document, who confirmed it, what the premises looked like"></textarea></label>'+
     photoCard(t("photograph the document or the premises"), "exemptphoto", t("Attach it")) +
@@ -5176,7 +5484,7 @@ V["collector.obsnew"]=function(){
     '</div></div>' : '')+
   '<div class="sect"><span class="eyebrow">What is wrong</span></div>'+
   '<div class="chips">'+OBS.map(function(o,i){
-      return '<button class="chip'+(S.obsKind===i||(S.obsKind==null&&i===0)?" on":"")+'" data-a="obspick" data-v="'+i+'">'+h(S.ar?o.ar:o.en)+'</button>'; }).join("")+'</div>'+
+      return '<button class="chip'+(S.obsKind===i||(S.obsKind==null&&i===0)?" on":"")+'" data-a="obspick" data-v="'+i+'">'+svg(o.ic,"ic")+h(S.ar?o.ar:o.en)+'</button>'; }).join("")+'</div>'+
   photoCard("photograph what you found","obssend", must? "Send with the photograph" : "Send to operations")+
   '<div class="card plain"><div class="kv" style="border:none"><span>Location</span>'+
     '<b class="mono" style="font-size:12px">'+(S.geo? S.geo.lat.toFixed(4)+', '+S.geo.lon.toFixed(4) : 'not captured')+'</b></div>'+
@@ -6608,7 +6916,8 @@ document.addEventListener("click", function(ev){
         'and it stays on the round for the next pass.</p>'+
         SKIP_REASONS.map(function(r,ix){
           return '<button class="btn row" data-a="skipdone" data-v="'+h(sid)+'" data-x="'+ix+'">'+
-            '<span>'+h(S.ar?SKIP_REASONS_AR[ix]:r)+'</span><span class="chev">'+svg("chev")+'</span></button>';
+            '<span class="rl">'+svg(SKIP_ICONS[ix],"ic icL ic3")+h(S.ar?SKIP_REASONS_AR[ix]:r)+'</span>'+
+            '<span class="chev">'+svg("chev")+'</span></button>';
         }).join(""));
       return;
     }
@@ -6743,6 +7052,9 @@ document.addEventListener("click", function(ev){
       paint(); toast("Account "+v+" transferred to "+newName); return;
     }
     case "obspick": S.obsKind=+v; paint(); return;
+    case "pick": S.picked[v]=x; paint(); return;
+    case "addhome": addHome(); return;
+    case "addno": ADD.hidden=true; addKeep(); showAdd(); closeSheet(); return;
 
     case "apisvc": {
       var sv=null; APICFG.services.forEach(function(x){ if(x.k===v) sv=x; });
@@ -7085,12 +7397,12 @@ document.addEventListener("click", function(ev){
       sheet(codeLabel(P2),
         '<p class="sm mono">'+h(it.c)+' · '+h(it.at)+'</p>'+
         (P2.thing==="bag" ? '<div class="sect"><span class="eyebrow">Rank the bag</span></div><div class="chips" id="brank">'+
-            RANKS.map(function(r){ return '<button class="chip'+(it.q===r.id?" on":"")+'" data-a="brank" data-v="'+bi+'|'+r.id+'">'+h(S.ar?r.ar:r.en)+'</button>'; }).join("")+'</div>'
+            RANKS.map(function(r){ return '<button class="chip'+(it.q===r.id?" on":"")+'" data-a="brank" data-v="'+bi+'|'+r.id+'">'+svg(r.ic,"ic")+h(S.ar?r.ar:r.en)+'</button>'; }).join("")+'</div>'
           : '<div class="sect"><span class="eyebrow">What was at the point</span></div><div class="chips" id="brank">'+
-            POINT_OUTCOMES.map(function(o){ return '<button class="chip'+(it.o===o?" on":"")+'" data-a="bout" data-v="'+bi+'|'+encodeURIComponent(o)+'">'+h(o)+'</button>'; }).join("")+'</div>')+
+            POINT_OUTCOMES.map(function(o,ix){ return '<button class="chip'+(it.o===o?" on":"")+'" data-a="bout" data-v="'+bi+'|'+encodeURIComponent(o)+'">'+svg(POINT_ICONS[ix],"ic")+h(S.ar?POINT_OUTCOMES_AR[ix]:o)+'</button>'; }).join("")+'</div>')+
         '<div class="sect"><span class="eyebrow">'+h(t("Comment"))+'</span></div>'+
         '<div class="chips">'+SCAN_COMMENTS.map(function(c,i){
-          return '<button class="chip'+(i===0?" on":"")+'" data-a="cmt" data-v="'+c.id+'">'+h(S.ar?c.ar:c.en)+'</button>'; }).join("")+'</div>'+
+          return '<button class="chip'+(i===0?" on":"")+'" data-a="cmt" data-v="'+c.id+'">'+svg(c.ic,"ic")+h(S.ar?c.ar:c.en)+'</button>'; }).join("")+'</div>'+
         '<div id="cmtbox"></div>'+
         '<button class="btn p" data-a="bsave" data-v="'+bi+'">'+h(t("Save"))+'</button>'+
         '<p class="sm">Leave it and it files itself as presence acknowledged. Open it only when the bag needs a rank or the point needs a note.</p>');
