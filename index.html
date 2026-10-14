@@ -152,6 +152,28 @@ svg.icXL{width:34px;height:34px;flex:none}
 .sayb svg{width:22px;height:22px}
 .sayb.on{background:var(--accent);color:#FBF7F2;border-color:var(--accent)}
 .sayb[hidden]{display:none}
+/* The per-control speaker. One on every button, every segment of a choice and
+   every form field, so a person who cannot read can hear what each one is before
+   pressing it. Kept visually quiet — it sits at the end of the control in muted
+   ink and only colours when it is speaking — because forty loud speakers on one
+   screen is its own kind of unreadable. */
+.sayi{display:inline-grid;place-items:center;width:30px;height:30px;min-width:30px;
+  border-radius:9px;color:var(--muted);flex:none;margin-inline-start:auto;
+  background:color-mix(in oklab,currentColor 9%,transparent)}
+.sayi svg{width:17px;height:17px;stroke-width:2.2}
+.sayi.on{color:var(--accent-ink);background:var(--accent-soft)}
+.hc .sayi{color:#E9E4DC;background:rgba(255,255,255,.14)}
+.btn .sayi,.bigrow .sayi{margin-inline-start:auto}
+.seg button .sayi{width:22px;height:22px;min-width:22px;margin-inline-start:4px;border-radius:7px}
+.seg button .sayi svg{width:13px;height:13px}
+.item .sayi{margin-inline-start:6px}
+.fldsay{display:flex;align-items:center;gap:6px}
+.segsay{display:flex;align-items:center;gap:6px;width:100%}
+.segsay>.seg{flex:1;min-width:0}
+.fldsay>select,.fldsay>input,.fldsay>textarea{flex:1;min-width:0}
+/* at the largest size the speaker grows with everything else */
+.device[data-ts="3"] .sayi{width:34px;height:34px;min-width:34px}
+.device[data-ts="3"] .sayi svg{width:19px;height:19px}
 /* a row whose whole point is one icon, one word, one tap */
 .bigrow{display:flex;align-items:center;gap:12px;width:100%;text-align:start;
   padding:14px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);
@@ -603,6 +625,19 @@ var AUDIT = [
   {at:"14 Sep, 09:41", who:"Marc Aoun", what:"Clearance changed \u00b7 +961 3 946 984 \u00b7 Customer \u2192 Facility operator"},
   {at:"2 Sep, 16:08",  who:"Marc Aoun", what:"Tariff set \u00b7 Restaurants 30.6% \u00b7 within the band"}
 ];
+/* The municipality's own WhatsApp line: the number households message to ask what
+   they owe, request a collection or report a missed round. It is also the number
+   the one-time codes are sent FROM, so Meta sees one business number and one
+   approval rather than two. Separate from SUPPORT.msisdn below, which is the
+   number a person calls when the automatic answer is not enough. */
+var BALADI_WA = {
+  msisdn:  "96171699231",
+  display: "+961 71 699 231"
+};
+function waUsLink(text){
+  return "https://wa.me/" + BALADI_WA.msisdn +
+         (text ? "?text=" + encodeURIComponent(text) : "");
+}
 var SUPPORT = {
   msisdn: "96170150153",
   hours:  "Monday to Friday, 08:00 to 14:00",
@@ -1553,6 +1588,499 @@ var AR = {
   "Pay now":"ادفع الآن","Amount due":"المستحق","Annual fee":"الرسم السنوي","Sorting rebate":"خصم الفرز",
   "Impact":"الأثر","This month":"هذا الشهر","My tags":"رموزي","Monthly prize":"جائزة الشهر",
   "National grand prize":"الجائزة الكبرى الوطنية","Draw entries":"مشاركات السحب",
+  /* the WhatsApp line, for the households who will never open the app */
+  "Ask us on WhatsApp":"\u0627\u0633\u0623\u0644\u0648\u0646\u0627 \u0639\u0644\u0649 \u0648\u0627\u062a\u0633\u0627\u0628",
+  "Open WhatsApp":"\u0641\u062a\u062d \u0648\u0627\u062a\u0633\u0627\u0628",
+  "What do I owe?":"\u0643\u0645 \u0627\u0644\u0645\u062a\u0648\u062c\u0651\u0628 \u0639\u0644\u064a\u0651?",
+  "Send a message or a voice note and we answer.":"\u0623\u0631\u0633\u0644\u0648\u0627 \u0631\u0633\u0627\u0644\u0629 \u0623\u0648 \u062a\u0633\u062c\u064a\u0644\u0627\u064b \u0635\u0648\u062a\u064a\u0627\u064b \u0648\u0646\u062c\u064a\u0628\u0643\u0645.",
+  "Send a message or a voice note and we answer. No app needed.":"\u0623\u0631\u0633\u0644\u0648\u0627 \u0631\u0633\u0627\u0644\u0629 \u0623\u0648 \u062a\u0633\u062c\u064a\u0644\u0627\u064b \u0635\u0648\u062a\u064a\u0627\u064b \u0648\u0646\u062c\u064a\u0628\u0643\u0645. \u062f\u0648\u0646 \u062d\u0627\u062c\u0629 \u0625\u0644\u0649 \u062a\u0637\u0628\u064a\u0642.",
+  /* the map legend and the round header */
+  "to do":"\u0642\u064a\u062f \u0627\u0644\u0627\u0646\u062a\u0638\u0627\u0631",
+  /* the sheets: settings, the guides and support, drawn after paint */
+  "LBP":"ليرة",
+  "USD":"دولار",
+  "View":"العرض",
+  "Phone":"هاتف",
+  "Reset":"إعادة ضبط",
+  "Desktop":"مكتبي",
+  "English":"إنكليزي",
+  "Receipts":"الوصولات",
+  "Settings":"الإعدادات",
+  "Resolving":"المعالجة",
+  "Signed in":"الدخول باسم",
+  "Your list":"قائمتكم",
+  "Your street":"شارعكم",
+  "Tap a category":"اضغطوا على فئة",
+  "The cash round":"جولة النقد",
+  "What lands here":"ما يصل إلى هنا",
+  "Starting a shift":"بدء الدوام",
+  "Tariff and basis":"الرسم والأساس",
+  "Your home screen":"شاشتكم الرئيسية",
+  "Minimum wage basis":"أساس الحد الأدنى للأجور",
+  "The dispatch queue":"طابور التوزيع",
+  "Doors to visit today, with the balance on each.":"الأبواب المطلوب زيارتها اليوم، ومعها رصيد كلٍّ منها.",
+  "Returns every category to the adopted schedule.":"يعيد كل فئة إلى الجدول المعتمد.",
+  "Sets the round, the stop count and the disposal site.":"يحدّد الجولة وعدد المحطات وموقع التخلّص.",
+  "Dispatch releases the vehicle against a named operator.":"التوزيع يُفرج عن المركبة باسم مشغّل محدّد.",
+  "Exceptions from crews, customer reports and failed stops.":"استثناءات الفرق وبلاغات الزبائن والمحطات المتعذّرة.",
+  "Tap the question mark on any screen for its own walkthrough.":"اضغطوا على علامة الاستفهام في أي شاشة لشرحها الخاص.",
+  "Nothing passes by default, and a driver cannot clear his own fault.":"لا شيء يمرّ تلقائياً، ولا يستطيع السائق رفع عطله بنفسه.",
+  "The share of doors on your street that put out a sorted bag this month.":"نسبة الأبواب في شارعكم التي أخرجت كيساً مفروزاً هذا الشهر.",
+  "Swipe sideways between this month's gold pot and the national grand prize.":"اسحبوا جانباً بين جائزة هذا الشهر الذهبية والجائزة الوطنية الكبرى.",
+  "Every fee is a percentage of it. Changing it recomputes the whole schedule.":"كل رسم نسبة منه. تغييره يعيد احتساب الجدول بكامله.",
+  "Set its percentage. Outside the adopted band it is recorded as an override.":"حدّدوا نسبتها. خارج الشريحة المعتمدة تُسجَّل كتجاوز.",
+  "Photograph what you find at a point; it is logged against the service record.":"صوّروا ما تجدونه عند النقطة؛ يُسجَّل على سجلّ الخدمة.",
+  "Marking it strikes the door from today's list and it returns on the next round.":"تعليمه يشطب الباب من قائمة اليوم ويعود في الجولة التالية.",
+  "Every cash payment issues a numbered receipt and can be sent by SMS or WhatsApp.":"كل دفعة نقدية تُصدر وصلاً مرقّماً ويمكن إرساله برسالة نصية أو عبر واتساب.",
+  "Swipe for the rest: trees equivalent, bags sorted for life, tonnes kept out of central treatment.":"اسحبوا للباقي: ما يعادل أشجاراً، وأكياس مفروزة مدى الحياة، وأطنان أُبعدت عن المعالجة المركزية.",
+  "Each item resolves to a scan, an exception or a weighbridge ticket, so it can be opened back later.":"كل بند يعود إلى مسح أو استثناء أو بطاقة وزن، فيمكن فتحه لاحقاً.",
+  "Three services, three schedules. Each line shows its own next day and time. Full schedule opens the detail.":"ثلاث خدمات، ثلاثة جداول. كل سطر يعرض يومه ووقته التاليين. الجدول الكامل يفتح التفاصيل.",
+  "The yearly waste tariff, split into two instalments. Pay now opens the channels; Payment history lists every receipt.":"رسم النفايات السنوي، مقسّم إلى قسطين. «ادفع الآن» يفتح القنوات، و«سجلّ الدفعات» يعرض كل وصل.",
+  /* ---- the screens that were written as English literals ----
+     Most of this app writes its words straight into the markup rather than
+     through t(), so none of these were ever reachable by the dictionary. They
+     are matched against the rendered text instead, whole node at a time, by
+     translateDom(). Adding a string here is all it takes to translate it. */
+  "Ask":"اسأل",
+  "Who":"من",
+  "you":"أنت",
+  "Bank":"مصرف",
+  "Base":"الأساس",
+  "Copy":"نسخ",
+  "Crew":"الفريق",
+  "Fuel":"الوقود",
+  "IBAN":"IBAN",
+  "Maps":"الخرائط",
+  "Name":"الاسم",
+  "Note":"ملاحظة",
+  "Open":"فتح",
+  "Pass":"سليم",
+  "Rate":"النسبة",
+  "Sent":"أُرسل",
+  "Site":"الموقع",
+  "Skip":"تخطٍّ",
+  "Slot":"الموعد",
+  "Bring":"أحضِر",
+  "Bulky":"ضخم",
+  "Clear":"مسح",
+  "Leaks":"تسريب",
+  "Order":"الترتيب",
+  "Owner":"المالك",
+  "Point":"النقطة",
+  "Saved":"وُفّر",
+  "Scans":"المسوحات",
+  "Stops":"المحطات",
+  "Today":"اليوم",
+  "Tyres":"الإطارات",
+  "Where":"أين",
+  "photo":"صورة",
+  "Accept":"قبول",
+  "Closed":"مقفل",
+  "Crew A":"الفريق أ",
+  "Crew B":"الفريق ب",
+  "Crew C":"الفريق ج",
+  "Detail":"التفاصيل",
+  "Dry it":"جفّفوه",
+  "Family":"العائلة",
+  "Method":"الطريقة",
+  "Mobile":"الخلوي",
+  "Photos":"الصور",
+  "RANK 1":"المرتبة ١",
+  "RANK 2":"المرتبة ٢",
+  "RANK 3":"المرتبة ٣",
+  "RANK 4":"المرتبة ٤",
+  "RANK 5":"المرتبة ٥",
+  "Status":"الحالة",
+  "Stream":"المسار",
+  "Tag it":"ضعوا ملصقاً",
+  "Tenant":"المستأجر",
+  "Update":"تحديث",
+  "Urgent":"عاجل",
+  "exempt":"معفى",
+  "upheld":"مقبول",
+  "Address":"العنوان",
+  "Arrived":"وصلنا",
+  "Balance":"الرصيد",
+  "Covered":"مغطّى",
+  "Network":"الشبكة",
+  "Pending":"قيد الانتظار",
+  "Receipt":"الوصل",
+  "Routine":"اعتيادي",
+  "Settled":"مسدّد",
+  "Uploads":"الرفعات",
+  "Vehicle":"المركبة",
+  "primary":"أساسي",
+  "problem":"مشكلة",
+  "Accepted":"مقبول",
+  "Awaiting":"بانتظار",
+  "Category":"الفئة",
+  "Credited":"قُيِّد",
+  "Disposal":"التخلّص",
+  "Duration":"المدة",
+  "Empty it":"أفرغوه",
+  "Evidence":"الإثبات",
+  "Feb 2026":"شباط ٢٠٢٦",
+  "Feedback":"ملاحظات",
+  "Lids off":"ارفعوا الأغطية",
+  "Location":"الموقع",
+  "Messages":"الرسائل",
+  "Odometer":"عدّاد الكيلومترات",
+  "Priority":"الأولوية",
+  "Progress":"التقدّم",
+  "Relation":"الصفة",
+  "Reported":"أُبلغ عنه",
+  "Reviewed":"روجِع",
+  "Serviced":"تمّت الخدمة",
+  "Sync now":"مزامنة الآن",
+  "The bill":"الفاتورة",
+  "Uploaded":"رُفع",
+  "drop-off":"نقطة إيداع",
+  "rejected":"مرفوض",
+  "requests":"طلبات",
+  "reserved":"محجوز",
+  "serviced":"تمّت خدمته",
+  "unissued":"غير مُصدر",
+  "Assistant":"المساعد",
+  "Downgrade":"خفض التصنيف",
+  "Draw date":"تاريخ السحب",
+  "Inspector":"المفتّش",
+  "Last sync":"آخر مزامنة",
+  "Next draw":"السحب القادم",
+  "Objective":"الهدف",
+  "Reference":"المرجع",
+  "Review 12":"مراجعة ١٢",
+  "Thu 06:30":"الخميس ٦:٣٠",
+  "Thu 09:04":"الخميس ٩:٠٤",
+  "Unmatched":"غير مطابَق",
+  "Your odds":"حظوظكم",
+  "affiliate":"منتسب",
+  "Accountant":"المحاسب",
+  "Annual cap":"السقف السنوي",
+  "Built from":"مبني على",
+  "Doors left":"أبواب متبقية",
+  "Downgraded":"خُفّض تصنيفه",
+  "My reports":"بلاغاتي",
+  "Net weight":"الوزن الصافي",
+  "New report":"بلاغ جديد",
+  "Next stops":"المحطات التالية",
+  "Not upheld":"غير مقبول",
+  "Paid 2 Oct":"دُفع ٢ تشرين الأول",
+  "Route type":"نوع المسار",
+  "The ladder":"سلّم التحصيل",
+  "Weighed in":"وُزن عند الدخول",
+  "Your point":"نقطتكم",
+  "not passed":"لم يُمرّ",
+  "tap a load":"اضغطوا على حمولة",
+  "Beneficiary":"المستفيد",
+  "Cash on you":"النقد معكم",
+  "Deposit due":"الإيداع مستحق",
+  "How to sort":"كيف تفرزون",
+  "Observation":"ملاحظة ميدانية",
+  "Organic pad":"ساحة العضوي",
+  "Start shift":"بدء الدوام",
+  "To disposal":"إلى التخلّص",
+  "Today 08:10":"اليوم ٨:١٠",
+  "Transfer to":"التحويل إلى",
+  "marked down":"خُفّض",
+  "within 50 m":"ضمن ٥٠ متراً",
+  "36 + 1 bonus":"٣٦ + ١ إضافية",
+  "Account name":"اسم الحساب",
+  "CO₂e avoided":"تجنّب ثاني أكسيد الكربون",
+  "Collect from":"الاستلام من",
+  "Days overdue":"أيام التأخير",
+  "Instalment 1":"القسط الأول",
+  "Instalment 2":"القسط الثاني",
+  "Last deposit":"آخر إيداع",
+  "October draw":"سحب تشرين الأول",
+  "Open in maps":"فتح في الخرائط",
+  "Payable 2026":"المتوجّب ٢٠٢٦",
+  "Send request":"إرسال الطلب",
+  "Storage mode":"وضع التخزين",
+  "acknowledged":"مُقرّ به",
+  "before 17:00":"قبل ١٧:٠٠",
+  "manual entry":"إدخال يدوي",
+  "not captured":"لم تُلتقط",
+  "How it learns":"كيف يتعلّم",
+  "Location gate":"بوابة الموقع",
+  "Mobile number":"رقم الخلوي",
+  "Point scanned":"مُسحت النقطة",
+  "Receipt range":"نطاق الوصولات",
+  "Registered to":"مسجّل باسم",
+  "Send feedback":"إرسال الملاحظات",
+  "Vehicle check":"فحص المركبة",
+  "Wallet number":"رقم المحفظة",
+  "What is wrong":"ما هو الخطأ",
+  "Your question":"سؤالكم",
+  "longest first":"الأطول أولاً",
+  "Add the number":"إضافة الرقم",
+  "Cash collected":"النقد المحصّل",
+  "Close the load":"إقفال الحمولة",
+  "Events waiting":"أحداث بانتظار الرفع",
+  "Manual entries":"إدخالات يدوية",
+  "Out of service":"خارج الخدمة",
+  "Report a fault":"الإبلاغ عن عطل",
+  "Tag on the bag":"الملصق على الكيس",
+  "The four rules":"القواعد الأربع",
+  "An electric SUV":"سيارة كهربائية",
+  "Bin fault photo":"صورة عطل الحاوية",
+  "Bin overflowing":"الحاوية فائضة",
+  "Collected today":"المحصّل اليوم",
+  "Missing numbers":"أرقام ناقصة",
+  "Net weight (kg)":"الوزن الصافي (كغ)",
+  "Question 1 of 8":"السؤال ١ من ٨",
+  "Recent sessions":"الجلسات الأخيرة",
+  "Reject the load":"رفض الحمولة",
+  "Reset the round":"إعادة ضبط الجولة",
+  "Rounds observed":"جولات مرصودة",
+  "Stream declared":"المسار المصرّح",
+  "Use my location":"استخدام موقعي",
+  "Vouchers earned":"قسائم مكتسبة",
+  "What can I win?":"ماذا يمكن أن أربح؟",
+  "Will default to":"سيُعتمد تلقائياً",
+  "With no history":"بلا سجلّ سابق",
+  "Yesterday 18:02":"أمس ١٨:٠٢",
+  "need a decision":"بحاجة إلى قرار",
+  "yesterday 16:41":"أمس ١٦:٤١",
+  "Bags marked down":"أكياس خُفّض تصنيفها",
+  "Bin or pad fault":"عطل في الحاوية أو الساحة",
+  "Building manager":"ناطور البناية",
+  "Drop-off network":"شبكة نقاط الإيداع",
+  "Exception logged":"سُجّل الاستثناء",
+  "Log an exception":"تسجيل استثناء",
+  "Mark all as read":"تعليم الكل كمقروء",
+  "Never in any bag":"لا توضع في أي كيس",
+  "Record a deposit":"تسجيل إيداع",
+  "Report a problem":"الإبلاغ عن مشكلة",
+  "Reserved for you":"محجوز لكم",
+  "Spot-check photo":"صورة تدقيق عشوائي",
+  "Take a photo now":"التقطوا صورة الآن",
+  "Where to send it":"إلى أين تُرسل",
+  "about 1 in 4,736":"نحو ١ من ٤٬٧٣٦",
+  "filed this month":"قُدّمت هذا الشهر",
+  "sorted this year":"فُرزت هذه السنة",
+  "After you send it":"بعد الإرسال",
+  "At the gate today":"عند البوابة اليوم",
+  "Collection missed":"لم يحصل المرور",
+  "Daily 06:00–20:00":"يومياً ٦:٠٠–٢٠:٠٠",
+  "Eight upheld (8+)":"ثماني مقبولة (+٨)",
+  "Help and feedback":"المساعدة والملاحظات",
+  "In register order":"بترتيب السجل",
+  "Issued 2 Oct 2026":"صدر ٢ تشرين الأول ٢٠٢٦",
+  "Issued 5 Oct 2026":"صدر ٥ تشرين الأول ٢٠٢٦",
+  "Issued 6 Oct 2026":"صدر ٦ تشرين الأول ٢٠٢٦",
+  "Note for the crew":"ملاحظة للفريق",
+  "Notifications (5)":"الإشعارات (٥)",
+  "Queued for upload":"بانتظار الرفع",
+  "Refer to the crew":"الإحالة إلى الفريق",
+  "Take a photograph":"التقطوا صورة",
+  "Three upheld (3+)":"ثلاث مقبولة (+٣)",
+  "Upheld this month":"المقبولة هذا الشهر",
+  "Vehicle and round":"المركبة والجولة",
+  "Your commission ›":"عمولتكم ›",
+  "predicted minutes":"الدقائق المتوقّعة",
+  "Asked of you today":"المطلوب منكم اليوم",
+  "Commission at 0.5%":"العمولة ٠٫٥٪",
+  "How do I get tags?":"كيف أحصل على ملصقات؟",
+  "How much do I owe?":"كم المتوجّب عليّ؟",
+  "Log an observation":"تسجيل ملاحظة",
+  "Monthly equivalent":"ما يعادله شهرياً",
+  "Paired · live mode":"مقترن · وضع مباشر",
+  "Reference to quote":"المرجع المطلوب ذكره",
+  "Weighbridge ticket":"بطاقة الوزن",
+  "inspections logged":"تفتيشات مسجّلة",
+  "A pot of gold worth":"جائزة بقيمة",
+  "Drawn nationally on":"يُسحب وطنياً في",
+  "Mon–Fri 08:00–14:00":"الاثنين–الجمعة ٨:٠٠–١٤:٠٠",
+  "Mon–Sat 08:00–20:00":"الاثنين–السبت ٨:٠٠–٢٠:٠٠",
+  "Mon–Sat 08:30–19:00":"الاثنين–السبت ٨:٣٠–١٩:٠٠",
+  "Neighbouring points":"النقاط المجاورة",
+  "Paid September 2026":"دُفع أيلول ٢٠٢٦",
+  "Report a fault here":"الإبلاغ عن عطل هنا",
+  "Send to my WhatsApp":"أرسلوه إلى واتساب",
+  "Sticker replacement":"استبدال ملصق",
+  "Your entries so far":"مشاركاتكم حتى الآن",
+  "Attach my location ›":"إرفاق موقعي ›",
+  "Contamination notice":"إشعار تلوّث",
+  "Fifteen upheld (15+)":"خمس عشرة مقبولة (+١٥)",
+  "How many do you need":"كم تحتاجون",
+  "How the value is set":"كيف تُحدَّد القيمة",
+  "Learned travel speed":"سرعة السير المكتسبة",
+  "Lifter and compactor":"الرافعة والكابس",
+  "Propose an exemption":"اقتراح إعفاء",
+  "Saturday 06:30–09:00":"السبت ٦:٣٠–٩:٠٠",
+  "The round · 22 stops":"الجولة · ٢٢ محطة",
+  "Thursday 06:30–09:00":"الخميس ٦:٣٠–٩:٠٠",
+  "Town sorting quality":"جودة الفرز في البلدة",
+  "Transfer the account":"نقل الحساب",
+  "Your collection crew":"فريق التحصيل الخاص بكم",
+  "photograph the point":"صوّروا النقطة",
+  "Bag 00042291 credited":"الكيس ٠٠٠٤٢٢٩١ قُيّد",
+  "Commission multiplier":"معامل العمولة",
+  "Lights and indicators":"الأضواء والغمّازات",
+  "On the register since":"على السجل منذ",
+  "Receipts issued today":"الوصولات الصادرة اليوم",
+  "Report an observation":"الإبلاغ عن ملاحظة",
+  "Residential household":"منزل سكني",
+  "Settings and language":"الإعدادات واللغة",
+  "Today, for this round":"اليوم، لهذه الجولة",
+  "Vehicle on the street":"المركبة في الشارع",
+  "What would you change":"ما الذي تغيّرونه",
+  "Your commission today":"عمولتكم اليوم",
+  "bags sorted, lifetime":"أكياس مفروزة، إجمالاً",
+  "presence acknowledged":"إقرار بالوجود",
+  "Any printed code works":"أي رمز مطبوع يعمل",
+  "Observation multiplier":"معامل الملاحظات",
+  "Pull from the handheld":"السحب من الجهاز المحمول",
+  "Tag or sticker problem":"مشكلة في الملصق",
+  "Tags are pre-generated":"الملصقات مطبوعة مسبقاً",
+  "Three bags, four rules":"ثلاثة أكياس، أربع قواعد",
+  "What goes in which bag":"ماذا يوضع في أي كيس",
+  "Your payment reference":"مرجع الدفع الخاص بكم",
+  "falls back to distance":"يعود إلى المسافة",
+  "of your street sorting":"من فرز شارعكم",
+  "A place, not an account":"مكان، وليس حساباً",
+  "Add an affiliate number":"إضافة رقم منتسب",
+  "Exceptions logged today":"الاستثناءات المسجّلة اليوم",
+  "I have sent the payment":"أرسلتُ الدفعة",
+  "Live camera unavailable":"الكاميرا المباشرة غير متوفرة",
+  "Open a sampling session":"فتح جلسة تدقيق",
+  "Scan the tag on the bag":"امسحوا الملصق على الكيس",
+  "Visual contamination, %":"التلوّث الظاهري، ٪",
+  "moving average, α = 0.3":"متوسط متحرّك، ألفا = ٠٫٣",
+  "How vouchers are counted":"كيف تُحتسب القسائم",
+  "In the order it suggests":"بالترتيب المقترح",
+  "Last stop to weighbridge":"آخر محطة إلى الميزان",
+  "Municipality of Zaytouna":"بلدية زيتونة",
+  "Participating this month":"المشاركون هذا الشهر",
+  "Start a sampling session":"بدء جلسة تدقيق",
+  "Your tag is read for you":"ملصقكم يُقرأ نيابةً عنكم",
+  "instalment 2, due 30 Nov":"القسط الثاني، يستحق ٣٠ تشرين الثاني",
+  "photograph of the ticket":"صورة البطاقة",
+  "How does the rebate work?":"كيف يعمل الحسم؟",
+  "Minutes per stop, learned":"الدقائق لكل محطة، مكتسبة",
+  "Offline · mobile data off":"دون اتصال · بيانات الخلوي مقفلة",
+  "The round · 16 doors left":"الجولة · ١٦ باباً متبقياً",
+  "Who or what is this about":"عمّن أو عمّ يدور الأمر",
+  "loads awaiting acceptance":"حمولات بانتظار القبول",
+  "photograph what you found":"صوّروا ما وجدتموه",
+  "trees planted, equivalent":"ما يعادل أشجاراً مزروعة",
+  "Notifications and messages":"الإشعارات والرسائل",
+  "Received from the handheld":"وردت من الجهاز المحمول",
+  "Commingled needs no request":"المختلط لا يحتاج طلباً",
+  "Open the next doors in maps":"افتحوا الأبواب التالية في الخرائط",
+  "When is my next collection?":"متى موعد المرور التالي؟",
+  "Who can act on this account":"من يحق له التصرّف بهذا الحساب",
+  "Acknowledge the remaining 12":"الإقرار بالـ ١٢ المتبقية",
+  "Entries in the national pool":"المشاركات في السحب الوطني",
+  "Entries in this month’s pool":"المشاركات في سحب هذا الشهر",
+  "One account, several numbers":"حساب واحد، أرقام عدّة",
+  "Uphold and schedule a return":"القبول وجدولة عودة",
+  "A photograph is required here":"الصورة مطلوبة هنا",
+  "Any time, including weekends.":"في أي وقت، بما فيه عطلة الأسبوع.",
+  "Every station in the village.":"كل محطة في البلدة.",
+  "Open the next 4 stops in maps":"افتحوا المحطات الأربع التالية في الخرائط",
+  "Open the next 5 stops in maps":"افتحوا المحطات الخمس التالية في الخرائط",
+  "Scan a customer card or point":"امسحوا بطاقة زبون أو نقطة",
+  "kept out of central treatment":"أُبعدت عن المعالجة المركزية",
+  "nearest neighbour, then 2-opt":"أقرب جار، ثم تحسين ثنائي",
+  "to be set by the municipality":"تحدّدها البلدية",
+  "Bags marked down, all sessions":"الأكياس المخفّضة، كل الجلسات",
+  "One-time bonus still available":"المكافأة لمرة واحدة ما زالت متاحة",
+  "This year · 24 vouchers earned":"هذه السنة · ٢٤ قسيمة",
+  "Your own reports need evidence":"بلاغاتكم تحتاج إثباتاً",
+  "loads open · 1 past its window":"حمولات مفتوحة · واحدة تجاوزت مهلتها",
+  "photograph of the tipping face":"صورة وجه التفريغ",
+  "Daily 06:00–20:00 · Recyclables":"يومياً ٦:٠٠–٢٠:٠٠ · قابل للتدوير",
+  "Instalment 2 is due 30 November":"القسط الثاني يستحق في ٣٠ تشرين الثاني",
+  "Municipal building, ground floor":"مبنى البلدية، الطابق الأرضي",
+  "Organic pad · location confirmed":"ساحة العضوي · الموقع مؤكّد",
+  "What the optimiser has learned ›":"ما تعلّمه المُحسِّن ›",
+  "Monday to Friday, 08:00 to 14:00.":"الاثنين إلى الجمعة، ٨:٠٠ إلى ١٤:٠٠.",
+  "spot-check photos awaiting upload":"صور تدقيق بانتظار الرفع",
+  "How is the service on your street?":"كيف هي الخدمة في شارعكم؟",
+  "It plans in minutes, not kilometres":"يخطّط بالدقائق لا بالكيلومترات",
+  "No camera was found on this device.":"لم يُعثر على كاميرا في هذا الجهاز.",
+  "Transfer and step down to affiliate":"النقل والتنازل إلى منتسب",
+  "Upheld observations, not filed ones":"الملاحظات المقبولة لا المقدَّمة",
+  "issued on the spot, and on WhatsApp":"يُصدر فوراً، وعلى واتساب",
+  "reports matched automatically today":"بلاغات طوبقت تلقائياً اليوم",
+  "the code below, written on the slip":"الرمز أدناه، مكتوباً على الإيصال",
+  "Ask the crew at your next collection":"اسألوا الفريق عند المرور القادم",
+  "Municipality of Zaytouna — waste fee":"بلدية زيتونة — رسم النفايات",
+  "Open a sampling session on this load":"افتحوا جلسة تدقيق على هذه الحمولة",
+  "Time left, as the round actually runs":"الوقت المتبقي، بحسب سير الجولة فعلياً",
+  "Your October vouchers are in the pool":"قسائم تشرين الأول في السحب",
+  "deposit before 17:00 · ceiling $2,000":"الإيداع قبل ١٧:٠٠ · السقف ٢٬٠٠٠ دولار",
+  "Open the round and tell the households":"افتحوا الجولة وأبلغوا الأهالي",
+  "Report a problem — photograph required":"الإبلاغ عن مشكلة — الصورة مطلوبة",
+  "Nothing is lost if you do not open them":"لا شيء يضيع إن لم تفتحوها",
+  "contamination at the pad, month to date":"التلوّث عند الساحة، منذ بداية الشهر",
+  "A pin turns green when the call is done.":"تتحوّل العلامة إلى الأخضر عند إتمام الزيارة.",
+  "Closed for repair · Organic · Recyclables":"مقفل للصيانة · عضوي · قابل للتدوير",
+  "Daily 06:00–20:00 · Organic · Recyclables":"يومياً ٦:٠٠–٢٠:٠٠ · عضوي · قابل للتدوير",
+  "Store the photograph without a photograph":"حفظ الصورة بدون صورة",
+  "Turn-by-turn opens in your phone’s own map.":"التوجيه خطوة بخطوة يفتح في خرائط هاتفكم.",
+  "your reference code, or your account number":"رمز المرجع، أو رقم الحساب",
+  "Organic collection moves to Friday this week":"مرور العضوي ينتقل إلى الجمعة هذا الأسبوع",
+  "one per activity type, each with its own serial":"واحد لكل نوع نشاط، لكلٍّ رقمه التسلسلي",
+  "the collector on your round, with an identity card":"المحصّل في جولتكم، ومعه بطاقة هوية",
+  "A scanned bag is a bag marked down for contamination":"الكيس الممسوح هنا هو كيس خُفّض تصنيفه بسبب التلوّث",
+  "Open daily 06:00 to 20:00. Free tags at the counter.":"مفتوح يومياً من ٦:٠٠ إلى ٢٠:٠٠. ملصقات مجانية عند الشبّاك.",
+  "Organic, recyclables, commingled — and the four rules":"عضوي، قابل للتدوير، مختلط — والقواعد الأربع",
+  "Branch hours. Keep the slip until the receipt arrives.":"ساعات الفرع. احتفظوا بالإيصال حتى وصول الوصل.",
+  "Recyclables 87 kg · organics 61 kg · commingled 34 kg.":"قابل للتدوير ٨٧ كغ · عضوي ٦١ كغ · مختلط ٣٤ كغ.",
+  "Any time. Shows on the account within one business day.":"في أي وقت. يظهر على الحساب خلال يوم عمل واحد.",
+  "each with the time it was captured, not the time it syncs":"لكلٍّ وقت التقاطه، لا وقت مزامنته",
+  "On the round. Never pay anyone who cannot issue a receipt.":"خلال الجولة. لا تدفعوا أبداً لمن لا يستطيع إصدار وصل.",
+  "A pin turns green as the stop is worked. Tap one to open it.":"تتحوّل العلامة إلى الأخضر مع إنجاز المحطة. اضغطوا عليها لفتحها.",
+  "Threshold met. 20% comes off your tariff — $23.95 this year.":"تحقّق الشرط. يُحسم ٢٠٪ من رسمكم — ٢٣٫٩٥ دولاراً هذه السنة.",
+  "the Saha and Al-Mrouj only. The Tuesday round is unaffected.":"الساحة والمروج فقط. جولة الثلاثاء غير متأثرة.",
+  "On the factors the municipality publishes in its annual report.":"بحسب المعاملات التي تنشرها البلدية في تقريرها السنوي.",
+  "Share of doors on the Saha that put out a sorted bag this month.":"نسبة الأبواب في الساحة التي أخرجت كيساً مفروزاً هذا الشهر.",
+  "A wet bag contaminates the whole load and the batch is downgraded.":"الكيس المبلول يلوّث الحمولة كلها فتُخفَّض الدفعة.",
+  "One tag on one bag. An untagged bag is collected but earns nothing.":"ملصق واحد لكيس واحد. الكيس بلا ملصق يُرفع لكنه لا يُحتسب.",
+  "451 kg that never went to the central facility or to final disposal.":"٤٥١ كغ لم تصل يوماً إلى المنشأة المركزية ولا إلى التخلّص النهائي.",
+  "Tip food out before the bottle or the tin goes in the recyclables bag.":"أفرغوا بقايا الطعام قبل وضع القنينة أو العلبة في كيس التدوير.",
+  "Maps takes ten stops at a time, so the rest follows once these are done.":"تأخذ الخرائط عشر محطات في المرة، والباقي يتبع بعد إنجازها.",
+  "when the round closes. Open one only to rank the bag or leave a comment.":"عند إقفال الجولة. لا تفتحوا واحداً إلا لتصنيف الكيس أو ترك ملاحظة.",
+  "Caps and lids are a different plastic. Loose in the bag, not on the bottle.":"الأغطية بلاستيك مختلف. ضعوها منفردة في الكيس لا على القنينة.",
+  "from every voucher earned this year across all participating municipalities.":"من كل قسيمة مكتسبة هذه السنة في جميع البلديات المشاركة.",
+  "Your 132 kg of CO₂e avoided is about what 6 mature trees take in over a year.":"١٣٢ كغ من ثاني أكسيد الكربون تجنّبتموها، أي ما تمتصّه ٦ أشجار ناضجة في سنة.",
+  "Contours every 25 m. The village climbs from the lower road to the Harissa side.":"خطوط كنتور كل ٢٥ متراً. ترتفع البلدة من الطريق السفلي نحو جهة حريصا.",
+  "Three vouchers, serials listed under Rewards. The monthly draw is on 31 October.":"ثلاث قسائم، أرقامها تحت المكافآت. السحب الشهري في ٣١ تشرين الأول.",
+  "Not sure which point is yours? Share your location and the app picks the nearest.":"لستم متأكدين أي نقطة لكم؟ شاركوا موقعكم ويختار التطبيق الأقرب.",
+  "Scanned by the crew on the organic round and counted towards your sorting rebate.":"مُسح من الفريق في جولة العضوي ويُحتسب ضمن حسم الفرز.",
+  "Start the session, then scan bags with the handheld as you work the tipping face.":"ابدأوا الجلسة، ثم امسحوا الأكياس بالجهاز المحمول أثناء العمل على وجه التفريغ.",
+  "Requests close at 22:00. Only points that asked are scheduled on the organic round.":"تُقفل الطلبات الساعة ٢٢:٠٠. تُجدول فقط النقاط التي طلبت ضمن جولة العضوي.",
+  "Tags are handed out free at these points, and by your collection crew on the round.":"تُوزَّع الملصقات مجاناً في هذه النقاط، ومن فريق التحصيل خلال الجولة.",
+  "Share your location and the nearest tag point and collection point are picked for you.":"شاركوا موقعكم فتُختار لكم أقرب نقطة ملصقات وأقرب نقطة تجميع.",
+  "There is no free-text “other” category. A box that collects everything routes nothing.":"لا توجد خانة «أخرى» حرّة. الخانة التي تجمع كل شيء لا توجّه شيئاً.",
+  "Hello Diane. Ask me about your fee, your collection days, tags, the rebate or the draw.":"أهلاً ديان. اسأليني عن رسمكم، أيام المرور، الملصقات، الحسم أو السحب.",
+  "The handheld Bluetooth scanner is paired and active. Pull the trigger anywhere in the app.":"الماسح المحمول مقترن وفعّال. اضغطوا الزناد في أي مكان داخل التطبيق.",
+  "One bottle left in the organic bag is enough to have the whole load downgraded at the gate.":"قنينة واحدة في كيس العضوي تكفي لتخفيض الحمولة كلها عند البوابة.",
+  "Findings feed the contractor’s KPI deductions and the contamination line in the annual report.":"تغذّي النتائج حسومات مؤشرات الأداء على المتعهّد وبند التلوّث في التقرير السنوي.",
+  "Drawn on the last day of the month. Your 3 vouchers are 3 of 14,208 entries — about 1 in 4,736.":"يُسحب في آخر يوم من الشهر. قسائمكم الثلاث من أصل ١٤٬٢٠٨ مشاركات — نحو ١ من ٤٬٧٣٦.",
+  "serves 12 flats, so a service record applies to the whole building and cannot resolve to one flat.":"يخدم ١٢ شقة، فسجلّ الخدمة ينطبق على البناية كلها ولا يمكن ردّه إلى شقة واحدة.",
+  "Not a map speed limit — what this round, with this vehicle, on these streets, has actually achieved.":"ليست سرعة من الخريطة — بل ما حقّقته هذه الجولة فعلاً، بهذه المركبة، في هذه الشوارع.",
+  "Pay at an OMT counter, by bank transfer, or in cash to a field collector against a numbered receipt.":"ادفعوا في شبّاك OMT، أو بتحويل مصرفي، أو نقداً لمحصّل ميداني مقابل وصل مرقّم.",
+  "Queue depth is shown on purpose. A hidden sync state is what makes a crew scan the same point twice.":"يُعرض عمق الطابور عمداً. حالة المزامنة المخفيّة هي ما يجعل الفريق يمسح النقطة نفسها مرتين.",
+  "A load closes only at an approved site. An override needs a reason and appears in the monthly report.":"لا تُقفل الحمولة إلا في موقع معتمد. التجاوز يحتاج تعليلاً ويظهر في التقرير الشهري.",
+  "OMT branches and the municipality hold stock as a public service. There is no charge for a tag, ever.":"فروع OMT والبلدية تحتفظ بمخزون كخدمة عامة. لا كلفة للملصق إطلاقاً.",
+  "Service changes, payment reminders and draw results arrive here and by SMS. Turn SMS off under Settings.":"تصلكم تغييرات الخدمة وتذكيرات الدفع ونتائج السحب هنا وبرسالة نصية. يمكن إيقاف الرسائل من الإعدادات.",
+  "Get these right and the bag is credited, the rebate counts and the load is not downgraded at the facility.":"التزموا بها فيُحتسب الكيس، ويُحسب الحسم، ولا تُخفَّض الحمولة في المنشأة.",
+  "Position matters when something is wrong, so the map opens on demand rather than running as a wall display.":"الموقع مهم عند وجود خلل، لذلك تفتح الخريطة عند الطلب بدل أن تعمل كشاشة عرض دائمة.",
+  "A report is matched against the crew record automatically. Only the ones that do not match reach an operator.":"يُطابَق البلاغ مع سجلّ الفريق تلقائياً. ما لا يُطابق وحده يصل إلى مشغّل.",
+  "Every bag here is credited to its premises as a mark-down, and feeds the neighbourhood sorting-quality figure.":"كل كيس هنا يُقيَّد على عقاره كتخفيض، ويغذّي مؤشّر جودة الفرز في الحي.",
+  "Every tag is printed once, with a unique serial, and issued to one premises. Nobody can create one in the app.":"كل ملصق يُطبع مرة واحدة برقم تسلسلي فريد ويُصدر لعقار واحد. لا يمكن لأحد إنشاؤه من التطبيق.",
+  "Drawn nationally on 28 December 2026 from every voucher earned this year. 486,330 entries in the national pool.":"يُسحب وطنياً في ٢٨ كانون الأول ٢٠٢٦ من كل قسيمة مكتسبة هذه السنة. ٤٨٦٬٣٣٠ مشاركة في السحب الوطني.",
+  "Arrears and the sorting record stay with the premises, not with the person. A transfer does not clear a balance.":"تبقى المتأخرات وسجلّ الفرز مع العقار لا مع الشخص. النقل لا يُسقط رصيداً.",
+  "Drop-off stations take sorted material outside collection hours. Station use counts towards your sorting rebate.":"تستقبل محطات الإيداع المواد المفروزة خارج ساعات المرور، ويُحتسب استخدامها ضمن حسم الفرز.",
+  "Rejecting sends the vehicle away loaded and is the most contested decision at the gate. It needs the photograph.":"الرفض يُعيد المركبة محمّلة وهو أكثر القرارات إثارة للنزاع عند البوابة. يحتاج الصورة.",
+  "Camera, a paired Bluetooth scanner, or the serial typed by hand. A manual entry is flagged and reported separately.":"الكاميرا، أو ماسح بلوتوث مقترن، أو الرقم التسلسلي يدوياً. الإدخال اليدوي يُعلَّم ويُبلَّغ عنه منفصلاً.",
+  "Each service runs on its own schedule. A change of day is announced in the app and by SMS at least three days ahead.":"لكل خدمة جدولها. يُعلَن تغيير اليوم في التطبيق وبرسالة نصية قبل ثلاثة أيام على الأقل.",
+  "Spot checks never block the round. They queue locally with their own timestamp and go up on the depot or home network.":"لا توقف عمليات التدقيق الجولة أبداً. تُحفظ محلياً بتوقيتها الخاص وتُرفع على شبكة المستودع أو المنزل.",
+  "Two or more of your recent reports were not upheld, so the next ones need a photograph. It clears once two are upheld.":"لم يُقبل بلاغان أو أكثر من بلاغاتكم الأخيرة، لذلك تحتاج التالية صورة. يزول الشرط بقبول بلاغين.",
+  "The pot grows as the town takes part, and the odds move with the number of entries. Both are published before each draw.":"تكبر الجائزة بمشاركة البلدة، وتتغيّر الحظوظ بعدد المشاركات. وكلاهما يُنشر قبل كل سحب.",
   /* the controls a non-reader depends on, in both languages */
   "Read this out loud":"اقرأ هذا بصوت عالٍ","Read the screen out loud":"اقرأ الشاشة بصوت عالٍ",
   "Read the name out loud":"اقرأ الاسم بصوت عالٍ","Read out loud":"القراءة بصوت عالٍ",
@@ -1984,7 +2512,7 @@ function sayBtn(text, cls){
     'aria-label="'+h(t("Read this out loud"))+'">'+svg("speak")+'</button>';
 }
 function markSaying(){
-  var all = document.querySelectorAll(".sayb");
+  var all = document.querySelectorAll(".sayb, .sayi");
   Array.prototype.forEach.call(all, function(b){
     b.classList.toggle("on", S.saying != null && b.getAttribute("data-say") === S.saying);
   });
@@ -2004,6 +2532,162 @@ function screenSpeech(){
       if(txt && txt.length < 160 && bits.indexOf(txt) === -1) bits.push(txt);
     });
   return bits.slice(0, 40).join(". ");
+}
+
+/* ---------------- Arabic, for the screens that were written in English ----------------
+   Most of this app writes its words as English literals inside the markup rather
+   than through t(), so the dictionary never saw them. Wrapping four hundred call
+   sites would be four hundred chances to break a string; translating the rendered
+   text instead is one place, and it cannot miss a screen somebody adds later.
+
+   It replaces a text node only when the WHOLE of it matches a dictionary key
+   exactly. No partial matches, no substrings — "Route" inside "Route type" is left
+   alone, because a half-translated sentence is worse than an English one.
+
+   Numbers with units are handled separately below: "12 min" is not a phrase to
+   translate, it is a number and a word. */
+var UNITS = [
+  [/\bmin\b/g,        "\u062f"],            /* دقيقة, abbreviated as on a watch face */
+  [/\bkm\/h\b/g,      "\u0643\u0645/\u0633"],
+  [/\bkm\b/g,         "\u0643\u0645"],
+  [/\ban hour\b/g,    "\u0628\u0627\u0644\u0633\u0627\u0639\u0629"],
+  [/\bleft\b/g,       "\u0645\u062a\u0628\u0642\u064d"],
+  [/\bof\b/g,         "\u0645\u0646"],
+  [/\bscans?\b/g,     "\u0645\u0633\u062d"],
+  [/\bstops?\b/g,     "\u0645\u062d\u0637\u0627\u062a"],
+  [/\bdoors?\b/g,     "\u0623\u0628\u0648\u0627\u0628"],
+  [/\bdays?\b/g,      "\u064a\u0648\u0645"],
+  [/\bbags?\b/g,      "\u0623\u0643\u064a\u0627\u0633"],
+  [/\bin gold\b/g,    "\u0630\u0647\u0628\u0627\u064b"],
+  [/\brepeatedly flagged\b/g, "\u0645\u064f\u0628\u0644\u0651\u063a \u0639\u0646\u0647\u0645 \u0645\u0631\u0627\u0631\u0627\u064b"],
+  [/\bflags?\b/g,     "\u0628\u0644\u0627\u063a\u0627\u062a"],
+  [/\bqueued\b/g,    "\u0641\u064a \u0627\u0644\u0637\u0627\u0628\u0648\u0631"],
+  [/\boptimised\b/g, "\u0645\u064f\u062d\u0633\u0651\u064e\u0646"],
+  [/\bsaved\b/g,     "\u0645\u0648\u0641\u0651\u0631\u0629"],
+  [/\bhere\b/g,      "\u0647\u0646\u0627"]
+];
+function arUnits(txt){
+  /* only where the string is a number followed by a unit, so prose is untouched */
+  /* a data string either starts with a number, or is a short phrase built around
+     one \u2014 "optimised · 13 min saved". Prose is excluded by the length. */
+  if(!/\d/.test(txt)) return null;
+  if(txt.length > 46) return null;
+  var out = txt, hit = false;
+  UNITS.forEach(function(u){ if(u[0].test(out)){ out = out.replace(u[0], u[1]); hit = true; } });
+  return hit ? out : null;
+}
+function translateDom(root){
+  if(!S.ar) return;
+  var v = root || $("view"); if(!v) return;
+  var w = document.createTreeWalker(v, NodeFilter.SHOW_TEXT, null, false);
+  var n, hits = [];
+  while((n = w.nextNode())){
+    var raw = n.nodeValue;
+    var key = raw.replace(/\s+/g, " ").trim();
+    if(key.length < 2) continue;
+    if(!/[A-Za-z]/.test(key)) continue;
+    var to = AR[key] || arUnits(key);
+    if(to) hits.push([n, raw.replace(key, to)]);
+  }
+  hits.forEach(function(x){ x[0].nodeValue = x[1]; });
+}
+
+/* Put a speaker on everything that can be pressed.
+   Done after the screen is drawn rather than at each of the four hundred places a
+   button is written, so it cannot be forgotten on the next screen somebody adds.
+   The text it speaks is the text actually on the control, read out of the DOM, so
+   it can never drift from what is on the glass.
+
+   The speaker is a span and not a button: a button inside a button is invalid and
+   behaves unpredictably on touch. The click handler checks for it first and stops
+   the event, so pressing the speaker never also presses the thing it sits on. */
+function sayIcon(txt){
+  var b = document.createElement("span");
+  b.className = "sayi";
+  b.setAttribute("data-a", "say");
+  b.setAttribute("data-say", txt);
+  b.setAttribute("role", "button");
+  b.setAttribute("aria-label", t("Read this out loud"));
+  b.innerHTML = svg("speak");
+  return b;
+}
+function ownText(el){
+  var c = el.cloneNode(true);
+  Array.prototype.forEach.call(c.querySelectorAll(".sayi"), function(x){ x.remove(); });
+  return (c.textContent || "").replace(/\s+/g, " ").trim();
+}
+function decorateSpeakers(root){
+  if(!canSpeak()) return;
+  var v = root || $("view"); if(!v) return;
+
+  /* every pressable control.
+     Segmented choices are deliberately NOT in this list. They are narrow, and a
+     speaker inside one covers the middle of the button \u2014 so the tap that
+     should pick the option only reads it out instead, and the setting never
+     changes. They get one speaker for the whole group, below. */
+  Array.prototype.forEach.call(
+    v.querySelectorAll(".btn, .bigrow, .item, .chip.tap"),
+    function(el){
+      if(el.querySelector(":scope > .sayi")) return;
+      if(el.querySelector(".sayb")) return;          /* already has its own, bigger one */
+      /* a control with no words at all is the one that most needs saying out loud,
+         so fall back to what it is labelled as for a screen reader */
+      var txt = ownText(el) || el.getAttribute("aria-label") || el.getAttribute("title") || "";
+      /* a control whose whole label is one or two characters is a shape, not a
+         word \u2014 the A at three sizes explains itself and a speaker saying
+         "A" three times is noise sitting on top of it */
+      if(!txt || txt.length < 3 || txt.length > 160) return;
+      el.appendChild(sayIcon(txt));
+    });
+
+  /* One speaker for a whole segmented choice, reading every option in order:
+     "English, or Arabic". A person hears the entire set from one tap, without
+     selecting anything and without a target sitting on top of the buttons. */
+  Array.prototype.forEach.call(v.querySelectorAll(".seg[data-g]"), function(seg){
+    if(seg.parentNode && seg.parentNode.classList.contains("segsay")) return;
+    var opts = Array.prototype.map.call(seg.querySelectorAll("button"), function(x){
+      return ownText(x);
+    }).filter(function(x){ return x && x.length > 1; });
+    if(opts.length < 2) return;
+    var wrap = document.createElement("div");
+    wrap.className = "segsay";
+    seg.parentNode.insertBefore(wrap, seg);
+    wrap.appendChild(seg);
+    wrap.appendChild(sayIcon(opts.join(", " + t("or") + " ")));
+  });
+
+  /* a dropdown is a list of choices nobody can see until it is open, which is the
+     worst case of all. The speaker beside it reads whatever is chosen, and
+     choosing a different one speaks it straight away \u2014 so the options can be
+     heard by moving through them rather than read. */
+  Array.prototype.forEach.call(v.querySelectorAll("select"), function(sel){
+    if(sel.parentNode && sel.parentNode.classList.contains("fldsay")) return;
+    var wrap = document.createElement("div");
+    wrap.className = "fldsay";
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.appendChild(sel);
+    var say = function(){
+      var o = sel.options[sel.selectedIndex];
+      return o ? (o.text || "").trim() : "";
+    };
+    var ico = sayIcon(say());
+    wrap.appendChild(ico);
+    sel.addEventListener("change", function(){
+      ico.setAttribute("data-say", say());
+      if(VOICE.on) speak(say());
+    });
+  });
+
+  /* the label above a field the operator has to fill in */
+  Array.prototype.forEach.call(v.querySelectorAll("label.fld > span, label.lab"), function(el){
+    if(el.querySelector(".sayi")) return;
+    var txt = ownText(el);
+    if(!txt || txt.length > 120) return;
+    el.style.display = "flex";
+    el.style.alignItems = "center";
+    el.style.gap = "6px";
+    el.appendChild(sayIcon(txt));
+  });
 }
 
 /* ---------------- navigation ---------------- */
@@ -2060,6 +2744,8 @@ function paint(){
   $("view").innerHTML = fn(c?c.a:null);
   $("view").scrollTop = 0;
   layoutWide();
+  translateDom();            translateDom($("appbar"));   translateDom($("tabbar"));
+  decorateSpeakers();        decorateSpeakers($("tabbar"));
   wireCarou();
   $("tabbar").innerHTML = R.tabs.map(function(x){
     return '<button data-a="tab" data-v="'+x[0]+'" class="'+(x[0]===S.tab&&!c?"on":"")+'">'+svg(x[2])+'<span>'+h(t(x[1]))+'</span></button>';
@@ -2244,6 +2930,11 @@ function sheet(title, body){
   $("sheet").innerHTML='<div class="grab"></div><div class="shead"><h3>'+h(title)+'</h3>'+
     '<button class="iconbtn" data-a="closesheet" aria-label="Close">&#10005;</button></div>'+body;
   $("sheet").classList.add("on"); $("scrim").classList.add("on");
+  /* A sheet is written after paint has finished, so it misses both passes unless
+     it asks for them itself. Settings is the one screen somebody who cannot read
+     most needs \u2014 it is where the text size and the reading out loud live. */
+  translateDom($("sheet"));
+  decorateSpeakers($("sheet"));
 }
 function closeSheet(){ $("sheet").classList.remove("on"); $("scrim").classList.remove("on"); }
 
@@ -2526,8 +3217,33 @@ function bindCustomer(ent){
    is. Real verification is the live path, where the provider issues and checks
    a one-time code per number and the browser never sees it. */
 var ACCESS_CODE = "680646";
+/* An interim with no end date is a permanent arrangement nobody decided on. This
+   is the date the shared code stops working, and the sign-in screen says so out
+   loud so it cannot quietly outlive the thing it is standing in for. Move it if
+   the provider takes longer; do not remove it. */
+var ACCESS_CODE_UNTIL = "2026-12-31";
+function codeExpired(){
+  var today = new Date();
+  var iso = today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+
+            "-"+String(today.getDate()).padStart(2,"0");
+  return iso > ACCESS_CODE_UNTIL;
+}
+function untilText(){
+  var d = new Date(ACCESS_CODE_UNTIL+"T00:00:00");
+  var m = ["January","February","March","April","May","June","July",
+           "August","September","October","November","December"][d.getMonth()];
+  return d.getDate()+" "+m+" "+d.getFullYear();
+}
+/* Two things have to be true, and a third has to be false. The number is on the
+   register, the code matches, and the shared code has not expired.
+
+   Note what this function is NOT reachable from: when LIVE.on is true the
+   sign-in handler never calls it at all — it goes to the provider instead. That
+   is the part that matters. The shared code cannot be used against real
+   household records, not because anyone remembers to turn it off, but because
+   the branch that reads it is not on that path. */
 function codeOk(entry, code){
-  return !!entry && digits(code) === ACCESS_CODE;
+  return !!entry && !codeExpired() && digits(code) === ACCESS_CODE;
 }
 /* One line that says which register is answering. Silent when self-contained,
    because that is the normal state and nobody needs telling. */
@@ -2615,7 +3331,10 @@ function paintLogin(){
         'two things let you in: your number is on the register, and you have the access code '+
         'you were given. The same code works for everyone, so it keeps a passer-by out of a '+
         'working session rather than proving who you are. Once the sender is live, a one-time '+
-        'code goes to your own number and is checked on the server.</div></div>'
+        'code goes to your own number and is checked on the server.'+
+        '<br><br><b>It stops working on '+h(untilText())+'</b>, and it never reaches real '+
+        'household records \u2014 those are only on the live path, which uses a code sent to '+
+        'the number itself.</div></div>'
       : '')+
     '<div class="btnrow"><button class="btn" data-a="backphone">'+h(t("Back"))+'</button>'+
     '<button class="btn" data-a="support">'+svg("help","ic")+h(t("Help"))+'</button></div>'+
@@ -2825,7 +3544,23 @@ function botAnswer(q){
 }
 V["customer.help"]=function(){
   if(!S.chat) S.chat=[{b:true, t:"Hello "+ME.name.split(" ")[0]+". Ask me about your fee, your collection days, tags, the rebate or the draw."}];
-  return '<div class="card plain"><p class="eyebrow">'+h(t("Assistant"))+'</p>'+
+  return ''+
+    /* For the households who will never open this app at all. Everything the
+       assistant below answers can be had by sending a message to the municipality
+       on WhatsApp instead \u2014 or a voice note, for anyone who would rather
+       speak than type. */
+    '<div class="card hc"><div style="display:flex;align-items:center;gap:11px">'+
+      '<span class="av" style="background:rgba(255,255,255,.14);color:#fff;width:42px;height:42px">'+
+        svg("phone","icL")+'</span>'+
+      '<div style="flex:1;min-width:0">'+
+        '<p class="h" style="color:#fff">'+h(t("Ask us on WhatsApp"))+'</p>'+
+        '<p class="mono sm">'+h(BALADI_WA.display)+'</p></div>'+
+      sayBtn(t("Ask us on WhatsApp")+". "+BALADI_WA.display+". "+
+             t("Send a message or a voice note and we answer."), "hcb")+'</div>'+
+      '<p class="sm">'+h(t("Send a message or a voice note and we answer. No app needed."))+'</p>'+
+      '<a class="btn" target="_blank" rel="noopener" href="'+
+        h(waUsLink(t("What do I owe?")))+'">'+svg("phone","ic ic3")+h(t("Open WhatsApp"))+'</a></div>'+
+    '<div class="card plain"><p class="eyebrow">'+h(t("Assistant"))+'</p>'+
     '<div class="chat">'+S.chat.map(function(m){
       return '<div class="bub '+(m.b?"b":"m")+'">'+h(m.t)+'</div>';
     }).join("")+'</div></div>'+
@@ -3021,7 +3756,7 @@ V["customer.dropoff"]=function(){
      '<span class="t"><b>'+h(pl? (S.ar?pl.ar:pl.en) : r[0])+'</b><span>'+h(r[1])+' · '+h(r[2])+
        (d!=null? ' · '+fmtDist(d) : '')+'</span></span>'+
      '<span class="r"><span class="pill '+r[3]+'"><i></i>'+h(r[4])+'</span>'+
-       (pl? '<a class="btn sm" target="_blank" rel="noopener" href="'+h(mapOut(pl.lat,pl.lon))+'">'+
+       (pl? '<a class="btn sm" target="_blank" rel="noopener" aria-label="'+h(t("Open this stop in maps"))+'" href="'+h(mapOut(pl.lat,pl.lon))+'">'+
           svg("map")+h(t("Maps"))+'</a>' : '')+'</span></div>'; }).join("")+'</div></div>'+
    mapCard(PLACES.filter(function(x){ return x.type==="dop"; }).map(function(x){
      return {id:x.id, lat:x.lat, lon:x.lon, label:S.ar?x.ar:x.en, kind:"dop", state:"dop", n:""};
@@ -3437,7 +4172,8 @@ function mapScaleBar(pr){
     '<path d="M0 0h'+px.toFixed(0)+'" stroke="var(--ink-2)" stroke-width="2.5" stroke-linecap="round"/>'+
     '<path d="M0 -5v10M'+px.toFixed(0)+' -5v10" stroke="var(--ink-2)" stroke-width="2.5" stroke-linecap="round"/>'+
     '<text x="'+(px/2).toFixed(0)+'" y="-9" text-anchor="middle" font-family="IBM Plex Mono, monospace" '+
-    'font-size="15" fill="var(--ink-2)">'+(pick>=1000 ? (pick/1000)+" km" : pick+" m")+'</text></g>';
+    'font-size="15" fill="var(--ink-2)" direction="ltr" style="direction:ltr;unicode-bidi:isolate">'+
+      (pick>=1000 ? (pick/1000)+" km" : pick+" m")+'</text></g>';
 }
 
 /* stops: [{id,lat,lon,label,state,kind,n}] — state is a key of PINCOL */
@@ -3930,7 +4666,7 @@ function nextStopsRoll(role, stops, n){
         '<span class="t"><b>'+h(r.label)+'</b><span class="mono">'+h(r.id)+' \u00b7 '+
           fmtMin(svcMin(role,r))+' \u00b7 '+Math.round(elevAt(r.lat,r.lon))+' m</span></span>'+
         '<span class="r">'+
-          '<a class="btn sm" target="_blank" rel="noopener" href="'+h(mapOut(r.lat,r.lon))+'">'+svg("map")+'</a>'+
+          '<a class="btn sm" target="_blank" rel="noopener" aria-label="'+h(t("Open this stop in maps"))+'" href="'+h(mapOut(r.lat,r.lon))+'">'+svg("map")+'</a>'+
           '<button class="btn sm" data-a="skipstop" data-v="'+h(r.id)+'">'+svg("skip","ic ic3")+h(t("Skip"))+'</button>'+
         '</span></div>'; }).join("")+'</div></div>'+
     '<a class="btn p" target="_blank" rel="noopener" href="'+h(mapOutRoute(run, S.geo))+'">'+
@@ -5721,12 +6457,27 @@ function runDraw(){
 }
 
 document.addEventListener("click", function(ev){
+  /* The speaker first, before anything else can claim the event. It sits inside
+     buttons and inside segmented choices, and pressing it must read the control
+     out rather than press it \u2014 otherwise someone checking what a button says
+     would trigger it, which for "Close the shift" is a bad afternoon. */
+  var si = ev.target.closest(".sayi");
+  if(si){
+    ev.preventDefault(); ev.stopPropagation();
+    var stxt = si.getAttribute("data-say") || "";
+    if(S.saying === stxt){ speakStop(); markSaying(); return; }
+    S.saying = stxt; markSaying();
+    if(!speak(stxt)){ S.saying = null; markSaying(); toast(t("This handset has no voice installed")); }
+    return;
+  }
   var seg = ev.target.closest(".seg[data-g] button");
   if(seg){
     var g=seg.parentNode.getAttribute("data-g"), v=seg.getAttribute("data-v");
     Array.prototype.forEach.call(seg.parentNode.children,function(b){ b.classList.remove("on"); });
     seg.classList.add("on");
     if(g==="stream"){ S.stream=v; paint(); }
+    if(VOICE.on && canSpeak()){ var picked = (seg.textContent||"").replace(/\s+/g," ").trim();
+      if(picked) speak(picked); }
     if(g==="lang"){ S.ar = v==="ar"; closeSheet(); paint(); }
     if(g==="cur2"){ S.lbp = v==="lbp"; closeSheet(); paint(); }
     if(g==="dk"){ S.drawKind=v; S.drawWinner=null; paint(); }
@@ -5787,7 +6538,9 @@ document.addEventListener("click", function(ev){
       var ent=findNumber(S.cc, S.phone);
       if(!codeOk(ent, code)){
         S.otpTries++;
-        S.otpErr = digits(code).length!==6 ? "The access code is six digits"
+        S.otpErr = codeExpired()
+          ? "The shared access code stopped working on "+untilText()+". Sign-in now needs a code sent to the number."
+          : digits(code).length!==6 ? "The access code is six digits"
                                            : "That access code is not right";
         paintLogin(); return;
       }
