@@ -20,7 +20,7 @@
 :root{
   color-scheme: light;
   --paper:#EFEBE4; --surface:#FBFAF7; --surface-2:#E8E3DA; --surface-3:#F4F1EB;
-  --ink:#211D18; --ink-2:#544C42; --muted:#8A8074;
+  --ink:#211D18; --ink-2:#544C42; --muted:#6F665B;
   --line:#DBD4C9; --line-soft:#E7E2D9;
   --accent:#7A5230; --accent-ink:#5E3E22; --accent-soft:#EEE5D9;
   --stamp:#A5442C; --stamp-soft:#F5E5DF;
@@ -30,12 +30,34 @@
   --gold:#A5791F; --gold-soft:#F6EEDA;
   --s1:#1D6FA3; --s2:#A05A00;   /* recycling, composting — validated for CVD on both surfaces */
   --shadow:0 1px 2px rgba(33,29,24,.06), 0 10px 30px -18px rgba(33,29,24,.35);
+  /* Type scale. Bigger text must not mean a longer screen, so every step up
+     takes its room back out of the padding, the gaps and the chrome rather than
+     out of what fits. --pad and --gap fall as --ts rises. */
+  --ts:1; --ts2:1; --lh:1.5; --pad:13px; --padv:11px; --gap:10px; --vpad:12px; --vpadx:15px;
 }
+/* Three levers, not one. Primary type grows, supporting type grows less, and the
+   line spacing tightens — so a name gets markedly bigger while the block it sits
+   in gets no taller. The padding and the gaps pay for the rest. */
+.device[data-ts="2"]{ --ts:1.12; --ts2:1.04; --lh:1.40; --pad:11px; --padv:9px;   --gap:8px;  --vpad:9px;  --vpadx:12px; }
+.device[data-ts="3"]{ --ts:1.26; --ts2:1.08; --lh:1.30; --pad:9px;  --padv:7.5px; --gap:6px;  --vpad:7px;  --vpadx:10px; }
+.device[data-ts="3"] .ill,.device[data-ts="3"] .illw{max-height:88px}
+.device[data-ts="3"] .note{padding:8px 10px}
+/* At the largest size two buttons side by side stop fitting their own labels:
+   "Open in maps" wrapped and then clipped. A row of two becomes a stack of
+   two, which is the right shape for this reader anyway — one action, one line,
+   one icon, the full width of a thumb. */
+.device[data-ts="3"] .btnrow{flex-direction:column;gap:8px}
+.device[data-ts="3"] .btnrow>*{width:100%}
+.device[data-ts="3"] .btn{justify-content:flex-start;gap:10px}
+.device[data-ts="3"] .btn .ic3{width:21px;height:21px}
+.device[data-ts="3"] .appbar{padding:4px 12px 8px}
+.device[data-ts="3"] .statusbar{padding:6px 14px 2px}
+.device[data-ts="2"] .appbar{padding:5px 14px 10px}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme: dark;
     --paper:#141210; --surface:#1D1A16; --surface-2:#262119; --surface-3:#201C17;
-    --ink:#EFEBE4; --ink-2:#B7AEA1; --muted:#8A8074;
+    --ink:#EFEBE4; --ink-2:#B7AEA1; --muted:#9A9084;
     --line:#332D25; --line-soft:#282219;
     --accent:#C08347; --accent-ink:#D9AC7C; --accent-soft:#2A2118;
     --stamp:#D0785C; --stamp-soft:#2E1B15;
@@ -51,7 +73,7 @@
 html,body{height:100%}
 body{margin:0;background:var(--paper);color:var(--ink);
   font-family:"IBM Plex Sans Arabic",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
-  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  font-size:calc(15px*var(--ts));line-height:var(--lh);-webkit-font-smoothing:antialiased}
 h1,h2,h3,h4{font-family:"Archivo",ui-sans-serif,system-ui,sans-serif;margin:0;letter-spacing:-.015em;text-wrap:balance}
 [dir="rtl"] h1,[dir="rtl"] h2,[dir="rtl"] h3,[dir="rtl"] h4{font-family:"IBM Plex Sans Arabic",sans-serif;letter-spacing:0}
 p{margin:0}
@@ -67,20 +89,20 @@ a{color:var(--accent-ink)}
   background:radial-gradient(1200px 700px at 50% -10%, var(--surface-3), var(--paper) 70%)}
 .device{width:404px;height:min(880px, calc(100dvh - 48px));background:var(--surface);border:1px solid var(--line);
   border-radius:34px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;position:relative}
-.statusbar{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 4px;font-size:11.5px;
+.statusbar{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 4px;font-size:calc(11.5px*var(--ts2));
   color:var(--muted);font-family:"IBM Plex Mono",monospace;flex:none}
 .appbar{display:flex;align-items:center;gap:10px;padding:6px 16px 12px;flex:none;border-bottom:1px solid var(--line-soft);background:var(--surface);z-index:5}
-.appbar .ttl{font-family:"Archivo",sans-serif;font-size:19px;font-weight:600;line-height:1.2;flex:1;min-width:0}
-.appbar .sub{font-size:11.5px;color:var(--muted);font-weight:400;display:block;letter-spacing:0}
+.appbar .ttl{font-family:"Archivo",sans-serif;font-size:calc(19px*var(--ts));font-weight:600;line-height:1.2;flex:1;min-width:0}
+.appbar .sub{font-size:calc(11.5px*var(--ts2));color:var(--muted);font-weight:400;display:block;letter-spacing:0}
 .iconbtn{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:var(--ink-2);flex:none}
 .iconbtn:hover{background:var(--surface-2)}
 .iconbtn svg{width:19px;height:19px}
-.view{flex:1;overflow-y:auto;overflow-x:hidden;padding:12px 15px 20px;display:flex;flex-direction:column;gap:10px;
+.view{flex:1;overflow-y:auto;overflow-x:hidden;padding:var(--vpad) var(--vpadx) 20px;display:flex;flex-direction:column;gap:var(--gap);
   -webkit-overflow-scrolling:touch;scrollbar-width:thin}
 .view>*{flex:0 0 auto}
 .login>*{flex:0 0 auto}
 .tabbar{flex:none;display:flex;border-top:1px solid var(--line);background:var(--surface);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
-.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:10px;color:var(--muted);font-size:10.5px;font-weight:500}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:10px;color:var(--muted);font-size:calc(10.5px*var(--ts2));font-weight:500}
 .tabbar button svg{width:21px;height:21px}
 .tabbar button.on{color:var(--accent-ink);font-weight:700}
 .tabbar button.on svg{stroke-width:2.1}
@@ -93,53 +115,82 @@ a{color:var(--accent-ink)}
 }
 
 /* ---------- primitives ---------- */
-.card{background:var(--surface-3);border:1px solid var(--line);border-radius:14px;padding:11px 13px;display:flex;flex-direction:column;gap:6px}
+.card{background:var(--surface-3);border:1px solid var(--line);border-radius:14px;padding:var(--padv) var(--pad);display:flex;flex-direction:column;gap:6px}
 .card.plain{background:var(--surface)}
 .card.acc{background:var(--accent-soft);border-color:color-mix(in oklab,var(--accent) 26%,transparent)}
 .card.gold{background:var(--gold-soft);border-color:color-mix(in oklab,var(--gold) 34%,transparent)}
 .card.flat{background:transparent;border-style:dashed}
-.eyebrow{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.h{font-family:"Archivo",sans-serif;font-size:16px;font-weight:600;line-height:1.25}
-.big{font-family:"Archivo",sans-serif;font-size:29px;font-weight:700;letter-spacing:-.03em;line-height:1.08}
-.sm{font-size:12px;color:var(--muted);line-height:1.4}
-.b2{font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.eyebrow{font-size:calc(10.5px*var(--ts2));letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.h{font-family:"Archivo",sans-serif;font-size:calc(16px*var(--ts));font-weight:600;line-height:1.25}
+.big{font-family:"Archivo",sans-serif;font-size:calc(29px*var(--ts));font-weight:700;letter-spacing:-.03em;line-height:1.08}
+.sm{font-size:calc(12px*var(--ts2));color:var(--muted);line-height:var(--lh)}
+.b2{font-size:calc(13.5px*var(--ts));color:var(--ink-2);line-height:var(--lh)}
 .sect{display:flex;align-items:baseline;gap:8px;margin-top:2px}
 .sect .eyebrow{flex:1}
-.link{font-size:12.5px;color:var(--accent-ink);font-weight:600}
+.link{font-size:calc(12.5px*var(--ts2));color:var(--accent-ink);font-weight:600}
 
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:12px;min-height:44px;
-  font-size:14.5px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;transition:.12s}
+  font-size:calc(14.5px*var(--ts));font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;transition:.12s}
 .btn:active{transform:scale(.99)}
 .btn.p{background:var(--accent);border-color:var(--accent);color:#FBF7F2}
 .btn.d{border-color:var(--stamp);color:var(--stamp)}
 .btn.g{background:var(--gold);border-color:var(--gold);color:#241C08}
-.btn.sm{padding:8px 11px;font-size:13px;border-radius:10px;width:auto}
+.btn.sm{padding:8px 11px;font-size:calc(13px*var(--ts));border-radius:10px;width:auto}
 .btn[disabled]{opacity:.45;pointer-events:none}
 [hidden]{display:none!important}
 svg.ic{width:17px;height:17px;flex:none}
+/* An icon that has to be understood rather than recognised wants more ink and
+   more room. ic3 thickens the stroke, icL and icXL enlarge it. Used on the
+   field screens, where the word beside the icon is support and not the message. */
+svg.ic3{stroke-width:2.7}
+svg.icL{width:24px;height:24px;flex:none}
+svg.icXL{width:34px;height:34px;flex:none}
+/* read-aloud: a tap target big enough for a gloved thumb, never smaller than 44px */
+.sayb{width:44px;height:44px;min-width:44px;border-radius:12px;display:grid;place-items:center;
+  color:var(--accent-ink);background:var(--accent-soft);flex:none;
+  border:1px solid color-mix(in oklab,var(--accent) 24%,transparent)}
+.sayb svg{width:22px;height:22px}
+.sayb.on{background:var(--accent);color:#FBF7F2;border-color:var(--accent)}
+.sayb[hidden]{display:none}
+/* a row whose whole point is one icon, one word, one tap */
+.bigrow{display:flex;align-items:center;gap:12px;width:100%;text-align:start;
+  padding:14px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);
+  font-weight:700;font-size:calc(15.5px*var(--ts))}
+.bigrow svg{width:30px;height:30px;flex:none;stroke-width:2.3}
+.bigrow>span.lab{flex:1;min-width:0;line-height:1.25}
+/* high contrast: white on a dark ground, which holds in either theme because the
+   ground is a fixed colour rather than a themed surface */
+.hc{background:#221E19;color:#FFFFFF;border-color:#221E19}
+.hc .sm,.hc .b2,.hc>span,.hc .kv>span{color:#E9E4DC}
+.hc .kv{border-bottom-color:rgba(255,255,255,.16)}
+.hc svg{color:#FFFFFF}
+.hc.good{background:#13532A}
+.hc.bad{background:#7E2015}
+.hc.warn{background:#6A4300}
+.sayb.hcb{background:rgba(255,255,255,.14);color:#FFFFFF;border-color:rgba(255,255,255,.3)}
 .btn .ic{width:17px;height:17px;flex:none}
 .btn.row{justify-content:space-between;text-align:start}
 .btnrow{display:flex;gap:8px}
 .btnrow .btn{width:auto;flex:1}
 
-.kv{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+.kv{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--line-soft);font-size:calc(13.5px*var(--ts))}
 .kv:last-child{border-bottom:none}
 .kv>span{color:var(--ink-2)}
 .kv>b{font-weight:600;font-variant-numeric:tabular-nums;text-align:end}
 .list{display:flex;flex-direction:column}
-.item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-soft);width:100%;text-align:start}
+.item{display:flex;align-items:center;gap:10px;padding:calc(var(--padv) - 2px) 0;border-bottom:1px solid var(--line-soft);width:100%;text-align:start}
 .item:last-child{border-bottom:none}
 .item .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-.item .t b{font-size:14px;font-weight:600}
-.item .t span{font-size:11.5px;color:var(--muted)}
+.item .t b{font-size:calc(14px*var(--ts));font-weight:600}
+.item .t span{font-size:calc(11.5px*var(--ts2));color:var(--muted)}
 .item .r{text-align:end;display:flex;flex-direction:column;gap:2px;flex:none}
-.item .r b{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
-.item .r span{font-size:11px;color:var(--muted)}
-.av{width:36px;height:36px;border-radius:11px;background:var(--surface-2);display:grid;place-items:center;flex:none;color:var(--accent-ink);font-weight:700;font-size:13px}
+.item .r b{font-size:calc(14px*var(--ts));font-weight:600;font-variant-numeric:tabular-nums}
+.item .r span{font-size:calc(11px*var(--ts2));color:var(--muted)}
+.av{width:36px;height:36px;border-radius:11px;background:var(--surface-2);display:grid;place-items:center;flex:none;color:var(--accent-ink);font-weight:700;font-size:calc(13px*var(--ts))}
 .av svg{width:18px;height:18px}
 .chev{color:var(--muted);flex:none}
 
-.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;border:1px solid transparent}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:calc(11px*var(--ts2));font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;border:1px solid transparent}
 .pill i{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
 .p-good{color:var(--good);background:var(--good-soft);border-color:color-mix(in oklab,var(--good) 30%,transparent)}
 .p-warn{color:var(--warn);background:var(--warn-soft);border-color:color-mix(in oklab,var(--warn) 34%,transparent)}
@@ -151,21 +202,21 @@ svg.ic{width:17px;height:17px;flex:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .stat{background:var(--surface-3);border:1px solid var(--line);border-radius:13px;padding:9px 11px;display:flex;flex-direction:column;gap:1px}
-.stat b{font-family:"Archivo",sans-serif;font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
-.stat span{font-size:10.5px;color:var(--muted);line-height:1.35}
+.stat b{font-family:"Archivo",sans-serif;font-size:calc(21px*var(--ts));font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.stat span{font-size:calc(10.5px*var(--ts2));color:var(--muted);line-height:1.35}
 .stat b svg{width:21px;height:21px;display:block;stroke-width:1.7}
 
 input[type=text],input[type=tel],input[type=number],input[type=search],select,textarea{
-  width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface);font-size:15px}
+  width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface);font-size:calc(15px*var(--ts))}
 textarea{resize:vertical;min-height:72px}
 label.fld{display:flex;flex-direction:column;gap:5px}
 #custblock{display:flex;flex-direction:column;gap:12px}
-label.fld>span{font-size:11.5px;color:var(--muted);font-weight:600}
+label.fld>span{font-size:calc(11.5px*var(--ts2));color:var(--muted);font-weight:600}
 .seg{display:flex;background:var(--surface-2);border-radius:11px;padding:3px;gap:2px}
-.seg button{flex:1;padding:8px 4px;font-size:12.5px;font-weight:600;border-radius:9px;color:var(--ink-2)}
+.seg button{flex:1;padding:8px 4px;font-size:calc(12.5px*var(--ts2));font-weight:600;border-radius:9px;color:var(--ink-2)}
 .seg button.on{background:var(--surface);color:var(--accent-ink);box-shadow:0 1px 2px rgba(0,0,0,.07)}
 .chips{display:flex;gap:7px;flex-wrap:wrap}
-.chip{padding:7px 11px;border-radius:20px;border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--ink-2);background:var(--surface)}
+.chip{padding:7px 11px;border-radius:20px;border:1px solid var(--line);font-size:calc(12.5px*var(--ts2));font-weight:600;color:var(--ink-2);background:var(--surface)}
 .chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
 .sw{width:46px;height:27px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);position:relative;flex:none;transition:.16s}
 .sw:after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:21px;height:21px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.16s}
@@ -176,23 +227,23 @@ label.fld>span{font-size:11.5px;color:var(--muted);font-weight:600}
 .bar i{display:block;height:100%;background:var(--accent);border-radius:5px;transition:width .5s cubic-bezier(.2,.7,.3,1)}
 .bar.g i{background:var(--gold)}
 .meter{display:flex;flex-direction:column;gap:5px}
-.meter .lab{display:flex;justify-content:space-between;font-size:12.5px}
+.meter .lab{display:flex;justify-content:space-between;font-size:calc(12.5px*var(--ts2))}
 
 .note{display:flex;gap:9px;align-items:flex-start;border-radius:12px;padding:9px 11px;background:var(--accent-soft);
-  border:1px solid color-mix(in oklab,var(--accent) 24%,transparent);font-size:12.5px;color:var(--ink-2);line-height:1.45}
+  border:1px solid color-mix(in oklab,var(--accent) 24%,transparent);font-size:calc(12.5px*var(--ts2));color:var(--ink-2);line-height:1.45}
 .note.w{background:var(--warn-soft);border-color:color-mix(in oklab,var(--warn) 34%,transparent)}
 .note.c{background:var(--crit-soft);border-color:color-mix(in oklab,var(--crit) 30%,transparent)}
 .note.g{background:var(--good-soft);border-color:color-mix(in oklab,var(--good) 30%,transparent)}
 .note.g svg{color:var(--good)}
 .btn.row.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
 select.sel,label.fld>select{appearance:none;-webkit-appearance:none;width:100%;padding:11px 12px;border:1px solid var(--line);
-  border-radius:11px;background:var(--surface);color:var(--ink);font:inherit;font-size:13.5px}
-.note b{display:block;color:var(--ink);font-size:13px;margin-bottom:2px}
+  border-radius:11px;background:var(--surface);color:var(--ink);font:inherit;font-size:calc(13.5px*var(--ts))}
+.note b{display:block;color:var(--ink);font-size:calc(13px*var(--ts));margin-bottom:2px}
 .note svg{width:17px;height:17px;flex:none;margin-top:1px;color:var(--accent-ink)}
 
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
-table{width:100%;border-collapse:collapse;font-size:12.5px}
-th{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700;text-align:start;
+table{width:100%;border-collapse:collapse;font-size:calc(12.5px*var(--ts2))}
+th{font-size:calc(10px*var(--ts2));letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700;text-align:start;
   padding:8px 10px;background:var(--surface-2);white-space:nowrap;border-bottom:1px solid var(--line)}
 td{padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap}
 tr:last-child td{border-bottom:none}
@@ -212,9 +263,9 @@ tr:last-child td{border-bottom:none}
 .scanline{position:absolute;inset-inline:6%;height:2px;background:#E0B27C;opacity:.85;animation:sweep 2.4s ease-in-out infinite}
 @keyframes sweep{0%,100%{top:12%}50%{top:86%}}
 @media (prefers-reduced-motion:reduce){.scanline{animation:none;top:50%}}
-.scancap{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:11.5px;color:#E8CCA8;font-family:"IBM Plex Mono",monospace}
+.scancap{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:calc(11.5px*var(--ts2));color:#E8CCA8;font-family:"IBM Plex Mono",monospace}
 .scanstate{position:absolute;top:10px;inset-inline-start:10px;background:rgba(21,18,15,.8);color:#E8CCA8;border-radius:8px;
-  padding:4px 8px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px}
+  padding:4px 8px;font-size:calc(11px*var(--ts2));font-weight:600;display:flex;align-items:center;gap:6px}
 .dotlive{width:7px;height:7px;border-radius:50%;background:#4ED07B;box-shadow:0 0 0 0 rgba(78,208,123,.6);animation:pulse 1.8s infinite}
 @keyframes pulse{70%{box-shadow:0 0 0 7px rgba(78,208,123,0)}100%{box-shadow:0 0 0 0 rgba(78,208,123,0)}}
 .hidden-input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
@@ -229,9 +280,9 @@ tr:last-child td{border-bottom:none}
 .grab{width:38px;height:4px;border-radius:3px;background:var(--line);margin:0 auto 10px}
 .sheet .shead{display:flex;align-items:center;gap:10px;margin-bottom:10px;position:sticky;top:-2px;
   background:var(--surface);z-index:2;padding:4px 0}
-.sheet .shead h3{font-size:17px;font-weight:600;flex:1}
+.sheet .shead h3{font-size:calc(17px*var(--ts));font-weight:600;flex:1}
 .toast{position:fixed;left:50%;transform:translate(-50%,16px);bottom:92px;background:var(--ink);color:var(--paper);
-  padding:11px 15px;border-radius:12px;font-size:13px;font-weight:500;z-index:90;opacity:0;transition:.2s;
+  padding:11px 15px;border-radius:12px;font-size:calc(13px*var(--ts));font-weight:500;z-index:90;opacity:0;transition:.2s;
   max-width:min(360px,92vw);text-align:center;pointer-events:none;box-shadow:0 12px 30px rgba(0,0,0,.3)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
@@ -241,41 +292,41 @@ tr:last-child td{border-bottom:none}
 .login>:first-child{margin-top:auto}
 .login>:last-child{margin-bottom:auto}
 .mark{width:62px;height:62px;border-radius:19px;background:linear-gradient(155deg,#9A6B41,#5E3E22);display:flex;align-items:center;
-  justify-content:center;color:#F6EFE6;font-family:"Reem Kufi","Noto Naskh Arabic",serif;font-size:36px;line-height:1;direction:rtl}
-.mark.sm{width:34px;height:34px;border-radius:11px;font-size:20px}
-.wordmark{font-family:"Archivo",sans-serif;font-size:27px;font-weight:700;letter-spacing:-.02em}
+  justify-content:center;color:#F6EFE6;font-family:"Reem Kufi","Noto Naskh Arabic",serif;font-size:calc(36px*var(--ts));line-height:1;direction:rtl}
+.mark.sm{width:34px;height:34px;border-radius:11px;font-size:calc(20px*var(--ts))}
+.wordmark{font-family:"Archivo",sans-serif;font-size:calc(27px*var(--ts));font-weight:700;letter-spacing:-.02em}
 .otpbox{display:flex;gap:8px;justify-content:space-between}
-.otpbox input{text-align:center;font-family:"IBM Plex Mono",monospace;font-size:21px;padding:13px 0;width:100%}
+.otpbox input{text-align:center;font-family:"IBM Plex Mono",monospace;font-size:calc(21px*var(--ts));padding:13px 0;width:100%}
 .rolegrid{display:flex;flex-direction:column;gap:9px}
 .rolecard{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--surface-3);width:100%;text-align:start}
 .rolecard:hover{border-color:var(--accent)}
 .rolecard .t{flex:1}
-.rolecard .t b{display:block;font-size:14.5px;font-weight:600}
-.rolecard .t span{font-size:11.5px;color:var(--muted)}
+.rolecard .t b{display:block;font-size:calc(14.5px*var(--ts));font-weight:600}
+.rolecard .t span{font-size:calc(11.5px*var(--ts2));color:var(--muted)}
 
-.quiz .opt{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:14px;width:100%;text-align:start}
+.quiz .opt{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:calc(14px*var(--ts));width:100%;text-align:start}
 .quiz .opt.right{border-color:var(--good);background:var(--good-soft);color:var(--good);font-weight:600}
 .quiz .opt.wrong{border-color:var(--crit);background:var(--crit-soft);color:var(--crit)}
-.quiz .opt .k{width:24px;height:24px;border-radius:8px;background:var(--surface-2);display:grid;place-items:center;font-size:11.5px;font-weight:700;flex:none}
+.quiz .opt .k{width:24px;height:24px;border-radius:8px;background:var(--surface-2);display:grid;place-items:center;font-size:calc(11.5px*var(--ts2));font-weight:700;flex:none}
 
 .ticket{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:9px 12px;display:flex;flex-direction:column;gap:4px;overflow:hidden}
 .ticket:before,.ticket:after{content:"";position:absolute;width:13px;height:13px;border-radius:50%;background:var(--paper);border:1px solid var(--line);top:50%;transform:translateY(-50%)}
 .ticket:before{inset-inline-start:-7px}
 .ticket:after{inset-inline-end:-7px}
 .ticket .th{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
-.ticket .tt{font-size:13.5px;font-weight:600}
-.ticket .ser{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--accent-ink);white-space:nowrap;direction:ltr}
-.ticket .tm{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:var(--muted);border-top:1px dashed var(--line);padding-top:6px}
+.ticket .tt{font-size:calc(13.5px*var(--ts));font-weight:600}
+.ticket .ser{font-family:"IBM Plex Mono",monospace;font-size:calc(10.5px*var(--ts2));color:var(--accent-ink);white-space:nowrap;direction:ltr}
+.ticket .tm{display:flex;justify-content:space-between;gap:10px;font-size:calc(11px*var(--ts2));color:var(--muted);border-top:1px dashed var(--line);padding-top:6px}
 .ticket.void{opacity:.55}
 
-.timer{font-family:"IBM Plex Mono",monospace;font-size:34px;font-weight:600;text-align:center;letter-spacing:-.02em}
+.timer{font-family:"IBM Plex Mono",monospace;font-size:calc(34px*var(--ts));font-weight:600;text-align:center;letter-spacing:-.02em}
 .map{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#E6E1D6}
 .map svg{display:block;width:100%;height:auto}
-.legend{display:flex;gap:11px;flex-wrap:wrap;font-size:11px;color:var(--ink-2);padding:7px 10px;background:var(--surface);border-top:1px solid var(--line)}
+.legend{display:flex;gap:11px;flex-wrap:wrap;font-size:calc(11px*var(--ts2));color:var(--ink-2);padding:7px 10px;background:var(--surface);border-top:1px solid var(--line)}
 .legend span{display:inline-flex;align-items:center;gap:5px}
 .legend i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--surface)}
 .wheel{height:64px;overflow:hidden;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
-.wheel .w{position:absolute;inset:0;display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;font-size:18px;font-weight:600}
+.wheel .w{position:absolute;inset:0;display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;font-size:calc(18px*var(--ts));font-weight:600}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* compact quick actions */
@@ -283,11 +334,11 @@ tr:last-child td{border-bottom:none}
 .quick button{background:var(--surface-3);border:1px solid var(--line);border-radius:13px;padding:10px 4px 8px;
   display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
 .quick button svg{width:20px;height:20px;color:var(--ink-2);stroke-width:1.7}
-.quick button span{font-size:10px;color:var(--muted);line-height:1.2}
+.quick button span{font-size:calc(10px*var(--ts2));color:var(--muted);line-height:1.2}
 /* fold — the detail stays, the space comes back */
 details.fold{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:0 13px}
 details.fold>summary{list-style:none;cursor:pointer;padding:10px 0;display:flex;align-items:center;gap:8px;
-  font-size:12.5px;font-weight:600;color:var(--ink-2)}
+  font-size:calc(12.5px*var(--ts2));font-weight:600;color:var(--ink-2)}
 details.fold>summary::-webkit-details-marker{display:none}
 details.fold>summary:after{content:"";margin-inline-start:auto;width:7px;height:7px;border-inline-end:2px solid var(--muted);
   border-block-end:2px solid var(--muted);transform:rotate(45deg);transition:transform .18s;flex:none}
@@ -299,8 +350,8 @@ details.fold>.fb{padding-bottom:11px;display:flex;flex-direction:column;gap:6px}
 .page.wide .sidecard{display:none}
 .page.wide .statusbar{padding:12px 28px 4px}
 .page.wide .appbar{padding:10px 26px 15px}
-.page.wide .appbar .ttl{font-size:22px}
-.page.wide .appbar .sub{font-size:12.5px}
+.page.wide .appbar .ttl{font-size:calc(22px*var(--ts))}
+.page.wide .appbar .sub{font-size:calc(12.5px*var(--ts2))}
 .page.wide .view{flex-direction:column;align-items:stretch;gap:12px;padding:20px 26px 28px;
   max-width:760px;margin-inline:auto;width:100%}
 .page.wide .view.cols{flex-direction:row;align-items:flex-start;gap:22px;max-width:none;margin-inline:0}
@@ -321,7 +372,7 @@ details.fold>.fb{padding-bottom:11px;display:flex;flex-direction:column;gap:6px}
 .page.wide .rolecard{align-items:flex-start}
 .page.wide .rolecard .chev{display:none}
 .page.wide .tabbar{padding:9px 6px 9px}
-.page.wide .tabbar button span{font-size:12px}
+.page.wide .tabbar button span{font-size:calc(12px*var(--ts2))}
 .page.wide .sheet{width:min(560px,100%)}
 @media(max-width:1000px){ .page.wide .device{width:100%;height:100dvh;border:none;border-radius:0}
   .page.wide .view{flex-direction:column;gap:10px;padding:14px 16px 24px}
@@ -330,39 +381,39 @@ details.fold>.fb{padding-bottom:11px;display:flex;flex-direction:column;gap:6px}
 .zrow{display:block;width:100%;text-align:start;padding:9px 0;border-top:1px solid var(--line-soft)}
 .zrow:first-of-type{border-top:none}
 .zhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:5px}
-.zhead b{font-size:13px}
-.zhead span{font-size:11px;color:var(--muted)}
+.zhead b{font-size:calc(13px*var(--ts))}
+.zhead span{font-size:calc(11px*var(--ts2));color:var(--muted)}
 .zb{display:flex;align-items:center;gap:7px;margin-top:2px}
 .ztrack{position:relative;flex:1;height:11px;border-radius:4px;background:var(--surface-2);overflow:hidden}
 .ztrack i{position:absolute;inset-inline-start:0;top:0;height:100%;border-radius:4px;display:block}
-.zb em{font-style:normal;font-size:11px;font-family:"IBM Plex Mono",monospace;color:var(--ink-2);min-width:34px;text-align:end}
+.zb em{font-style:normal;font-size:calc(11px*var(--ts2));font-family:"IBM Plex Mono",monospace;color:var(--ink-2);min-width:34px;text-align:end}
 .lgnd{display:flex;gap:14px;flex-wrap:wrap;padding:2px 0 4px}
-.lgnd span{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)}
+.lgnd span{display:flex;align-items:center;gap:6px;font-size:calc(11.5px*var(--ts2));color:var(--ink-2)}
 .lgnd i{width:10px;height:10px;border-radius:3px;display:block}
 /* chat */
 .chat{display:flex;flex-direction:column;gap:9px}
-.bub{max-width:84%;padding:9px 12px;border-radius:15px;font-size:13.5px;line-height:1.45}
+.bub{max-width:84%;padding:9px 12px;border-radius:15px;font-size:calc(13.5px*var(--ts));line-height:1.45}
 .bub.b{align-self:flex-start;background:var(--surface-2);border-end-start-radius:5px}
 .bub.m{align-self:flex-end;background:var(--accent);color:#FBF7F1;border-end-end-radius:5px}
-.bub .w{display:block;font-size:10.5px;opacity:.7;margin-top:3px}
-.typing{align-self:flex-start;color:var(--muted);font-size:12px}
+.bub .w{display:block;font-size:calc(10.5px*var(--ts2));opacity:.7;margin-top:3px}
+.typing{align-self:flex-start;color:var(--muted);font-size:calc(12px*var(--ts2))}
 /* inbox */
 .nrow{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line-soft);width:100%;text-align:start}
 .nrow:first-of-type{border-top:none}
 .nrow .ni{flex:none;width:30px;height:30px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2)}
 .nrow .ni svg{width:16px;height:16px}
 .nrow .nb{flex:1;min-width:0}
-.nrow .nb b{display:block;font-size:13px;line-height:1.3}
-.nrow .nb p{margin:2px 0 0;font-size:11.5px;color:var(--ink-2);line-height:1.4}
-.nrow .nb span{font-size:10.5px;color:var(--muted)}
+.nrow .nb b{display:block;font-size:calc(13px*var(--ts));line-height:1.3}
+.nrow .nb p{margin:2px 0 0;font-size:calc(11.5px*var(--ts2));color:var(--ink-2);line-height:1.4}
+.nrow .nb span{font-size:calc(10.5px*var(--ts2));color:var(--muted)}
 .nrow .dot{flex:none;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-top:11px}
 /* sorting guide */
 .sg{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line-soft)}
 .sg:first-of-type{border-top:none}
 .sg .tagi{flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;color:var(--ink-2);background:var(--surface-2)}
 .sg .tagi svg{width:15px;height:15px}
-.sg b{display:block;font-size:13px}
-.sg p{margin:0;font-size:11.5px;color:var(--ink-2);line-height:1.4}
+.sg b{display:block;font-size:calc(13px*var(--ts))}
+.sg p{margin:0;font-size:calc(11.5px*var(--ts2));color:var(--ink-2);line-height:1.4}
 .sg .no{color:var(--stamp)}
 /* carousel */
 .carou{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
@@ -388,27 +439,29 @@ a.btn{text-decoration:none}
 /* the round is a list someone scrolls on a doorstep: one line per door */
 .drow{display:flex;align-items:stretch;border-top:1px solid var(--line-soft)}
 .drow:first-child{border-top:none}
-.dmain{flex:1;min-width:0;display:flex;align-items:center;gap:9px;padding:7px 2px;text-align:start;background:none;border:0}
+.dmain{flex:1;min-width:0;display:flex;align-items:center;gap:9px;padding:var(--drowp,7px) 2px;text-align:start;background:none;border:0}
+.device[data-ts="2"]{--drowp:5px}
+.device[data-ts="3"]{--drowp:3px}
 .dav{width:26px;height:26px;border-radius:8px;background:var(--surface-2);color:var(--accent-ink);
-  display:grid;place-items:center;font-size:12px;font-weight:600;flex:none}
+  display:grid;place-items:center;font-size:calc(12px*var(--ts2));font-weight:600;flex:none}
 .dt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden}
-.dt b{font-size:13px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dt span{font-size:10.5px;color:var(--muted);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dt b{font-size:calc(13px*var(--ts));font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dt span{font-size:calc(10.5px*var(--ts2));color:var(--muted);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dr{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex:none;text-align:end}
-.dr b{font-size:13px;font-weight:600}
-.dr span{font-size:10.5px;color:var(--muted)}
+.dr b{font-size:calc(13px*var(--ts));font-weight:600}
+.dr span{font-size:calc(10.5px*var(--ts2));color:var(--muted)}
 .dr span.late{color:var(--stamp)}
 .dact{width:34px;flex:none;display:grid;place-items:center;border:0;border-inline-start:1px solid var(--line-soft);
   background:none;color:var(--ink-2);text-decoration:none}
 .dact svg{width:17px;height:17px}
 .dact:active{background:var(--surface-2)}
-.dact.skip{width:40px;font-size:9.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.dact.skip{width:40px;font-size:calc(9.5px*var(--ts2));font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .heros{display:flex;flex-direction:column;gap:10px}
 .hero{background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:13px 15px 14px;
   display:flex;flex-direction:column;gap:5px}
-.hero .hv{font-family:"Archivo",sans-serif;font-size:44px;font-weight:700;line-height:1;letter-spacing:-.02em;
+.hero .hv{font-family:"Archivo",sans-serif;font-size:calc(44px*var(--ts));font-weight:700;line-height:1;letter-spacing:-.02em;
   color:var(--accent-ink);display:flex;align-items:baseline;gap:2px}
-.hero .hv span{font-size:20px;font-weight:600;color:var(--muted)}
+.hero .hv span{font-size:calc(20px*var(--ts));font-weight:600;color:var(--muted)}
 .hero .hbar{height:9px;border-radius:5px;background:var(--surface-2);overflow:hidden}
 .hero .hbar i{display:block;height:100%;border-radius:5px;background:var(--accent)}
 .hero p.sm{margin:0}
@@ -432,8 +485,8 @@ svg.mico{width:34px;height:34px;flex:none;stroke-width:1.5}
 .gstep{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line-soft)}
 .gstep:first-child{border-top:none}
 .gn{flex:none;width:21px;height:21px;border-radius:7px;background:var(--accent-soft);color:var(--accent-ink);
-  display:grid;place-items:center;font-size:11.5px;font-weight:700;font-family:"Archivo",sans-serif;margin-top:1px}
-.gstep b{display:block;font-size:13.5px;margin-bottom:1px}
+  display:grid;place-items:center;font-size:calc(11.5px*var(--ts2));font-weight:700;font-family:"Archivo",sans-serif;margin-top:1px}
+.gstep b{display:block;font-size:calc(13.5px*var(--ts));margin-bottom:1px}
 .gstep p{margin:0}
 /* next-collection rows */
 .nxt{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line-soft)}
@@ -441,11 +494,11 @@ svg.mico{width:34px;height:34px;flex:none;stroke-width:1.5}
 .nxt .ico{flex:none;width:29px;height:29px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2)}
 .nxt .ico svg{width:17px;height:17px}
 .nxt .m{flex:1;min-width:0}
-.nxt .m b{display:block;font-size:13.5px;line-height:1.25}
-.nxt .m span{display:block;font-size:11.5px;color:var(--muted)}
+.nxt .m b{display:block;font-size:calc(13.5px*var(--ts));line-height:1.25}
+.nxt .m span{display:block;font-size:calc(11.5px*var(--ts2));color:var(--muted)}
 .nxt .w{flex:none;text-align:end}
-.nxt .w b{display:block;font-size:13px;font-family:"Archivo",sans-serif}
-.nxt .w span{display:block;font-size:11px;color:var(--muted)}
+.nxt .w b{display:block;font-size:calc(13px*var(--ts));font-family:"Archivo",sans-serif}
+.nxt .w span{display:block;font-size:calc(11px*var(--ts2));color:var(--muted)}
 </style>
 </head>
 <body>
@@ -914,6 +967,43 @@ var PAYMENTS = [
   {r:"OR-2024-41002", d:"9 May 2024",  a:41.20, ch:"OMT",               t:"$41.20",       s:"Settled"}
 ];
 
+/* ===================== the reconciliation desk =====================
+   Money arrives as a line on a statement: a date, an amount, and whatever the
+   payer typed in the note. Matching may succeed, may fail, and may be wrong, so
+   the arrival is recorded as received and the match is a separate act. These are
+   the four ways it goes wrong, which is what the desk actually deals with.     */
+var ARRIVALS = [
+  {id:"AR-4401", on:"13 Oct 2026", a:59.88, ch:"Bank transfer", note:"FEE PAYMENT BLD-C2417261-Q",
+   ref:"BLD-C2417261-Q", ok:true,  wait:1, why:"matched"},
+  {id:"AR-4402", on:"13 Oct 2026", a:30.00, ch:"OMT",           note:"BLD-C3128261-X waste fee",
+   ref:"BLD-C3128261-X", ok:false, wait:1, why:"reference mistyped \u2014 the check character does not match"},
+  {id:"AR-4403", on:"12 Oct 2026", a:15.00, ch:"OMT",           note:"waste fee for october",
+   ref:"", ok:false, wait:2, why:"no reference anywhere in the note"},
+  {id:"AR-4404", on:"11 Oct 2026", a:84.00, ch:"Bank transfer", note:"ref BLD-X99992612-9",
+   ref:"BLD-X99992612-9", ok:true,  wait:3, why:"reference is well formed but no such account is on the register"}
+];
+/* money placed against an account but not yet posted to the balance: this is the
+   twenty-four hours the app promises on every payment screen, as a queue */
+var PENDING_PAY = [
+  {id:901, rc:"RCP-2026-000014", prem:"C-8140", a:59.88, ch:"OMT",     ref:"BLD-C8140261-H", wait:0},
+  {id:902, rc:"RCP-2026-000015", prem:"C-9021", a:119.76,ch:"Bank transfer", ref:"BLD-C9021261-J", wait:2}
+];
+
+var OBJ_GROUNDS = [
+  ["category",     "The category on the register is wrong",        "تصنيف العقار على السجل خطأ"],
+  ["floor_area",   "The floor area bracket is wrong",              "شريحة المساحة خطأ"],
+  ["empty_month",  "The premises was empty for part of the year",  "العقار كان فارغاً جزءاً من السنة"],
+  ["closed_month", "The business was closed for part of the year", "العمل كان مقفلاً جزءاً من السنة"],
+  ["sorting",      "A sorting assessment is wrong",                "تقييم الفرز خطأ"],
+  ["other",        "Something else",                               "سبب آخر"]
+];
+var MY_OBJECTIONS = [
+  {ref:"OBJ-2026-000118", prem:"C-2417", ground:"category", st:"under_review",
+   at:"6 Oct 2026", due:"5 Nov 2026",
+   text:"This is a single dwelling, not the mixed-use category the register shows.",
+   dec:"", adj:null}
+];
+
 var VOUCHERS = [
   {k:"Recyclables sorted",  kAr:"فرز المواد القابلة للتدوير", s:"DV-2026-10-2417-01", w:"3 recyclable bags scanned in October", wAr:"٣ أكياس تدوير ممسوحة في تشرين الأول", at:"5 Oct 2026"},
   {k:"Organics separated",  kAr:"فصل النفايات العضوية",       s:"DV-2026-10-2417-02", w:"2 organic bags collected in October", wAr:"كيسان عضويان مرفوعان في تشرين الأول", at:"6 Oct 2026"},
@@ -1215,6 +1305,7 @@ var BACKEND = {
 var LIVE = {
   on:false, token:null, refresh:null, sub:null,
   profile:null, account:null, err:"", busy:false, lastCheck:null,
+  standing:null, notices:null, objections:null, recon:null, regrecon:null, learning:null,
 
   /* a failure here must never take the screen down with it */
   say:function(e){
@@ -1292,6 +1383,89 @@ var LIVE = {
       headers:{"Prefer":"return=representation"}});
   },
 
+  /* ---- what the household owes, as the database computes it ----
+     Not stored anywhere: account_standing derives the balance from the invoices
+     and the payments every time it is read, so it cannot drift from them. */
+  loadStanding:function(){
+    return Promise.all([
+      LIVE.req("/rest/v1/account_standing?select=premises_id,zone_id,invoiced_usd,paid_usd,balance_usd,oldest_unpaid_due,days_overdue,objection_open"),
+      LIVE.req("/rest/v1/arrears_ladder?select=premises_id,balance_usd,days_overdue,stage,objection_open"),
+      LIVE.req("/rest/v1/payment_reference?select=ref,premises_id,year,seq&order=year.desc")
+    ]).then(function(r){
+      LIVE.standing = {acct:r[0]||[], ladder:r[1]||[], refs:r[2]||[]};
+      return LIVE.standing;
+    });
+  },
+
+  /* ---- everything the municipality has said to anybody ----
+     A household reads its own; staff read the town's. Same endpoint either way:
+     the policy decides, not a parameter we could get wrong. */
+  loadNotices:function(){
+    return LIVE.req("/rest/v1/notification?select=id,kind,premises_id,channel,body_en,body_ar,created_at,sent_at,failed_at,failure,read_at&order=created_at.desc&limit=60")
+      .then(function(rows){ LIVE.notices = rows||[]; return LIVE.notices; });
+  },
+  markRead:function(id){
+    return LIVE.req("/rest/v1/notification?id=eq."+encodeURIComponent(id),
+      {method:"PATCH", body:{read_at:new Date().toISOString()}});
+  },
+
+  /* ---- objections: the household's right to say the register is wrong ---- */
+  loadObjections:function(){
+    return LIVE.req("/rest/v1/objection?select=id,ref,premises_id,ground,status,statement,filed_at,due_by,decided_at,decision_reason,adjustment_usd&order=filed_at.desc")
+      .then(function(rows){ LIVE.objections = rows||[]; return LIVE.objections; });
+  },
+  fileObjection:function(o){
+    return LIVE.req("/rest/v1/objection", {method:"POST", body:o,
+      headers:{"Prefer":"return=representation"}});
+  },
+
+  /* ---- the municipality's reconciliation desk ----
+     Money in the bank that nobody has placed, and money placed that nobody has
+     posted to an account. Two different failures, two different queues. */
+  loadRecon:function(){
+    return Promise.all([
+      LIVE.req("/rest/v1/payment_arrival_queue?select=id,received_on,amount_usd,channel,note_as_given,ref_extracted,ref_valid,days_waiting,why&order=received_on.asc"),
+      LIVE.req("/rest/v1/payment_unreconciled?select=id,receipt_no,premises_id,amount_usd,channel,external_ref,paid_at,days_waiting,unallocated&order=paid_at.asc")
+    ]).then(function(r){
+      LIVE.recon = {arrivals:r[0]||[], pending:r[1]||[]};
+      return LIVE.recon;
+    });
+  },
+  reconcile:function(paymentId){
+    return LIVE.req("/rest/v1/rpc/payment_reconcile", {method:"POST",
+      body:{p_payment:paymentId}});
+  },
+
+  /* ---- the billing cycle: priced here, issued by an administrator ---- */
+  loadRegisterRecon:function(){
+    return LIVE.req("/rest/v1/register_reconciliation?select=*")
+      .then(function(rows){ LIVE.regrecon = (rows&&rows[0])||null; return LIVE.regrecon; });
+  },
+  billDry:function(year){
+    return LIVE.req("/rest/v1/rpc/bill_year", {method:"POST",
+      body:{p_year:year, p_dry_run:true}});
+  },
+
+  /* ---- the optimiser's memory, which now outlives the tab ----
+     One call returns the decaying average for every stop this role has worked and
+     the speed it actually travels at. Empty on a route nobody has run yet, which
+     is why the app keeps its own defaults to fall back on. */
+  loadLearning:function(role){
+    return LIVE.req("/rest/v1/rpc/learning_snapshot", {method:"POST",
+      body:{p_role:role}})
+      .then(function(snap){
+        if(snap && snap.service) LIVE.learning = snap;
+        return snap;
+      });
+  },
+  /* the write side of the same loop: what this stop actually cost */
+  postStop:function(stop){
+    if(!LIVE.on || !LIVE.token || !LIVE.profile) return Promise.resolve(null);
+    stop.actor_id = LIVE.profile.id;
+    return LIVE.req("/rest/v1/round_stop", {method:"POST", body:stop,
+      headers:{"Prefer":"return=representation"}});
+  },
+
   /* ---- is the register reachable at all? anon is granted nothing, so a
          clean refusal is the healthy answer, not an error ---- */
   check:function(){
@@ -1349,7 +1523,8 @@ var S = {
   sample:null, sampleSeen:{}, sampleN:6, inspectFor:null, session:null, nuRole:"customer", clrEdit:null,
   liveBusy:false, liveNote:"", served:{}, issues:{}, stopOpenedAt:{}, lastReceipt:null,
   skipped:{}, shiftOpen:false, shiftStart:null, faultFor:null, notified:{},
-  exemptFor:null, lastMissed:null, loads:0, roundOpen:false, otpSendLink:""
+  exemptFor:null, lastMissed:null, loads:0, roundOpen:false, otpSendLink:"",
+  ts:2, saying:null, tsSet:false, camTried:false
 };
 /* ?live=1 opens the session against the municipality's database instead of this file */
 try{ if(typeof location!=="undefined" && /[?&]live=1/.test(location.search)) LIVE.on=true; }catch(e){}
@@ -1378,6 +1553,43 @@ var AR = {
   "Pay now":"ادفع الآن","Amount due":"المستحق","Annual fee":"الرسم السنوي","Sorting rebate":"خصم الفرز",
   "Impact":"الأثر","This month":"هذا الشهر","My tags":"رموزي","Monthly prize":"جائزة الشهر",
   "National grand prize":"الجائزة الكبرى الوطنية","Draw entries":"مشاركات السحب",
+  /* the controls a non-reader depends on, in both languages */
+  "Read this out loud":"اقرأ هذا بصوت عالٍ","Read the screen out loud":"اقرأ الشاشة بصوت عالٍ",
+  "Read the name out loud":"اقرأ الاسم بصوت عالٍ","Read out loud":"القراءة بصوت عالٍ",
+  "Text size":"حجم الخط","Camera opens by itself":"الكاميرا تفتح تلقائياً",
+  "This handset has no voice installed":"لا يوجد صوت مثبّت على هذا الجهاز",
+  "Reading out loud is on":"القراءة بصوت عالٍ مفعّلة","Reading out loud is off":"القراءة بصوت عالٍ متوقفة",
+  "The camera is not available":"الكاميرا غير متوفرة",
+  "Type the code instead \u2014 it records exactly the same.":"اكتبوا الرمز بدلاً من ذلك — يُسجَّل بالطريقة نفسها.",
+  "Turn the camera on":"تشغيل الكاميرا","Turn the camera off":"إيقاف الكاميرا","Type the code":"اكتب الرمز",
+  "Point the camera at the printed code. Or press type the code.":"وجّهوا الكاميرا نحو الرمز المطبوع، أو اضغطوا اكتب الرمز.",
+  "Press the speaker to hear what to do":"اضغطوا على السمّاعة لسماع ما يجب فعله",
+  "The camera may open by itself on a scanning screen":"يمكن للكاميرا أن تفتح تلقائياً في شاشة المسح",
+  "The camera will not open by itself \u2014 codes are typed":"لن تفتح الكاميرا تلقائياً — تُكتب الرموز",
+  "Next stop":"المحطة التالية","About":"حوالي","here":"هنا",
+  "here, on what this round has averaged.":"هنا، بحسب متوسط هذه الجولة.",
+  "Owing":"المتوجّب","Exempt":"معفى","Account":"الحساب","Payable":"المتوجّب",
+  "Primary contact":"جهة الاتصال الأساسية","Affiliate":"منتسب",
+  /* objecting to the assessment: a customer screen, so it is translated */
+  "Object to this assessment":"الاعتراض على هذا التقدير",
+  "Objections":"الاعتراضات","Object to the assessment":"الاعتراض على التقدير",
+  "If the assessment is wrong, say so":"إذا كان التقدير خطأً، قولوا ذلك",
+  "The Review Panel has thirty days to decide. While it is deciding, the amount is paused \u2014 you will not be chased for it and it will not age into arrears.":"للجنة المراجعة ثلاثون يوماً للبتّ. خلال ذلك يُعلَّق المبلغ: لا تُطالبون به ولا يتحوّل إلى متأخرات.",
+  "Your objections":"اعتراضاتكم","Under review":"قيد المراجعة",
+  "Filed, awaiting the panel":"مُقدَّم، في انتظار اللجنة",
+  "Upheld":"مقبول","Partly upheld":"مقبول جزئياً","Rejected":"مرفوض","Withdrawn":"مسحوب",
+  "One at a time":"واحد في كل مرة",
+  "An objection on the same ground is already open. The panel will decide this one before another can be filed.":"هناك اعتراض مفتوح على السبب نفسه. تبتّ اللجنة فيه قبل تقديم اعتراض آخر.",
+  "File an objection":"تقديم اعتراض","What the panel can decide":"ما يمكن أن تقرّره اللجنة",
+  "The register is corrected and the bill adjusted":"يُصحَّح السجل ويُعدَّل الرسم",
+  "Some of it is corrected":"يُصحَّح جزء منه","With a reason, in writing":"مع تعليل خطّي",
+  "Every decision is recorded against the account and sent to you. A decision cannot be changed afterwards \u2014 only objected to again on a different ground.":"يُسجَّل كل قرار على الحساب ويُرسل إليكم. لا يُعدَّل القرار لاحقاً، بل يمكن الاعتراض مجدداً على سبب مختلف.",
+  "What is wrong?":"ما هو الخطأ؟","Ground":"السبب","Tell the panel why":"اشرحوا للجنة السبب",
+  "At least twenty characters. Say what the register has wrong and what it should say.":"عشرون حرفاً على الأقل. اذكروا ما هو خطأ في السجل وما يجب أن يكون.",
+  "You can attach a title deed, a power bill or a licence after filing. The panel may ask for one.":"يمكنكم إرفاق سند ملكية أو فاتورة كهرباء أو رخصة بعد التقديم. قد تطلب اللجنة ذلك.",
+  "Filed once":"يُقدَّم مرة واحدة",
+  "An objection cannot be edited after it is filed \u2014 you can withdraw it and file again, but only before the panel starts. That is deliberate: the panel decides on what was actually submitted.":"لا يمكن تعديل الاعتراض بعد تقديمه: يمكن سحبه وتقديمه مجدداً، لكن قبل أن تبدأ اللجنة. هذا مقصود، فاللجنة تبتّ في ما قُدِّم فعلاً.",
+  "File it":"تقديمه","by":"قبل","Post":"ترحيل",
   "Nobody home":"لا أحد في المنزل","Take cash payment":"قبض نقدي","Send receipt":"إرسال الوصل",
   "WhatsApp":"واتساب","SMS":"رسالة نصية","Comment":"ملاحظة","Add a comment":"أضف ملاحظة",
   "Photo spot check":"تدقيق بالصورة","Upload later at home":"يُرفع لاحقاً من المنزل",
@@ -1425,7 +1637,27 @@ var I = {
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.6"/>',
   help:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.8-.9 1.4v.5"/><path d="M12 16.6v.4"/>',
   alert:'<path d="M12 4 21 20H3z"/><path d="M12 10v4M12 17v.4"/>',
-  pin:'<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>'
+  pin:'<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>',
+  /* ---- for the people who cannot read the label ----
+     Each of these has to carry its whole meaning as a shape. A driver glancing
+     at a phone in one hand should not have to parse a word to know which button
+     ends the shift and which one reports a fault. */
+  speak:'<path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.2 8.8a4.6 4.6 0 0 1 0 6.4"/><path d="M18.2 5.8a9 9 0 0 1 0 12.4"/>',
+  mute:'<path d="M11 5 6 9H3v6h3l5 4z"/><path d="m15.5 9.5 5 5M20.5 9.5l-5 5"/>',
+  aa:'<path d="M2.5 17 6 8l3.5 9"/><path d="M3.7 14.2h4.6"/><path d="M13 17 17.5 5 22 17"/><path d="M14.5 13.2h6"/>',
+  yes:'<path d="m4 12.8 5.6 5.6L20 5.8"/>',
+  no:'<path d="M6 6l12 12M18 6 6 18"/>',
+  nohome:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M5.2 19.2 18.8 5.6"/>',
+  blocked:'<circle cx="12" cy="12" r="9"/><path d="M6.4 6.4 17.6 17.6"/>',
+  bin:'<path d="M4.5 7h15"/><path d="M6.5 7l1 13.2h9L17.5 7"/><path d="M9.4 7V4.4h5.2V7"/><path d="M10.2 11v6M13.8 11v6"/>',
+  scales:'<path d="M12 4.5v15.5"/><path d="M7.5 20h9"/><path d="M4 8.5h16"/><path d="M4 8.5 1.8 13.4h4.4z"/><path d="M20 8.5 17.8 13.4h4.4z"/>',
+  play:'<path d="M8 5.2 19 12 8 18.8z"/>',
+  stopsq:'<rect x="6.2" y="6.2" width="11.6" height="11.6" rx="2.2"/>',
+  skip:'<path d="M4 12h9"/><path d="m10 8.4 3.6 3.6L10 15.6"/><path d="M18.5 5.6v12.8"/>',
+  phone:'<path d="M6.4 3h3L11 7.2 8.9 8.8a12.4 12.4 0 0 0 6.3 6.3L16.8 13 21 14.6v3.1a2 2 0 0 1-2.2 2A17.2 17.2 0 0 1 4.3 5.2 2 2 0 0 1 6.4 3z"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7.2V12l3.6 2.1"/>',
+  camoff:'<path d="M4 18V9a2 2 0 0 1 2-2h2l1.4-2h5.2L16 7h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4.4 3.6 19.6 20.4"/>',
+  hand:'<path d="M8.6 12V6.2a1.6 1.6 0 0 1 3.2 0V12"/><path d="M11.8 12V5.2a1.6 1.6 0 0 1 3.2 0V12"/><path d="M15 12V7.4a1.6 1.6 0 0 1 3.2 0V14a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3.6a1.6 1.6 0 0 1 3.2 0V12"/>'
 };
 function svg(name,cls){ return '<svg class="'+(cls||"")+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+I[name]+'</svg>'; }
 
@@ -1620,6 +1852,24 @@ function ill(k,cls){
     'preserveAspectRatio="xMidYMid meet">'+ILL[k]+'</svg>';
 }
 
+/* The roles whose screens are read standing up, outdoors, by someone who may not
+   read the words at all. They get larger type and louder icons by default. */
+var FIELD_ROLES = ["crew","driver","collector","ops","facility"];
+
+/* ---- the camera, as a platform permission rather than a button ----
+   A collector should not have to find and press "open camera" forty times a
+   shift. The scan screen opens with the camera already running. Whether it may
+   is set here, by the administrator, per role — because a handset with no
+   camera, or a municipality that would rather crews typed the serial, is a
+   real situation and not a fault. The browser still asks the person once;
+   this decides whether the app asks at all. */
+var CAMPERM = {
+  auto: {crew:true, driver:true, collector:true, facility:true, customer:true, ops:false,
+         review:false, muni:false, admin:true},
+  allowed: true          /* the master switch: off and nothing opens a camera */
+};
+function camAuto(role){ return !!(CAMPERM.allowed && CAMPERM.auto[role]); }
+
 var ROLES = {
   customer:{label:"Customer", sub:"Residents and businesses on the register", icon:"user",
     who:{n:"Diane Fadel", s:"C-2417 · Dayaa"},
@@ -1649,6 +1899,112 @@ var ROLES = {
     who:{n:"System administrator", s:"Full clearance"},
     tabs:[["setup","Setup","gear"],["draw","Draw","gift"],["users","Users","users"],["data","Data","db"]]}
 };
+
+/* ---------------- reading it out ----------------
+   Half the people who will use this cannot read the screen. A collector on a
+   round, a driver closing a load: they know the job, they do not know the words.
+   So every instruction, every name and every action on the field screens can be
+   spoken, in whichever language the screen is in.
+
+   speechSynthesis is in the browser already — no key, no network, no cost, and
+   it keeps working on a round with no signal. Not every handset has an Arabic
+   voice installed, so the control hides itself rather than sitting there doing
+   nothing when pressed. */
+var VOICE = {
+  /* Present is not the same as usable. Some embedded browsers expose the property
+     and nothing behind it, and a speaker button that does nothing when pressed is
+     worse than no button at all for someone who is relying on it. So the test is
+     whether speak() is actually a function. An empty voice list is treated
+     differently: that is usually the list still loading, not an absence. */
+  ok: (function(){
+    try{
+      return typeof window !== "undefined" && !!window.speechSynthesis &&
+             typeof window.speechSynthesis.speak === "function";
+    }catch(e){ return false; }
+  })(),
+  on: true,
+  voices: [],
+  warmed: false
+};
+function voiceLoad(){
+  if(!VOICE.ok) return;
+  try{ VOICE.voices = window.speechSynthesis.getVoices() || []; }catch(e){ VOICE.voices = []; }
+}
+if(VOICE.ok){
+  voiceLoad();
+  try{ window.speechSynthesis.onvoiceschanged = voiceLoad; }catch(e){}
+}
+/* Is there a voice that can actually say this language? An English voice reading
+   Arabic is worse than silence — it sounds like nonsense and the listener loses
+   confidence in the whole thing. */
+function voiceFor(lang){
+  if(!VOICE.ok) return null;
+  if(!VOICE.voices.length) voiceLoad();
+  var want = lang === "ar" ? "ar" : "en";
+  var hit = null;
+  VOICE.voices.forEach(function(v){
+    var L = (v.lang||"").toLowerCase().replace("_","-");
+    if(!hit && L.indexOf(want) === 0) hit = v;
+  });
+  return hit;
+}
+function canSpeak(){
+  if(!VOICE.ok || !VOICE.on) return false;
+  /* no voices listed at all usually means the list has not arrived yet rather
+     than that there are none, so give it the benefit of the doubt */
+  if(!VOICE.voices.length) return true;
+  return !!voiceFor(S.ar ? "ar" : "en");
+}
+function speakStop(){
+  if(!VOICE.ok) return;
+  try{ window.speechSynthesis.cancel(); }catch(e){}
+  S.saying = null;
+}
+function speak(text){
+  if(!VOICE.ok || !VOICE.on || !text) return false;
+  try{
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(String(text));
+    var lang = S.ar ? "ar" : "en";
+    var v = voiceFor(lang);
+    if(v){ u.voice = v; u.lang = v.lang; } else { u.lang = lang === "ar" ? "ar-LB" : "en-GB"; }
+    /* slower than default: this is an instruction, not a paragraph */
+    u.rate = 0.92; u.pitch = 1;
+    u.onend = function(){ S.saying = null; markSaying(); };
+    u.onerror = function(){ S.saying = null; markSaying(); };
+    window.speechSynthesis.speak(u);
+    return true;
+  }catch(e){ return false; }
+}
+/* the button. The text travels in an attribute so a name with an apostrophe in
+   it cannot break the handler, and the same markup works inside any card. */
+function sayBtn(text, cls){
+  if(!canSpeak()) return "";
+  return '<button class="sayb '+(cls||"")+'" data-a="say" data-say="'+h(String(text||""))+'" '+
+    'aria-label="'+h(t("Read this out loud"))+'">'+svg("speak")+'</button>';
+}
+function markSaying(){
+  var all = document.querySelectorAll(".sayb");
+  Array.prototype.forEach.call(all, function(b){
+    b.classList.toggle("on", S.saying != null && b.getAttribute("data-say") === S.saying);
+  });
+}
+/* Everything worth hearing on this screen, in order, as one passage. Built from
+   the rendered text rather than from a second copy of the words, so it cannot
+   drift out of step with what is on the glass. */
+function screenSpeech(){
+  var v = $("view"); if(!v) return "";
+  var bits = [];
+  var ttl = document.querySelector("#appbar .ttl");
+  if(ttl) bits.push(ttl.textContent.trim());
+  Array.prototype.forEach.call(
+    v.querySelectorAll("p.h, .big, .card b, .kv, .item .t, .note div, .bigrow span.lab, .btn"),
+    function(el){
+      var txt = (el.textContent||"").replace(/\s+/g," ").trim();
+      if(txt && txt.length < 160 && bits.indexOf(txt) === -1) bits.push(txt);
+    });
+  return bits.slice(0, 40).join(". ");
+}
 
 /* ---------------- navigation ---------------- */
 function snap(){ return {tab:S.tab, stack:S.stack.slice()}; }
@@ -1689,9 +2045,15 @@ function paint(){
   $("appbar").hidden=false; $("tabbar").hidden=false;
   var tabDef=null; R.tabs.forEach(function(x){ if(x[0]===S.tab) tabDef=x; });
   var title = c ? (c.title || screenTitle(c.s)) : t(tabDef?tabDef[1]:R.label);
+  /* Field and operations roles start a step larger, because the screen is read
+     at arm's length, outdoors, often in sun. Everyone can change it. */
+  if(!S.tsSet){ S.ts = FIELD_ROLES.indexOf(S.role) >= 0 ? 3 : 2; }
+  dev.setAttribute("data-ts", String(S.ts));
   $("appbar").innerHTML =
     '<button class="iconbtn" data-a="back" aria-label="'+h(t("Back"))+'">'+svg("back")+'</button>'+
     '<div class="ttl">'+h(title)+'<span class="sub">'+h(c?t(R.label):TOWN)+'</span></div>'+
+    (canSpeak() ? '<button class="iconbtn'+(S.saying==="__screen__"?" on":"")+'" data-a="sayscreen" '+
+       'aria-label="'+h(t("Read the screen out loud"))+'">'+svg("speak")+'</button>' : '')+
     '<button class="iconbtn" data-a="guide" aria-label="'+h(t("Guide"))+'">'+svg("help")+'</button>'+
     '<button class="iconbtn" data-a="menu" aria-label="Menu">'+svg("gear")+'</button>';
   S.photoCtx = false;
@@ -1706,10 +2068,18 @@ function paint(){
   var wantsCam = (key===S.role+".scan" || key===S.role+".sorting" || key==="facility.inspect"
                   || key==="customer.pickup" || S.camPhoto || S.pickScan);
   if(!wantsCam){ stopCam(); S.pickCamTried=false; S.pickScan=false; }
-  /* reading the tag is the point of this screen, so the scanner opens itself */
-  if(key==="customer.pickup" && !S.pickupPhoto && !S.pickTag && !S.camOn && !S.camErr && !S.pickCamTried){
-    S.pickCamTried=true; S.pickScan=true; setTimeout(startCam, 60);
+  /* Reading the tag is the whole point of these screens, so the camera opens
+     itself. Pressing "open camera" forty times a shift is not a feature, and a
+     collector who cannot read the button never pressed it at all. Whether it
+     may open is CAMPERM, set by the administrator; the handset still asks the
+     person once, the first time, and that answer is the browser's to keep. */
+  var scanScreen = (key===S.role+".scan" || key==="facility.inspect" || key==="customer.pickup");
+  if(scanScreen && camAuto(S.role) && !S.camOn && !S.camErr && !S.camTried){
+    S.camTried = true;
+    if(key==="customer.pickup"){ S.pickCamTried=true; S.pickScan=true; }
+    setTimeout(startCam, 60);
   }
+  if(!scanScreen) S.camTried = false;
 }
 var TITLES = {};
 function screenTitle(s){ return TITLES[s] || s; }
@@ -2149,14 +2519,15 @@ function bindCustomer(ent){
   ME.exempt = d.st==="exempt";
 }
 /* ---- the gate, when the app is running self-contained ----
-   There is no honest one-time code without a server. A code this device
-   generates is a code this device already knows, so checking it proves nothing
-   about who holds the number \u2014 it is friction wearing a security badge.
-   So self-contained mode does not pretend: the REGISTER is the gate, any six
-   digits pass, and the screen says so. Real verification is the live path,
-   where the provider issues and checks the code and the browser never sees it.  */
+   Two things have to be true to get in: the number is on the register, and the
+   access code matches. The code is SHARED, not secret \u2014 it sits in this file,
+   so anyone who reads the page can find it. It keeps a passer-by out of a
+   working session; it is not authentication, and the screen does not claim it
+   is. Real verification is the live path, where the provider issues and checks
+   a one-time code per number and the browser never sees it. */
+var ACCESS_CODE = "680646";
 function codeOk(entry, code){
-  return !!entry && digits(code).length === 6;
+  return !!entry && digits(code) === ACCESS_CODE;
 }
 /* One line that says which register is answering. Silent when self-contained,
    because that is the normal state and nobody needs telling. */
@@ -2230,20 +2601,21 @@ function paintLogin(){
     '<div class="mark">&#1576;</div>'+
     '<h2 style="font-size:21px;font-weight:600">Confirm your number</h2>'+
     '<p class="b2">'+h(LIVE.on? t("Enter the six-digit code sent on WhatsApp to")
-                              : t("Confirming"))+' <b class="mono">'+
+                              : t("Enter the access code for"))+' <b class="mono">'+
       h(maskNum(S.cc, S.phone))+'</b>'+
       (findNumber(S.cc,S.phone)? ', '+h(t("the number on the register for"))+' <b>'+h(findNumber(S.cc,S.phone).name)+'</b>' : '')+
       '.</p>'+
-    '<label class="fld"><span>'+h(LIVE.on? t("WhatsApp confirmation code") : t("Six digits"))+'</span>'+
+    '<label class="fld"><span>'+h(LIVE.on? t("WhatsApp confirmation code") : t("Access code"))+'</span>'+
       '<input id="otp" class="mono" inputmode="numeric" maxlength="6" placeholder="------" style="text-align:center;font-size:26px;letter-spacing:.3em"></label>'+
     '<button class="btn p"'+(S.liveBusy?' disabled':'')+' data-a="checkotp">'+
       h(S.liveBusy? t("Checking") : t("Continue"))+'</button>'+
     (!LIVE.on
-      ? '<div class="note"><span>'+svg("info")+'</span><div><b>No code has been sent yet</b>'+
-        'Until the municipality\u2019s WhatsApp sender is connected, the register is the gate: '+
-        'only a number already on it can get in, and any six digits will pass. '+
-        'Once the sender is live the code is issued and checked on the server, and the number '+
-        'itself is what proves who you are.</div></div>'
+      ? '<div class="note"><span>'+svg("info")+'</span><div><b>The shared access code</b>'+
+        'No code has been sent. Until the municipality\u2019s WhatsApp sender is connected, '+
+        'two things let you in: your number is on the register, and you have the access code '+
+        'you were given. The same code works for everyone, so it keeps a passer-by out of a '+
+        'working session rather than proving who you are. Once the sender is live, a one-time '+
+        'code goes to your own number and is checked on the server.</div></div>'
       : '')+
     '<div class="btnrow"><button class="btn" data-a="backphone">'+h(t("Back"))+'</button>'+
     '<button class="btn" data-a="support">'+svg("help","ic")+h(t("Help"))+'</button></div>'+
@@ -2283,7 +2655,7 @@ V["customer.home"]=function(){
     '<div><p class="sm">'+h(t("Amount due"))+' &middot; '+h(dueLabel())+
       (liveOn()?' <span class="pill p-good"><i></i>live</span>':'')+'</p>'+
       '<div class="big">'+money(dueNow())+'</div></div>'+
-    '<button class="btn p sm" style="flex:none;white-space:nowrap" data-a="push" data-v="pay">'+h(t("Pay now"))+'</button></div></div>'+
+    '<button class="btn p sm" style="flex:none;white-space:nowrap" data-a="push" data-v="pay">'+svg("cash","ic ic3")+h(t("Pay now"))+'</button></div></div>'+
 
   '<div class="card"><p class="eyebrow">'+h(t("Next collection"))+'</p>'+
     SCHED.map(function(x){
@@ -2296,7 +2668,7 @@ V["customer.home"]=function(){
   '<div class="quick">'+
     '<button data-a="push" data-v="pickup">'+svg("bag")+'<span>'+h(t("Request a pickup"))+'</span></button>'+
     '<button data-a="push" data-v="tags">'+svg("ticket")+'<span>'+h(t("Request tags"))+'</span></button>'+
-    '<button data-a="push" data-v="sortguide">'+svg("leaf")+'<span>'+h(t("How to sort"))+'</span></button>'+
+    '<button data-a="push" data-v="sortguide">'+svg("leaf","ic ic3")+svg("leaf")+'<span>'+h(t("How to sort"))+'</span></button>'+
     '<button data-a="push" data-v="training">'+svg("task")+'<span>'+h(t("Sorting training"))+(S.trainDone?' \u2713':'')+'</span></button>'+
   '</div>'+
 
@@ -2362,7 +2734,8 @@ function contactsView(prem, canAdmin){
       return '<div class="item"><span class="av">'+svg("user")+'</span>'+
         '<span class="t"><b>'+h(c.name)+'</b><span class="mono">+'+h(c.msisdn)+' &middot; '+h(c.rel)+'</span></span>'+
         (c.primary? '<span class="pill p-acc"><i></i>primary</span>'
-          : '<span class="pill p-neut"><i></i>affiliate</span>')+'</div>';
+          : '<span class="pill p-neut"><i></i>affiliate</span>')+
+        sayBtn(c.name+". "+c.rel+". "+(c.primary? t("Primary contact") : t("Affiliate")))+'</div>';
     }).join("")+'</div></div>'+
     '<div class="sect"><span class="eyebrow">Add an affiliate number</span></div>'+
     '<label class="fld"><span>Mobile number</span>'+
@@ -2371,14 +2744,14 @@ function contactsView(prem, canAdmin){
     '<label class="fld"><span>Name</span><input id="ct_name"></label>'+
     '<label class="fld"><span>Relation</span><select id="ct_rel">'+
       RELATIONS.map(function(r){ return '<option>'+h(r)+'</option>'; }).join("")+'</select></label>'+
-    '<button class="btn p" data-a="addcontact" data-v="'+h(prem)+'">Add the number</button>'+
+    '<button class="btn p" data-a="addcontact" data-v="'+h(prem)+'">'+svg("users","ic ic3")+'Add the number</button>'+
     '<div class="sect"><span class="eyebrow">Transfer the account</span></div>'+
     (list.filter(function(c){ return !c.primary; }).length
       ? '<label class="fld"><span>Transfer to</span><select id="ct_to">'+
         list.filter(function(c){ return !c.primary; }).map(function(c){
           return '<option value="'+h(c.msisdn)+'">'+h(c.name)+' &middot; '+h(c.rel)+'</option>'; }).join("")+
         '</select></label>'+
-        '<button class="btn d" data-a="transfer" data-v="'+h(prem)+'">Transfer and step down to affiliate</button>'
+        '<button class="btn d" data-a="transfer" data-v="'+h(prem)+'">'+svg("users","ic ic3")+'Transfer and step down to affiliate</button>'
       : '<p class="sm">Add an affiliate number first. An account can only be transferred to a number already on it.</p>')+
     '<p class="sm">Arrears and the sorting record stay with the premises, not with the person. A transfer does not clear a balance'+
     (canAdmin? ', and an administrator transfer is recorded against the administrator who made it' : '')+'.</p>';
@@ -2403,14 +2776,14 @@ V["customer.inbox"]=function(){
           '<span class="nb"><b>'+h(x.t)+'</b><p>'+h(x.b)+'</p><span>'+h(x.d)+'</span></span>'+
           (unread?'<span class="dot"></span>':'')+'</button>';
       }).join("")+'</div>'+
-      (unreadCount()? '<button class="btn" data-a="readall">'+h(t("Mark all as read"))+'</button>' : '')+
+      (unreadCount()? '<button class="btn" data-a="readall">'+svg("yes","ic ic3")+h(t("Mark all as read"))+'</button>' : '')+
       '<p class="sm">Service changes, payment reminders and draw results arrive here and by SMS. Turn SMS off under Settings.</p>'
     : '<div class="card plain"><p class="eyebrow">Municipality of Zaytouna</p><div class="chat">'+
         MSGS.map(function(m){
           return '<div class="bub '+(m.me?"m":"b")+'">'+h(m.t)+'<span class="w">'+h(m.d)+'</span></div>';
         }).join("")+'</div></div>'+
       '<label class="fld"><span>'+h(t("Reply"))+'</span><input id="msgin" placeholder="'+h(t("Type a message"))+'"></label>'+
-      '<button class="btn p" data-a="sendmsg">'+h(t("Send"))+'</button>'+
+      '<button class="btn p" data-a="sendmsg">'+svg("doc","ic ic3")+h(t("Send"))+'</button>'+
       '<p class="sm">Messages go to the municipal office, not to the collection crew. Anything urgent on the street should be reported as a problem so it reaches operations.</p>');
 };
 
@@ -2459,8 +2832,8 @@ V["customer.help"]=function(){
     '<div class="chips">'+CHAT_SUGGEST.map(function(q){
       return '<button class="chip" data-a="chatq" data-v="'+h(q)+'">'+h(q)+'</button>'; }).join("")+'</div>'+
     '<label class="fld"><span>'+h(t("Your question"))+'</span><input id="chatin" placeholder="'+h(t("Type a question"))+'"></label>'+
-    '<div class="btnrow"><button class="btn" data-a="chatclear">'+h(t("Clear"))+'</button>'+
-    '<button class="btn p" data-a="chatsend">'+h(t("Ask"))+'</button></div>'+
+    '<div class="btnrow"><button class="btn" data-a="chatclear">'+svg("no","ic ic3")+h(t("Clear"))+'</button>'+
+    '<button class="btn p" data-a="chatsend">'+svg("help","ic ic3")+h(t("Ask"))+'</button></div>'+
     '<p class="sm">The assistant answers from your own account and the published rules. It does not guess, and it cannot change anything on your account. '+
     'Anything it cannot answer goes to the municipal office.</p>'+
     '<div class="sect"><span class="eyebrow">'+h(t("Feedback"))+'</span></div>'+
@@ -2469,7 +2842,7 @@ V["customer.help"]=function(){
       return '<button class="chip'+(S.fbScore===n?" on":"")+'" data-a="fbscore" data-v="'+n+'">'+n+'</button>'; }).join("")+
     '<span class="sm" style="align-self:center">1 poor &middot; 5 good</span></div>'+
     '<label class="fld"><span>'+h(t("What would you change"))+'</span><input id="fbtext" placeholder="'+h(t("optional"))+'"></label>'+
-    '<button class="btn p" data-a="fbsend">'+h(t("Send feedback"))+'</button>'+
+    '<button class="btn p" data-a="fbsend">'+svg("doc","ic ic3")+h(t("Send feedback"))+'</button>'+
     '<p class="sm">Feedback is read by the municipality and reported in the monthly service review. It is not a complaint channel &mdash; use Report a problem for anything that needs a crew.</p></div>'+
     '<button class="btn row" data-a="push" data-v="creports"><span>'+svg("alert","ic")+' Report a problem</span><span class="chev">'+svg("chev")+'</span></button>';
 }; TITLES.schedule="Collection schedule";
@@ -2538,7 +2911,7 @@ V["customer.sorting"]=function(){
   'If you are asking for a pickup, the tag goes on the request itself.</div></div>'+
   '<button class="btn p" data-a="push" data-v="pickup">'+svg("bag","ic")+h(t("Request a pickup"))+'</button>'+
 
-  '<button class="card flat" style="text-align:start;width:100%;padding:11px 13px" data-a="push" data-v="sortguide">'+
+  '<button class="card flat" style="text-align:start;width:100%;padding:11px 13px" data-a="push" data-v="sortguide">'+svg("leaf","ic ic3")+
     ill("bags3","xs")+
     '<div style="display:flex;gap:10px;align-items:center;margin-top:9px">'+svg("leaf","ic")+
     '<div style="flex:1"><b style="font-size:13.5px;display:block">'+h(t("What goes in which bag"))+'</b>'+
@@ -2572,7 +2945,7 @@ V["customer.bagscanned"]=function(code){
   if(!K){
     return '<div class="card c" style="text-align:center"><p class="h">'+h(t("Unrecognised code"))+'</p>'+
       '<p class="mono">'+h(code)+'</p><p class="sm">Not one of the four Baladi tags. Nothing has been recorded.</p></div>'+
-      '<button class="btn" data-a="back">'+h(t("Back"))+'</button>';
+      '<button class="btn" data-a="back">'+svg("back","ic ic3")+h(t("Back"))+'</button>';
   }
   /* a place tag says where you are; a bag tag says whose bag it is */
   if(P.thing==="place"){
@@ -2582,8 +2955,8 @@ V["customer.bagscanned"]=function(code){
       '<p class="mono">'+h(code)+'</p>'+
       '<p class="sm">'+h(codeSubject(P))+'. This is a place, not a bag \u2014 nothing is credited by scanning it.</p></div>'+
       placeRow(pl)+
-      '<button class="btn p" data-a="push" data-v="pickup">'+h(t("Request a pickup"))+'</button>'+
-      '<button class="btn" data-a="back">'+h(t("Back"))+'</button>';
+      '<button class="btn p" data-a="push" data-v="pickup">'+svg("truck","ic ic3")+h(t("Request a pickup"))+'</button>'+
+      '<button class="btn" data-a="back">'+svg("back","ic ic3")+h(t("Back"))+'</button>';
   }
   var mine = P.prem===ME.id;
   return ''+
@@ -2599,8 +2972,8 @@ V["customer.bagscanned"]=function(code){
   '<div class="kv"><span>'+h(t("Credited"))+'</span><b>'+(P.state==="issued"?"when the crew records the pickup":"not yet issued")+'</b></div></div>'+
   (mine? '' : '<div class="note w"><span>'+svg("alert")+'</span><div><b>This tag is not on your account</b>'+
     'It is issued to '+h(codeSubject(P))+'. Scanning it will not credit you.</div></div>')+
-  '<button class="btn p" data-a="push" data-v="pickup">'+h(t("Request a pickup"))+' for this bag</button>'+
-  '<button class="btn" data-a="back">'+h(t("Back"))+'</button>';
+  '<button class="btn p" data-a="push" data-v="pickup">'+svg("truck","ic ic3")+h(t("Request a pickup"))+' for this bag</button>'+
+  '<button class="btn" data-a="back">'+svg("back","ic ic3")+h(t("Back"))+'</button>';
 };
 
 
@@ -2615,7 +2988,7 @@ V["customer.tags"]=function(){
   '<label class="fld"><span>Collect from</span><select id="tagfrom">'+
     TAGPOINTS.filter(function(p){return p.open;}).map(function(p){ return '<option>'+h(p.n)+'</option>'; }).join("")+
   '</select></label>'+
-  '<button class="btn p" data-a="reqtags">'+h(t("Request tags"))+'</button>'+
+  '<button class="btn p" data-a="reqtags">'+svg("bag","ic ic3")+h(t("Request tags"))+'</button>'+
   '<div class="sect"><span class="eyebrow">Reserved for you</span></div>'+
   '<div class="card plain"><div class="list">'+TAG_POOL.slice(0,3).map(function(s){
     return '<div class="item"><span class="t"><b class="mono">'+h(s)+'</b><span>unissued</span></span>'+
@@ -2664,8 +3037,8 @@ V["customer.training"]=function(){
       '<span class="ser">DV-2026-BONUS-2417</span></div>'+
       '<p class="sm">A one-time bonus voucher, awarded once per customer. It enters this month&rsquo;s draw and the national draw on 28 December.</p>'+
       '<div class="tm"><span>Issued today</span><span>all draws</span></div></div>'+
-      '<button class="btn p" data-a="tab" data-v="rewards">See it in your vouchers</button>'+
-      '<button class="btn" data-a="quizreset">Take it again &mdash; the bonus is awarded only once</button>';
+      '<button class="btn p" data-a="tab" data-v="rewards">'+svg("ticket","ic ic3")+'See it in your vouchers</button>'+
+      '<button class="btn" data-a="quizreset">'+svg("sync","ic ic3")+'Take it again &mdash; the bonus is awarded only once</button>';
   }
   var q=QUIZ[S.quizI];
   return '<div class="card plain"><p class="eyebrow">Question '+(S.quizI+1)+' of '+QUIZ.length+'</p>'+
@@ -2691,7 +3064,7 @@ V["customer.pickup"]=function(){
   (S.pickTag
     ? '<div class="card acc"><div style="display:flex;gap:10px;align-items:center">'+svg("check","ic")+
       '<div style="flex:1"><p class="eyebrow">'+h(t("Tag read"))+'</p><p class="mono" style="font-size:13px">'+h(S.pickTag)+'</p></div>'+
-      '<button class="btn sm" data-a="pickrescan">'+h(t("Scan another"))+'</button></div></div>'
+      '<button class="btn sm" data-a="pickrescan">'+svg("scan","ic ic3")+h(t("Scan another"))+'</button></div></div>'
     : scanCard(t("Scan the tag on the bag")))+
   ill("tagbag","s")+
   '<label class="fld"><span>Tag on the bag</span>'+
@@ -2706,7 +3079,7 @@ V["customer.pickup"]=function(){
     '<button class="on" data-v="thu">Thursday 06:30–09:00</button>'+
     '<button data-v="sat">Saturday 06:30–09:00</button></div></label>'+
   '<label class="fld"><span>Note for the crew</span><input id="pnote" placeholder="optional"></label>'+
-  '<button class="btn p" data-a="pickupsend">Send request</button>'+
+  '<button class="btn p" data-a="pickupsend">'+svg("doc","ic ic3")+'Send request</button>'+
   '<p class="sm">Requests close at 22:00. Only points that asked are scheduled on the organic round.</p>'+
   '<div class="note"><span>'+svg("info")+'</span><div><b>Commingled needs no request</b>'+
   'Commingled waste is systematic collection &mdash; every point on the line, '+h(SCHED[0].days)+'. There is nothing to ask for.</div></div>';
@@ -2739,7 +3112,7 @@ V["customer.pay"]=function(){
         '<p class="sm">'+h(d.when)+'</p></div></details>';
     }).join("")+
 
-    '<button class="btn p" data-a="paid" data-v="'+h(ref)+'">'+h(t("I have sent the payment"))+'</button>'+
+    '<button class="btn p" data-a="paid" data-v="'+h(ref)+'">'+svg("yes","ic ic3")+h(t("I have sent the payment"))+'</button>'+
     '<p class="sm">Telling us does not record the payment \u2014 the municipality records it when the money arrives. '+
     'It only lets you track it here in the meantime.</p>'+
 
@@ -2760,7 +3133,7 @@ V["customer.paysent"]=function(){
     '<div class="card plain"><p class="eyebrow">If it has not shown after '+PAY_SETTLE_HOURS+' hours</p>'+
     '<p class="sm">Check the reference you wrote on the transfer. If it was missing or wrong the payment is still '+
     'yours \u2014 send the transfer slip from your Account tab and the municipality will match it by hand.</p></div>'+
-    '<button class="btn" data-a="tab" data-v="account">'+h(t("Back to my account"))+'</button>';
+    '<button class="btn" data-a="tab" data-v="account">'+svg("user","ic ic3")+h(t("Back to my account"))+'</button>';
 };
 
 /* One receipt, used by the customer, the collector and the cashier alike. */
@@ -2819,7 +3192,7 @@ V["customer.rewards"]=function(){
       '<p class="sm">'+h(S.ar?v.wAr:v.w)+'</p>'+
       '<div class="tm"><span>Issued '+h(v.at)+'</span><span>'+(v.bonus?'all draws':'October draw')+'</span></div></div>';
   }).join("")+
-  (!S.trainBonus ? '<button class="card flat" style="text-align:start;width:100%" data-a="push" data-v="training">'+
+  (!S.trainBonus ? '<button class="card flat" style="text-align:start;width:100%" data-a="push" data-v="training">'+svg("gift","ic ic3")+
     '<p class="h">One-time bonus still available</p>'+
     '<p class="sm">Finish the sorting training once and a fourth voucher is issued &mdash; it enters every draw from then on. Awarded once per customer.</p></button>' : '')+
   fold(t("How vouchers are counted"),
@@ -2847,7 +3220,8 @@ V["customer.account"]=function(){
   return ''+
   '<div class="card"><div style="display:flex;gap:11px;align-items:center">'+
     '<span class="av" style="width:44px;height:44px;border-radius:14px">NH</span>'+
-    '<div style="flex:1"><p class="h">'+h(ME.name)+'</p><p class="sm mono">'+h(ME.id)+' · +'+h(ME.msisdn)+'</p></div></div>'+
+    '<div style="flex:1;min-width:0"><p class="h">'+h(ME.name)+'</p><p class="sm mono">'+h(ME.id)+' · +'+h(ME.msisdn)+'</p></div>'+
+    sayBtn(ME.name+". "+t("Account")+" "+ME.id+". "+t("Payable")+" "+money(myPayable())+".")+'</div>'+
     '<div class="kv"><span>Address</span><b style="font-size:12.5px">'+h(ME.addr)+'</b></div>'+
     '<div class="kv"><span>Category</span><b>Residential household</b></div>'+
     '<div class="kv"><span>Collection point</span><b class="mono">'+h(ME.point)+'</b></div>'+
@@ -2859,12 +3233,87 @@ V["customer.account"]=function(){
     '<div class="kv"><span>Instalment 2</span><b>'+money(myPayable()/2)+' due 30 Nov</b></div></div>'+
   '<button class="btn row" data-a="push" data-v="history"><span>'+svg("doc","ic")+' '+h(t("Payment history"))+'</span><span class="chev">'+svg("chev")+'</span></button>'+
   '<button class="btn row" data-a="push" data-v="creports"><span>'+svg("alert","ic")+' Report a problem</span><span class="chev">'+svg("chev")+'</span></button>'+
+  '<button class="btn row" data-a="push" data-v="objections"><span>'+svg("check","ic")+' '+h(t("Object to this assessment"))+'</span>'+
+    (openObjections().length? '<span class="pill p-warn"><i></i>'+h(t("Under review"))+'</span>'
+                            : '<span class="chev">'+svg("chev")+'</span>')+'</button>'+
   '<button class="btn row" data-a="push" data-v="contacts"><span>'+svg("users","ic")+' '+h(t("Who can act on this account"))+'</span>'+
     '<span class="pill p-neut">'+contactsOf(ME.id).length+'</span></button>'+
   '<button class="btn row" data-a="push" data-v="inbox"><span>'+svg("bell","ic")+' '+h(t("Notifications and messages"))+'</span>'+
     (unreadCount()? '<span class="pill p-acc"><i></i>'+unreadCount()+' new</span>' : '<span class="chev">'+svg("chev")+'</span>')+'</button>'+
   '<button class="btn row" data-a="push" data-v="help"><span>'+svg("info","ic")+' '+h(t("Help and feedback"))+'</span><span class="chev">'+svg("chev")+'</span></button>'+
   '<button class="btn row" data-a="menu"><span>'+svg("gear","ic")+' Settings and language</span><span class="chev">'+svg("chev")+'</span></button>';
+};
+
+/* ---- objecting to the assessment ----
+   A fee a household cannot dispute is a fee they will not pay. The statutory
+   window is thirty days, and while an objection is open the amount is PAUSED:
+   the arrears ladder reports "paused" and the nightly notices skip them. That is
+   enforced in the database, not here, so it holds whatever this screen does.  */
+function myObjections(){
+  if(LIVE.on && LIVE.objections) return LIVE.objections.map(function(o){
+    return {ref:o.ref, prem:o.premises_id, ground:o.ground, st:o.status,
+            at:(o.filed_at||"").slice(0,10), due:(o.due_by||"").slice(0,10),
+            text:o.statement||"", dec:o.decision_reason||"", adj:o.adjustment_usd};
+  });
+  return MY_OBJECTIONS;
+}
+function openObjections(){
+  return myObjections().filter(function(o){
+    return o.st==="submitted" || o.st==="under_review"; });
+}
+function groundLabel(g){
+  var hit=null; OBJ_GROUNDS.forEach(function(x){ if(x[0]===g) hit=x; });
+  return hit ? (S.ar?hit[2]:hit[1]) : g;
+}
+function objStatusLabel(st){
+  return {submitted:"Filed, awaiting the panel", under_review:"Under review",
+          upheld:"Upheld", partly_upheld:"Partly upheld",
+          rejected:"Rejected", withdrawn:"Withdrawn"}[st] || st;
+}
+TITLES.objections="Objections"; TITLES.object="Object to the assessment";
+V["customer.objections"]=function(){
+  var mine = myObjections();
+  return '<div class="note"><span>'+svg("info")+'</span><div><b>'+
+      h(t("If the assessment is wrong, say so"))+'</b>'+
+      h(t("The Review Panel has thirty days to decide. While it is deciding, the amount is paused \u2014 you will not be chased for it and it will not age into arrears."))+
+      '</div></div>'+
+    (mine.length ? '<div class="card plain"><p class="eyebrow">'+h(t("Your objections"))+'</p><div class="list">'+
+      mine.map(function(o){
+        var open = o.st==="submitted"||o.st==="under_review";
+        return '<div class="item" style="cursor:default"><span class="av">'+svg("check")+'</span>'+
+          '<span class="t"><b>'+h(groundLabel(o.ground))+'</b>'+
+            '<span class="mono">'+h(o.ref)+' \u00b7 '+h(o.at)+'</span>'+
+            (o.dec? '<span>'+h(o.dec)+'</span>' : '')+'</span>'+
+          '<span class="r"><span class="pill '+(open?"p-warn":"p-good")+'"><i></i>'+
+            h(t(objStatusLabel(o.st)))+'</span>'+
+            (o.adj!=null? '<b>'+money(Number(o.adj))+'</b>' : (open? '<span>'+h(t("by"))+' '+h(o.due)+'</span>' : ''))+
+          '</span></div>';
+      }).join("")+'</div></div>' : '')+
+    (openObjections().length
+      ? '<div class="note"><span>'+svg("info")+'</span><div><b>'+h(t("One at a time"))+'</b>'+
+        h(t("An objection on the same ground is already open. The panel will decide this one before another can be filed."))+'</div></div>'
+      : '<button class="btn p" data-a="push" data-v="object">'+svg("check","ic")+
+        h(t("File an objection"))+'</button>')+
+    fold(t("What the panel can decide"),
+      '<div class="kv"><span>'+h(t("Upheld"))+'</span><b>'+h(t("The register is corrected and the bill adjusted"))+'</b></div>'+
+      '<div class="kv"><span>'+h(t("Partly upheld"))+'</span><b>'+h(t("Some of it is corrected"))+'</b></div>'+
+      '<div class="kv"><span>'+h(t("Rejected"))+'</span><b>'+h(t("With a reason, in writing"))+'</b></div>'+
+      '<p class="sm">'+h(t("Every decision is recorded against the account and sent to you. A decision cannot be changed afterwards \u2014 only objected to again on a different ground."))+'</p>');
+};
+V["customer.object"]=function(){
+  return '<div class="card"><p class="h">'+h(t("What is wrong?"))+'</p>'+
+    '<label class="lab" for="objg">'+h(t("Ground"))+'</label>'+
+    '<select id="objg" class="inp">'+OBJ_GROUNDS.map(function(g){
+      return '<option value="'+h(g[0])+'">'+h(S.ar?g[2]:g[1])+'</option>'; }).join("")+'</select>'+
+    '<label class="lab" for="objt">'+h(t("Tell the panel why"))+'</label>'+
+    '<textarea id="objt" class="inp" rows="5" placeholder="'+
+      h(t("At least twenty characters. Say what the register has wrong and what it should say."))+'"></textarea>'+
+    '<p class="sm">'+h(t("You can attach a title deed, a power bill or a licence after filing. The panel may ask for one."))+'</p>'+
+    '</div>'+
+    '<div class="note"><span>'+svg("info")+'</span><div><b>'+h(t("Filed once"))+'</b>'+
+      h(t("An objection cannot be edited after it is filed \u2014 you can withdraw it and file again, but only before the panel starts. That is deliberate: the panel decides on what was actually submitted."))+
+      '</div></div>'+
+    '<button class="btn p" data-a="objsend">'+svg("check","ic")+h(t("File it"))+'</button>';
 };
 
 /* ============================== shared bits ============================== */
@@ -3126,14 +3575,45 @@ var LEARN = {
   defService: {crew:3.5, driver:2.0, collector:6.0}
 };
 function learnKeyFor(role, stop){ return role==="collector" ? stop.id : stop.id; }
+/* Where the memory comes from. The copy in this file lasts until the tab closes;
+   the one in the register outlives it, so when the register is live that is the
+   one to believe. Both are the same decaying average, so they are comparable;
+   the difference is only how long they survive. */
+function learnedService(role, key){
+  var L = LIVE.learning;
+  if(L && L.role === role && L.service && L.service[key] && L.service[key].min != null){
+    var v = Number(L.service[key].min);
+    if(isFinite(v) && v > 0) return v;
+  }
+  return null;
+}
+function learnedSpeed(role){
+  var L = LIVE.learning;
+  if(L && L.role === role && L.speed && L.speed.km_per_min != null){
+    var v = Number(L.speed.km_per_min);
+    if(isFinite(v) && v > 0) return v;
+  }
+  return null;
+}
 function svcMin(role, stop){
+  var key = learnKeyFor(role, stop);
+  var live = learnedService(role, key);
+  if(live != null) return live;
   var m = LEARN.service[role] || {};
-  var v = m[learnKeyFor(role, stop)];
+  var v = m[key];
   return v != null ? v : (LEARN.defService[role] || 4);
 }
 function legMin(role, a, b){
-  var sp = LEARN.speed[role] || 0.3;
+  var sp = learnedSpeed(role) || LEARN.speed[role] || 0.3;
   return km(a.lat, a.lon, b.lat, b.lon) / sp;
+}
+/* which memory the screen is actually using, so it can say so rather than imply it */
+function learnSource(role){
+  var L = LIVE.learning;
+  if(L && L.role === role && L.service && Object.keys(L.service).length)
+    return {live:true, n:Object.keys(L.service).length,
+            obs:(L.speed && L.speed.observations) || 0};
+  return {live:false, n:Object.keys(LEARN.service[role]||{}).length, obs:LEARN.n[role]||0};
 }
 function routeMinutes(role, order){
   if(!order.length) return 0;
@@ -3219,9 +3699,20 @@ function scanCard(label){
     '<div class="reticle"><i></i><div class="scanline"></div></div>'+
     '<div class="scanstate" id="scanstate"><i class="dotlive"></i>'+h(t("Handheld scanner"))+' · '+h(t("Waiting for a scan"))+'</div>'+
     '<div class="scancap">'+h(label)+'</div></div>'+
-    (S.camErr? '<div class="note w"><span>'+svg("info")+'</span><div><b>Live camera unavailable</b>'+h(S.camErr)+'</div></div>' : '')+
-    '<div class="btnrow"><button class="btn p" data-a="cam">'+svg("cam","ic")+h(S.camOn?t("Stop camera"):t("Open camera"))+'</button>'+
-    '<button class="btn" data-a="manual">'+svg("doc","ic")+h(t("Enter the code"))+'</button></div></div>';
+    (S.camErr
+      ? '<div class="note w"><span>'+svg("alert")+'</span><div><b>'+h(t("The camera is not available"))+'</b>'+
+        h(S.camErr)+' '+h(t("Type the code instead \u2014 it records exactly the same."))+'</div></div>'
+      : '')+
+    '<div class="btnrow">'+
+      (S.camOn
+        ? '<button class="btn" data-a="cam">'+svg("camoff","ic ic3")+h(t("Turn the camera off"))+'</button>'
+        : '<button class="btn p" data-a="cam">'+svg("cam","ic ic3")+h(t("Turn the camera on"))+'</button>')+
+      '<button class="btn" data-a="manual">'+svg("aa","ic ic3")+h(t("Type the code"))+'</button>'+
+    '</div>'+
+    (canSpeak() ? '<div style="display:flex;gap:10px;align-items:center">'+
+        sayBtn(label+". "+t("Point the camera at the printed code. Or press type the code."))+
+        '<span class="sm">'+h(t("Press the speaker to hear what to do"))+'</span></div>' : '')+
+    '</div>';
 }
 function streamSeg(group){
   return '<div class="seg" data-g="'+group+'">'+Object.keys(STREAMS).map(function(k){
@@ -3252,7 +3743,7 @@ V["crew.scanned"]=function(code){
     return '<div class="card c" style="text-align:center"><p class="h">'+h(t("Unrecognised code"))+'</p>'+
       '<p class="mono" style="font-size:14px">'+h(code)+'</p>'+
       '<p class="sm">Not a Baladi tag. Nothing has been recorded. Type the serial by hand if the label is damaged.</p></div>'+
-      '<button class="btn p" data-a="back">'+h(t("Back"))+'</button>';
+      '<button class="btn p" data-a="back">'+svg("back","ic ic3")+h(t("Back"))+'</button>';
   }
 
   /* ---------- the header says what this actually is ---------- */
@@ -3288,13 +3779,13 @@ V["crew.scanned"]=function(code){
         h(S.ar?r.ar:r.en)+'</button>'; }).join("")+'</div>'+
       '<div class="sect"><span class="eyebrow">'+h(t("What happened to the bag"))+'</span></div>'+
       BAG_OUTCOMES.map(function(o,ix){
-        return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+
+        return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+svg("yes","ic ic3")+
           '<span>'+h(S.ar?BAG_OUTCOMES_AR[ix]:o)+'</span>'+
           (S.scanOutcome===o?'<span class="pill p-acc"><i></i>'+h(t("logged"))+'</span>':'<span class="chev">'+svg("chev")+'</span>')+
           '</button>'; }).join("")+
       commentBlock()+
       (spot? spotBlock() : '')+
-      '<button class="btn p" data-a="scandone" data-v="'+h(code)+'">'+h(t("Next"))+' '+h(t("bag"))+'</button>';
+      '<button class="btn p" data-a="scandone" data-v="'+h(code)+'">'+svg("chev","ic ic3")+h(t("Next"))+' '+h(t("bag"))+'</button>';
   }
 
   /* ---------- a DROP-OFF STATION: bins, not bags ---------- */
@@ -3307,13 +3798,13 @@ V["crew.scanned"]=function(code){
                         : "A station is assumed cleared. Log something below only when it is not.")+'</div></div>'+
       '<div class="sect"><span class="eyebrow">'+h(t("What was at the station"))+'</span></div>'+
       DOP_OUTCOMES.map(function(o,ix){
-        return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+
+        return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+svg("yes","ic ic3")+
           '<span>'+h(S.ar?DOP_OUTCOMES_AR[ix]:o)+'</span>'+
           (S.scanOutcome===o?'<span class="pill p-acc"><i></i>'+h(t("logged"))+'</span>':'<span class="chev">'+svg("chev")+'</span>')+
           '</button>'; }).join("")+
       commentBlock()+
       (spot? spotBlock() : '')+
-      '<button class="btn p" data-a="scandone" data-v="'+h(code)+'">'+h(t("Next"))+' '+h(t("station"))+'</button>';
+      '<button class="btn p" data-a="scandone" data-v="'+h(code)+'">'+svg("chev","ic ic3")+h(t("Next"))+' '+h(t("station"))+'</button>';
   }
 
   /* ---------- a COLLECTION POINT: what was out on the street ---------- */
@@ -3327,13 +3818,13 @@ V["crew.scanned"]=function(code){
                       : "Nothing to do if that is right \u2014 walk on. Log something below only when it is not.")+'</div></div>'+
     '<div class="sect"><span class="eyebrow">'+h(t("What was at the point"))+'</span></div>'+
     POINT_OUTCOMES.map(function(o,ix){
-      return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+
+      return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+svg("yes","ic ic3")+
         '<span>'+h(S.ar?POINT_OUTCOMES_AR[ix]:o)+'</span>'+
         (S.scanOutcome===o?'<span class="pill p-acc"><i></i>'+h(t("logged"))+'</span>':'<span class="chev">'+svg("chev")+'</span>')+
         '</button>'; }).join("")+
     commentBlock()+
     (spot? spotBlock() : '')+
-    '<button class="btn p" data-a="scandone" data-v="'+h(code)+'">'+h(t("Next"))+' '+h(t("point"))+'</button>';
+    '<button class="btn p" data-a="scandone" data-v="'+h(code)+'">'+svg("chev","ic ic3")+h(t("Next"))+' '+h(t("point"))+'</button>';
 };
 /* A map of one pin tells you nothing a line of text does not. */
 function placeRow(pl){
@@ -3440,7 +3931,7 @@ function nextStopsRoll(role, stops, n){
           fmtMin(svcMin(role,r))+' \u00b7 '+Math.round(elevAt(r.lat,r.lon))+' m</span></span>'+
         '<span class="r">'+
           '<a class="btn sm" target="_blank" rel="noopener" href="'+h(mapOut(r.lat,r.lon))+'">'+svg("map")+'</a>'+
-          '<button class="btn sm" data-a="skipstop" data-v="'+h(r.id)+'">'+h(t("Skip"))+'</button>'+
+          '<button class="btn sm" data-a="skipstop" data-v="'+h(r.id)+'">'+svg("skip","ic ic3")+h(t("Skip"))+'</button>'+
         '</span></div>'; }).join("")+'</div></div>'+
     '<a class="btn p" target="_blank" rel="noopener" href="'+h(mapOutRoute(run, S.geo))+'">'+
       svg("map","ic")+h(t("Open the next"))+' '+run.length+' '+h(t("stops in maps"))+'</a>'+
@@ -3452,13 +3943,24 @@ function nextStopCard(role, stops){
   var nxt = stops.filter(function(p){ return p.state!=="done"; })[0];
   if(!nxt) return '<div class="card acc" style="text-align:center"><p class="h">Round complete</p>'+
     '<p class="sm">Every stop worked.</p></div>';
-  return '<div class="card"><p class="eyebrow">'+h(t("Next stop"))+' \u00b7 '+nxt.n+'</p>'+
-    '<p class="h">'+h(nxt.label)+'</p><p class="mono sm">'+h(nxt.id)+'</p>'+
-    '<p class="sm">About '+fmtMin(svcMin(role,nxt))+' here, on what this round has averaged.</p>'+
+  /* White on a dark ground, the biggest type on the screen, and it can be heard.
+     This is the card someone reads standing beside a truck in the sun, so it is
+     the one that gets the contrast rather than the decoration. */
+  var spoken = t("Next stop")+" "+nxt.n+". "+nxt.label+". "+
+               t("About")+" "+fmtMin(svcMin(role,nxt))+" "+t("here")+".";
+  return '<div class="card hc"><div style="display:flex;align-items:flex-start;gap:10px">'+
+      '<span class="av" style="background:rgba(255,255,255,.14);color:#fff;width:42px;height:42px">'+
+        svg("pin","icL")+'</span>'+
+      '<div style="flex:1;min-width:0">'+
+        '<p class="eyebrow" style="color:#C9C2B6">'+h(t("Next stop"))+' \u00b7 '+nxt.n+'</p>'+
+        '<p class="h" style="font-size:calc(19px*var(--ts));color:#fff">'+h(nxt.label)+'</p>'+
+        '<p class="mono sm">'+h(nxt.id)+'</p></div>'+
+      sayBtn(spoken, "hcb")+'</div>'+
+    '<p class="sm">'+h(t("About"))+' '+fmtMin(svcMin(role,nxt))+' '+h(t("here, on what this round has averaged."))+'</p>'+
     '<div class="btnrow">'+
       '<a class="btn" target="_blank" rel="noopener" href="'+h(mapOut(nxt.lat,nxt.lon))+'">'+
-        svg("map","ic")+h(t("Open in maps"))+'</a>'+
-      '<button class="btn p" data-a="servestop" data-v="'+h(nxt.id)+'">'+h(t("Serviced"))+'</button>'+
+        svg("map","ic ic3")+h(t("Open in maps"))+'</a>'+
+      '<button class="btn p" data-a="servestop" data-v="'+h(nxt.id)+'">'+svg("yes","ic ic3")+h(t("Serviced"))+'</button>'+
     '</div></div>';
 }
 TITLES.optimiser="What the optimiser has learned";
@@ -3503,7 +4005,7 @@ function optimiserView(){
   'bad morning does not rewrite the plan, and a street that has genuinely got slower shows through within a few rounds. '+
   'An implausible reading &mdash; a screen left open over lunch &mdash; is discarded rather than learned.</p></div>'+
 
-  '<button class="btn" data-a="resetserved">'+h(t("Reset the round"))+'</button>';
+  '<button class="btn" data-a="resetserved">'+svg("sync","ic ic3")+h(t("Reset the round"))+'</button>';
 }
 V["crew.optimiser"]=optimiserView;
 V["driver.optimiser"]=optimiserView;
@@ -3519,7 +4021,7 @@ V["crew.route"]=function(){
     nextStopCard("crew", stops)+
     fold(t("The round")+" \u00b7 "+stops.length+" stops",
     '<div class="list">'+stops.map(function(r){
-      return '<button class="item" data-a="servestop" data-v="'+h(r.id)+'">'+
+      return '<button class="item" data-a="servestop" data-v="'+h(r.id)+'">'+svg("yes","ic ic3")+
       '<span class="av">'+(r.state==="done"? svg("check") : '<b class="mono">'+r.n+'</b>')+'</span>'+
       '<span class="t"><b>'+h(r.label)+'</b><span class="mono">'+h(r.id)+' \u00b7 '+h(TAGKIND[r.kind].en)+'</span></span>'+
       '<span class="pill '+(r.state==="done"?"p-good":(r.state==="issue"?"p-crit":"p-neut"))+'"><i></i>'+
@@ -3562,7 +4064,7 @@ function batchView(){
         (x.r? '<span class="pill '+(x.q? (RANKS.filter(function(r){return r.id===x.q;})[0]||{p:"p-good"}).p : "p-good")+'"><i></i>'+h(x.o||"reviewed")+'</span>'
             : '<span class="pill p-neut"><i></i>acknowledged</span>')+'</span></button>';
     }).join("")+'</div></div>'+
-    (un? '<button class="btn" data-a="ackall">Acknowledge the remaining '+un+'</button>' : '');
+    (un? '<button class="btn" data-a="ackall">'+svg("yes","ic ic3")+'Acknowledge the remaining '+un+'</button>' : '');
 }
 V["crew.batch"]=function(){ return batchView(); };
 V["collector.batch"]=function(){ return batchView(); };
@@ -3571,14 +4073,14 @@ V["crew.sync"]=function(){
     '<b>'+(S.hidOn?"Paired · live mode":"Paired · off")+'</b></div>'+
     '<div class="kv"><span>Storage mode</span><b class="num">'+BATCH.length+' scans held</b></div></div>'+
     '<div class="btnrow"><button class="btn p" data-a="pull">'+svg("sync","ic")+'Pull from the handheld</button>'+
-    '<button class="btn" data-a="push" data-v="batch">Review '+BATCH.length+'</button></div>'+
+    '<button class="btn" data-a="push" data-v="batch">'+svg("sync","ic ic3")+'Review '+BATCH.length+'</button></div>'+
     '<div class="card '+(S.queued?"":"acc")+'"><div style="text-align:center"><p class="sm">Events waiting</p>'+
     '<div class="big">'+S.queued+'</div><p class="sm">each with the time it was captured, not the time it syncs</p></div></div>'+
     '<div class="card plain"><div class="kv"><span>Scans</span><b class="num">'+S.queued+'</b></div>'+
     '<div class="kv"><span>Photos</span><b class="num">'+S.pendingPhotos+'</b></div>'+
     '<div class="kv"><span>Network</span><b>Offline · mobile data off</b></div>'+
     '<div class="kv"><span>Last sync</span><b>06:02</b></div></div>'+
-    '<button class="btn p" data-a="sync">Sync now</button>'+
+    '<button class="btn p" data-a="sync">'+svg("sync","ic ic3")+'Sync now</button>'+
     '<p class="sm">Queue depth is shown on purpose. A hidden sync state is what makes a crew scan the same point twice.</p>';
 };
 
@@ -3597,7 +4099,7 @@ V["driver.shift"]=function(){
     '<p class="sm">'+h(S.ar?st.howAr:st.howEn)+'</p>'+
     '<div class="sect"><span class="eyebrow">Vehicle check</span></div>'+
     VCHECK.map(function(v,i){
-      return '<button class="btn row" data-a="vchk" data-v="'+i+'"><span>'+h(v[0])+'</span>'+
+      return '<button class="btn row" data-a="vchk" data-v="'+i+'"><span>'+svg(v[1]?"yes":"no","ic ic3")+' '+h(v[0])+'</span>'+
       '<span class="pill '+(v[1]?"p-good":"p-crit")+'"><i></i>'+(v[1]?"Pass":"Fault")+'</span></button>'; }).join("")+
     (S.shiftOn
       ? '<div class="card acc"><div class="kv" style="border:none"><span>'+h(t("Shift running since"))+'</span>'+
@@ -3606,7 +4108,7 @@ V["driver.shift"]=function(){
         '<div class="kv"><span>'+h(t("Loads tipped"))+'</span><b class="num">'+(S.loads||0)+'</b></div>'+
         '<div class="kv"><span>'+h(t("Stops skipped"))+'</span><b class="num">'+Object.keys(S.skipped).length+'</b></div></div>'+
         '<button class="btn d" data-a="endshift">'+svg("sync","ic")+h(t("Close the shift"))+'</button>'
-      : '<button class="btn p" data-a="startshift">'+h(t("Start shift"))+'</button>')+
+      : '<button class="btn p" data-a="startshift">'+svg("play","ic ic3")+h(t("Start shift"))+'</button>')+
     '<p class="sm">No item passes by default, and a driver cannot clear his own fault. Dispatch releases a vehicle against a named operator. '+
     'A shift closes against the odometer and the loads tipped, and nothing can be logged to it afterwards.</p>';
 };
@@ -3620,7 +4122,7 @@ V["driver.route"]=function(){
     nextStopCard("driver", stops)+
     '<div class="btnrow"><button class="btn d" data-a="fault" data-v="'+h((stops[0]||{}).id||"")+'">'+
       svg("alert","ic")+h(t("Report a fault"))+'</button>'+
-    '<button class="btn p" data-a="arrived">'+h(t("Arrived"))+'</button></div>'+
+    '<button class="btn p" data-a="arrived">'+svg("pin","ic ic3")+h(t("Arrived"))+'</button></div>'+
     '<button class="btn" data-a="push" data-v="obs">'+svg("cam","ic")+h(t("Report an observation"))+'</button>'+
     '<button class="btn" data-a="tab" data-v="load">'+svg("truck","ic")+h(t("To disposal"))+'</button>'+
     nextStopsRoll("driver", stops, 5);
@@ -3644,7 +4146,7 @@ function faultView(){
     '<label class="fld"><span>'+h(t("Comment"))+'</span>'+
       '<textarea id="fnote" placeholder="what you can see, in your own words"></textarea></label>'+
     photoCard(t("photograph the fault"), "faultphoto", t("Attach the photograph"))+
-    '<button class="btn p" data-a="faultsend">'+h(t("Send it to operations"))+'</button>'+
+    '<button class="btn p" data-a="faultsend">'+svg("alert","ic ic3")+h(t("Send it to operations"))+'</button>'+
     '<p class="sm">It reaches operations with your name, the point and the time attached, and it is counted against the contractor if upheld.</p>';
 }
 V["driver.fault"]=faultView; V["crew.fault"]=faultView; V["collector.fault"]=faultView;
@@ -3681,7 +4183,7 @@ V["driver.load"]=function(){
     '<label class="fld"><span>Weighbridge ticket</span><input class="mono" value="WB-2026-11408"></label>'+
     '<label class="fld"><span>Net weight (kg)</span><input class="mono" value="3,180"></label>'+
     '<div class="scanbox" style="aspect-ratio:16/7"><div class="scancap">photograph of the ticket</div></div>'+
-    '<button class="btn p" data-a="closeload">'+h(t("Close the load"))+'</button>'+
+    '<button class="btn p" data-a="closeload">'+svg("scales","ic ic3")+h(t("Close the load"))+'</button>'+
     '<button class="btn" data-a="fault" data-v="disposal">'+svg("alert","ic")+h(t("Report a fault here"))+'</button>'+
     '<p class="sm">A load closes only at an approved site. An override needs a reason and appears in the monthly report.</p>'+
     nextStopsRoll("driver", roundStops("driver"), 4);
@@ -3715,9 +4217,14 @@ V["collector.round"]=function(){
           '<span class="dr">'+(d.due
             ? '<b>'+money(d.due)+'</b><span'+(d.days>60?' class="late"':'')+'>'+d.days+'d</span>'
             : '<span class="pill p-neut">exempt</span>')+'</span></button>'+
+        /* the name read out, because a collector who cannot read the list still
+           has to knock on the right door and ask for the right person */
+        (canSpeak() ? '<button class="dact" data-a="say" data-say="'+
+            h((S.ar?d.ar:d.n)+". "+d.id+". "+(d.due? t("Owing")+" "+money(d.due) : t("Exempt")))+'" '+
+            'aria-label="'+h(t("Read the name out loud"))+'">'+svg("speak")+'</button>' : '')+
         '<a class="dact" target="_blank" rel="noopener" aria-label="Open in maps" href="'+
           h(mapOut(pl.lat, pl.lon))+'">'+svg("map")+'</a>'+
-        '<button class="dact skip" data-a="skipstop" data-v="'+h(d.id)+'">'+h(t("Skip"))+'</button>'+
+        '<button class="dact skip" data-a="skipstop" data-v="'+h(d.id)+'">'+svg("skip","ic ic3")+h(t("Skip"))+'</button>'+
       '</div>';
      }).join("")+'</div>', true)+
        '<a class="btn p" target="_blank" rel="noopener" href="'+
@@ -3728,7 +4235,7 @@ V["collector.round"]=function(){
       ? '<div class="note g"><span>'+svg("check")+'</span><div><b>'+h(t("The round is open"))+'</b>'+
         Object.keys(S.notified).length+' households were told this morning that you would be calling today.</div></div>'
       : '<button class="btn p" data-a="openround">'+svg("bell","ic")+h(t("Open the round and tell the households"))+'</button>')+
-    '<button class="btn" data-a="resetround">Reset the round</button>';
+    '<button class="btn" data-a="resetround">'+svg("sync","ic ic3")+'Reset the round</button>';
 };
 V["collector.door"]=function(id){
   var d=null; ROUTE_DOORS.forEach(function(x){ if(x.id===id) d=x; });
@@ -3739,8 +4246,8 @@ V["collector.door"]=function(id){
     '<div class="kv"><span>Address</span><b style="font-size:12.5px">'+h(d.a)+'</b></div>'+
     '<div class="kv"><span>Balance</span><b>'+money(d.due)+'</b></div>'+
     '<div class="kv"><span>Days overdue</span><b class="num">'+d.days+'</b></div></div>'+
-    '<button class="btn p" data-a="push" data-v="cashtake" data-x="'+h(d.id)+'">'+h(t("Take cash payment"))+'</button>'+
-    '<button class="btn" data-a="nobody" data-v="'+h(d.id)+'">'+h(t("Nobody home"))+'</button>'+
+    '<button class="btn p" data-a="push" data-v="cashtake" data-x="'+h(d.id)+'">'+svg("cash","ic ic3")+h(t("Take cash payment"))+'</button>'+
+    '<button class="btn" data-a="nobody" data-v="'+h(d.id)+'">'+svg("nohome","ic ic3")+h(t("Nobody home"))+'</button>'+
     '<button class="btn" data-a="exempt" data-v="'+h(d.id)+'">'+svg("doc","ic")+h(t("Propose an exemption"))+'</button>'+
     '<button class="btn" data-a="fault" data-v="'+h(d.point)+'">'+svg("alert","ic")+h(t("Report a fault"))+'</button>'+
     '<button class="btn" data-a="obsfor" data-v="'+h(d.id)+'">'+svg("cam","ic")+
@@ -3757,7 +4264,7 @@ V["collector.cashtake"]=function(id){
     '<label class="fld"><span>Amount taken</span><input class="mono" id="camt" value="'+amt.toFixed(2)+'" style="text-align:center;font-size:24px"></label>'+
     '<p class="sm">= '+nf(Math.round(amt*FX))+' LL at '+nf(FX)+'</p>'+
     '<div class="kv"><span>Payment plan</span><b>4 &times; '+money(amt/4)+'</b></div>'+
-    '<button class="btn p" data-a="push" data-v="receipt" data-x="'+h(id)+'">Confirm and issue the receipt</button>';
+    '<button class="btn p" data-a="push" data-v="receipt" data-x="'+h(id)+'">'+svg("doc","ic ic3")+'Confirm and issue the receipt</button>';
 };
 V["collector.receipt"]=function(id){
   var d=null; ROUTE_DOORS.forEach(function(x){ if(x.id===id) d=x; });
@@ -3771,7 +4278,7 @@ V["collector.receipt"]=function(id){
     '<div class="card"><div class="kv" style="border:none"><span>Cash on you</span><b>'+money(1285+amt)+'</b></div>'+
     '<div class="kv"><span>Deposit due</span><b>before 17:00</b></div></div>'+
     '<div class="note"><span>'+svg("info")+'</span><div><b>Tell the payer</b>'+h(settleNotice())+'</div></div>'+
-    '<button class="btn" data-a="markpaid" data-v="'+h(id)+'">Done &middot; next door</button>'+
+    '<button class="btn" data-a="markpaid" data-v="'+h(id)+'">'+svg("yes","ic ic3")+'Done &middot; next door</button>'+
     '<p class="sm">The receipt goes to the payer&rsquo;s own number, so any gap between what was taken and what was recorded surfaces immediately.</p>';
 };
 
@@ -3784,7 +4291,7 @@ V["collector.scanned"]=function(code){
     '<p class="sm">'+h(S.lastScan&&S.lastScan.src==="handheld"?t("Handheld scanner"):t("Camera"))+'</p></div>'+
     '<div class="card"><div class="kv" style="border:none"><span>Matched account</span><b class="mono">C-3128</b></div>'+
     '<div class="kv"><span>Balance</span><b>'+money(119.76)+'</b></div></div>'+
-    '<button class="btn p" data-a="push" data-v="cashtake" data-x="C-3128">'+h(t("Take cash payment"))+'</button>'+
+    '<button class="btn p" data-a="push" data-v="cashtake" data-x="C-3128">'+svg("cash","ic ic3")+h(t("Take cash payment"))+'</button>'+
     '<div class="sect"><span class="eyebrow">'+h(t("Comment"))+'</span></div>'+
     '<div class="chips">'+SCAN_COMMENTS.map(function(c,i){
       return '<button class="chip'+(i===0?" on":"")+'" data-a="cmt" data-v="'+c.id+'">'+h(S.ar?c.ar:c.en)+'</button>'; }).join("")+'</div><div id="cmtbox"></div>';
@@ -3818,7 +4325,7 @@ V["collector.exempt"]=function(){
     '<label class="fld"><span>'+h(t("What you saw or were shown"))+'</span>'+
       '<textarea id="exnote" placeholder="the document, who confirmed it, what the premises looked like"></textarea></label>'+
     photoCard(t("photograph the document or the premises"), "exemptphoto", t("Attach it")) +
-    '<button class="btn p" data-a="exemptsend">'+h(t("Send the proposal"))+'</button>'+
+    '<button class="btn p" data-a="exemptsend">'+svg("doc","ic ic3")+h(t("Send the proposal"))+'</button>'+
     '<div class="sect"><span class="eyebrow">'+h(t("Already granted on this round"))+'</span></div>'+
     '<div class="card plain"><div class="list">'+EXEMPTIONS.map(function(e){
       return '<div class="item"><span class="av">'+svg("doc")+'</span>'+
@@ -3853,7 +4360,7 @@ V["collector.tellthem"]=function(){
           : '<a class="btn sm p" target="_blank" rel="noopener" data-a="toldthem" data-v="'+h(d.id)+'" href="'+
             h(waLink(d.msisdn, msg))+'">'+svg("bell")+'</a>')+'</span></div>';
     }).join("")+'</div></div>'+
-    '<button class="btn" data-a="tab" data-v="round">'+h(t("Start the round"))+'</button>'+
+    '<button class="btn" data-a="tab" data-v="round">'+svg("queue","ic ic3")+h(t("Start the round"))+'</button>'+
     '<p class="sm">One message each, carrying the balance and the reference. Nothing automatic goes out: you send them, '+
     'from your own number, so a household can reply to a person.</p>';
 };
@@ -3870,7 +4377,7 @@ V["collector.missed"]=function(){
     'into a reference they can pay against tonight.</div></div>'+
     '<a class="btn p" target="_blank" rel="noopener" href="'+h(m.link)+'">'+
       svg("bell","ic")+h(t("Send it on WhatsApp"))+'</a>'+
-    '<button class="btn" data-a="tab" data-v="round">'+h(t("Next door"))+'</button>'+
+    '<button class="btn" data-a="tab" data-v="round">'+svg("queue","ic ic3")+h(t("Next door"))+'</button>'+
     '<p class="sm">It carries the account, the balance and the payment reference, so they can settle without waiting for the next round.</p>';
 };
 
@@ -3878,14 +4385,14 @@ V["collector.cash"]=function(){
   return '<div class="card plain"><div class="kv" style="border:none"><span>Handheld scanner</span><b>'+(S.hidOn?"Paired · live mode":"Paired · off")+'</b></div>'+
     '<div class="kv"><span>Storage mode</span><b class="num">'+BATCH.length+' scans held</b></div></div>'+
     '<div class="btnrow"><button class="btn" data-a="pull">'+svg("sync","ic")+'Pull from the handheld</button>'+
-    '<button class="btn" data-a="push" data-v="batch">Review '+BATCH.length+'</button></div>'+
+    '<button class="btn" data-a="push" data-v="batch">'+svg("sync","ic ic3")+'Review '+BATCH.length+'</button></div>'+
     '<div class="card acc" style="text-align:center"><p class="sm">Cash on you</p><div class="big">'+money(1285)+'</div>'+
     '<p class="sm">deposit before 17:00 · ceiling '+money(2000)+'</p></div>'+
     '<div class="card plain"><div class="kv"><span>Receipts issued today</span><b class="num">12</b></div>'+
     '<div class="kv"><span>Receipt range</span><b class="mono">08831–08842</b></div>'+
     '<div class="kv"><span>Missing numbers</span><b class="num">0</b></div>'+
     '<div class="kv"><span>Last deposit</span><b>yesterday 16:41</b></div></div>'+
-    '<button class="btn p" data-a="deposit">Record a deposit</button>'+
+    '<button class="btn p" data-a="deposit">'+svg("cash","ic ic3")+'Record a deposit</button>'+
     '<button class="btn" data-a="exp" data-v="cash">'+svg("doc","ic")+h(t("Export"))+' today&rsquo;s receipts</button>';
 };
 function flagsFor(id){ var d=null; ROUTE_DOORS.forEach(function(x){ if(x.id===id) d=x; }); return d? (d.flags||0) : 0; }
@@ -4021,9 +4528,9 @@ V["ops.resolve"]=function(){
     '<div class="kv"><span>Exception logged</span><b style="color:var(--crit)">No</b></div>'+
     '<div class="kv"><span>Neighbouring points</span><b>6 of 7 scanned</b></div></div>'+
     '<div class="card acc"><p class="sm">Six of seven scanned is one skipped house. Two of seven would be something that happened to the run. Vehicle presence alone proves nothing.</p></div>'+
-    '<button class="btn p" data-a="res" data-v="Upheld · return on the Friday sweep · logged against Crew B">Uphold and schedule a return</button>'+
-    '<button class="btn" data-a="res" data-v="Not upheld · the record was sent to the customer">Not upheld</button>'+
-    '<button class="btn" data-a="res" data-v="Referred to Crew B for explanation">Refer to the crew</button>';
+    '<button class="btn p" data-a="res" data-v="Upheld · return on the Friday sweep · logged against Crew B">'+svg("yes","ic ic3")+'Uphold and schedule a return</button>'+
+    '<button class="btn" data-a="res" data-v="Not upheld · the record was sent to the customer">'+svg("no","ic ic3")+'Not upheld</button>'+
+    '<button class="btn" data-a="res" data-v="Referred to Crew B for explanation">'+svg("users","ic ic3")+'Refer to the crew</button>';
 };
 
 /* ============================== claims reviewer ============================== */
@@ -4346,8 +4853,73 @@ V["muni.fees"]=function(){
     fold("Arrears ladder",
       [["SMS reminder",1204,"31%"],["Collector visit",428,"44%"],["Formal notice",187,"58%"],["Certificate withheld",65,"76%"]]
       .map(function(r){ return '<div class="kv"><span>'+h(r[0])+' &middot; '+nf(r[1])+'</span><b>'+h(r[2])+' settle in 14 days</b></div>'; }).join(""))+
+    '<button class="btn p" data-a="push" data-v="recon">'+svg("cash","ic")+'Reconciliation desk</button>'+
     '<button class="btn" data-a="exp" data-v="register">'+svg("doc","ic")+h(t("Export"))+' the register</button>'+
     '<button class="btn" data-a="exp" data-v="arrears">'+svg("doc","ic")+h(t("Export"))+' arrears</button>';
+};
+/* ---------------- the reconciliation desk ----------------
+   The screen that did not exist. Every payment path in this app ends in the same
+   sentence — allow up to twenty-four hours for it to be recorded — and until now
+   nothing in the software was responsible for keeping that promise. This is the
+   work: money in the bank nobody has placed, and money placed nobody has posted. */
+TITLES.recon="Reconciliation";
+V["muni.recon"]=function(){
+  var arr = (LIVE.on && LIVE.recon) ? LIVE.recon.arrivals.map(function(a){
+        return {id:a.id, on:(a.received_on||"").slice(0,10), a:Number(a.amount_usd),
+                ch:a.channel, note:a.note_as_given||"", ref:a.ref_extracted||"",
+                ok:a.ref_valid===true, wait:a.days_waiting||0, why:a.why||""};
+      }) : ARRIVALS.filter(function(a){ return a.why!=="matched"; });
+  var pend = (LIVE.on && LIVE.recon) ? LIVE.recon.pending.map(function(x){
+        return {id:x.id, rc:x.receipt_no, prem:x.premises_id, a:Number(x.amount_usd),
+                ch:x.channel, ref:x.external_ref||"", wait:x.days_waiting||0};
+      }) : PENDING_PAY;
+  var unplaced = arr.reduce(function(t,a){ return t+a.a; }, 0);
+  var waiting  = pend.reduce(function(t,a){ return t+a.a; }, 0);
+  var late     = pend.filter(function(x){ return x.wait >= 1; }).length;
+
+  return '<div class="note"><span>'+svg("info")+'</span><div><b>The twenty-four hours, as a queue</b>'+
+      'Every payment screen tells the household to allow up to '+PAY_SETTLE_HOURS+' hours. '+
+      'This is what has to happen inside them. Money that arrives without a readable '+
+      'reference cannot be placed by the software and needs a person.</div></div>'+
+    '<div class="grid2">'+
+      '<div class="stat"><b>'+money(unplaced)+'</b><span>in the bank, unplaced</span></div>'+
+      '<div class="stat"><b>'+money(waiting)+'</b><span>placed, not yet posted</span></div></div>'+
+    (late ? '<div class="note w"><span>'+svg("alert")+'</span><div><b>'+late+
+        ' past the '+PAY_SETTLE_HOURS+'-hour promise</b>'+
+        'A household was told it would show by now. It has not.</div></div>' : '')+
+
+    '<div class="card plain"><p class="eyebrow">Arrived, not placed</p>'+
+    (arr.length ? '<div class="list">'+arr.map(function(a){
+      return '<div class="item" style="cursor:default"><span class="av">'+svg("cash")+'</span>'+
+        '<span class="t"><b>'+money(a.a)+' &middot; '+h(a.ch)+'</b>'+
+          '<span class="mono">'+h(a.note||"(no note)")+'</span>'+
+          '<span>'+h(a.why)+'</span></span>'+
+        '<span class="r"><span class="pill p-warn"><i></i>'+a.wait+'d</span></span></div>';
+    }).join("")+'</div>'
+      : '<p class="sm">Nothing waiting. Every transfer that came in carried a reference the register recognised.</p>')+
+    '</div>'+
+
+    '<div class="card plain"><p class="eyebrow">Placed, not yet posted</p>'+
+    (pend.length ? '<div class="list">'+pend.map(function(x){
+      return '<div class="item" style="cursor:default"><span class="av">'+svg("doc")+'</span>'+
+        '<span class="t"><b>'+money(x.a)+' &middot; '+h(x.prem)+'</b>'+
+          '<span class="mono">'+h(x.ref||x.rc)+'</span></span>'+
+        '<span class="r"><button class="btn p sm" data-a="postpay" data-v="'+h(String(x.id))+'">'+
+          h(t("Post"))+'</button>'+
+          '<span class="pill '+(x.wait>=1?"p-warn":"p-good")+'"><i></i>'+x.wait+'d</span></span></div>';
+    }).join("")+'</div>'
+      : '<p class="sm">Nothing pending. Everything received has been posted to an account.</p>')+
+    '</div>'+
+
+    fold("How a reference is checked",
+      '<p class="sm">The code is <b>BLD</b>, the account, the last two digits of the year, '+
+      'the instalment, and one check character computed from all of it. The alphabet has '+
+      'no I and no O, because the code is read off a phone and copied onto a paper slip by '+
+      'hand. A single mistyped character fails the check instead of landing on somebody '+
+      'else\u2019s account \u2014 which is the whole reason the character is there.</p>'+
+      '<div class="kv"><span>Example</span><b class="mono">'+h(payRef("C-2417",2026,1))+'</b></div>'+
+      '<div class="kv"><span>Settlement promise</span><b>'+PAY_SETTLE_HOURS+' hours</b></div>')+
+    '<button class="btn" data-a="exp" data-v="arrivals">'+svg("doc","ic")+h(t("Export"))+' the day\u2019s arrivals</button>';
 };
 V["muni.payouts"]=function(){
   return '<div class="note"><span>'+svg("info")+'</span><div><b>Money going out</b>'+
@@ -4453,9 +5025,9 @@ V["facility.load"]=function(id){
     '<div class="kv"><span>Status</span><b>'+h(l.st)+'</b></div></div>'+
     '<label class="fld"><span>Visual contamination, %</span><input id="l_cont" class="mono" inputmode="decimal" value="0"></label>'+
     '<div class="scanbox" style="aspect-ratio:16/7"><div class="scancap">photograph of the tipping face</div></div>'+
-    '<div class="btnrow"><button class="btn" data-a="loadres" data-v="Downgraded" data-x="'+h(l.id)+'">Downgrade</button>'+
-    '<button class="btn p" data-a="loadres" data-v="Accepted" data-x="'+h(l.id)+'">Accept</button></div>'+
-    '<button class="btn d" data-a="loadres" data-v="Rejected" data-x="'+h(l.id)+'">Reject the load</button>'+
+    '<div class="btnrow"><button class="btn" data-a="loadres" data-v="Downgraded" data-x="'+h(l.id)+'">'+svg("alert","ic ic3")+'Downgrade</button>'+
+    '<button class="btn p" data-a="loadres" data-v="Accepted" data-x="'+h(l.id)+'">'+svg("yes","ic ic3")+'Accept</button></div>'+
+    '<button class="btn d" data-a="loadres" data-v="Rejected" data-x="'+h(l.id)+'">'+svg("no","ic ic3")+'Reject the load</button>'+
     '<button class="btn" data-a="sessfor" data-v="'+h(l.id)+'">'+svg("scan","ic")+'Open a sampling session on this load</button>'+
     '<p class="sm">Rejecting sends the vehicle away loaded and is the most contested decision at the gate. It needs the photograph.</p>';
 };
@@ -4494,7 +5066,7 @@ V["facility.inspect"]=function(){
       : '<p class="sm">Nothing marked down yet. A clean load that ends with zero is a result worth recording too.</p>')+
     '<label class="fld"><span>Round or load this session covers</span>'+
       '<input id="sess_ref" placeholder="COM-5A, WB-2026-11408, or leave blank" value="'+h(ss.ref||"")+'"></label>'+
-    '<button class="btn d" data-a="sessend">End the session</button>';
+    '<button class="btn d" data-a="sessend">'+svg("stopsq","ic ic3")+'End the session</button>';
 };
 V["facility.session"]=function(id){
   var x=null; SESSIONS.forEach(function(y){ if(y.id===id) x=y; });
@@ -5057,6 +5629,16 @@ function settingsSheet(){
     '<span class="seg" data-g="cur2" style="width:150px"><button class="'+(!S.lbp?"on":"")+'" data-v="usd">USD</button>'+
     '<button class="'+(S.lbp?"on":"")+'" data-v="lbp">LBP</button></span></div>'+
     '<div class="kv"><span>'+h(t("Handheld scanner"))+'</span><button class="sw '+(S.hidOn?"on":"")+'" data-a="hid" role="switch"></button></div>'+
+    '<div class="kv"><span>'+svg("aa","ic ic3")+' '+h(t("Text size"))+'</span>'+
+    '<span class="seg" data-g="ts" style="width:150px">'+
+      [[1,"A"],[2,"A"],[3,"A"]].map(function(x){
+        return '<button class="'+(S.ts===x[0]?"on":"")+'" data-a="ts" data-v="'+x[0]+'" '+
+          'style="font-size:'+(11+x[0]*3)+'px;font-weight:700">'+x[1]+'</button>'; }).join("")+
+    '</span></div>'+
+    (VOICE.ok ? '<div class="kv"><span>'+svg("speak","ic ic3")+' '+h(t("Read out loud"))+'</span>'+
+      '<button class="sw '+(VOICE.on?"on":"")+'" data-a="voice" role="switch"></button></div>' : '')+
+    '<div class="kv"><span>'+svg("cam","ic ic3")+' '+h(t("Camera opens by itself"))+'</span>'+
+      '<button class="sw '+(CAMPERM.allowed?"on":"")+'" data-a="camperm" role="switch"></button></div>'+
     '<div class="kv"><span>'+h(t("View"))+'</span>'+
     '<span class="seg" data-g="view" style="width:170px"><button class="'+(!S.wide?"on":"")+'" data-v="phone">'+h(t("Phone"))+'</button>'+
     '<button class="'+(S.wide?"on":"")+'" data-v="wide">'+h(t("Desktop"))+'</button></span></div></div>'+
@@ -5205,7 +5787,8 @@ document.addEventListener("click", function(ev){
       var ent=findNumber(S.cc, S.phone);
       if(!codeOk(ent, code)){
         S.otpTries++;
-        S.otpErr = "The code is six digits";
+        S.otpErr = digits(code).length!==6 ? "The access code is six digits"
+                                           : "That access code is not right";
         paintLogin(); return;
       }
       S.who=ent.name; S.otpErr=""; S.otpTries=0;
@@ -5330,6 +5913,44 @@ document.addEventListener("click", function(ev){
     case "push": push(v, x); return;
     case "back": back(); return;
     case "menu": settingsSheet(); return;
+
+    /* read it out. Pressing the same one again stops it, which is what someone
+       does when they have heard enough. */
+    case "say": {
+      var txt = b.getAttribute("data-say") || "";
+      if(S.saying === txt){ speakStop(); markSaying(); return; }
+      S.saying = txt; markSaying();
+      if(!speak(txt)){ S.saying=null; markSaying(); toast(t("This handset has no voice installed")); }
+      return;
+    }
+    case "sayscreen": {
+      if(S.saying === "__screen__"){ speakStop(); paint(); return; }
+      var all = screenSpeech();
+      S.saying = "__screen__";
+      if(!speak(all)){ S.saying=null; toast(t("This handset has no voice installed")); }
+      paint(); return;
+    }
+    case "ts": { S.ts = Math.max(1, Math.min(3, Number(v)||2)); S.tsSet=true; closeSheet(); paint(); return; }
+    case "voice": {
+      VOICE.on = !VOICE.on;
+      if(!VOICE.on) speakStop();
+      closeSheet(); paint();
+      toast(VOICE.on ? t("Reading out loud is on") : t("Reading out loud is off"));
+      return;
+    }
+    case "camperm": {
+      CAMPERM.allowed = !CAMPERM.allowed;
+      if(!CAMPERM.allowed){ stopCam(); }
+      S.camTried=false; closeSheet(); paint();
+      toast(CAMPERM.allowed
+        ? t("The camera may open by itself on a scanning screen")
+        : t("The camera will not open by itself \u2014 codes are typed"));
+      return;
+    }
+    case "campermrole": {
+      CAMPERM.auto[v] = !CAMPERM.auto[v];
+      S.camTried=false; paint(); return;
+    }
     case "guide": guideSheet(); return;
 
     case "geo":
@@ -5554,6 +6175,51 @@ document.addEventListener("click", function(ev){
     case "receipt": toast("Receipt "+v+" · open it to send on WhatsApp"); return;
     case "repsend": S.stack=[]; toast("Report "+v+" matched against the crew record"); paint(); return;
     case "exp": doExport(v); return;
+
+    /* an objection is somebody saying the register is wrong about them, which is
+       a right rather than a complaint, so it is recorded and timed, not triaged */
+    case "objsend": {
+      var g = ($("objg")&&$("objg").value) || OBJ_GROUNDS[0][0];
+      var txt = (($("objt")&&$("objt").value) || "").trim();
+      if(txt.length < 20){
+        toast("Tell the panel why \u2014 at least twenty characters"); return;
+      }
+      if(LIVE.on){
+        LIVE.fileObjection({premises_id:ME.id, ground:g,
+          current_category_id:"res", current_bracket:"A",
+          requested_category_id:"res", statement:txt})
+          .then(function(){ return LIVE.loadObjections(); })
+          .then(function(){
+            S.stack=[{s:"objections"}];
+            toast("Filed \u00b7 the panel has thirty days, and the amount is paused");
+            paint();
+          })
+          .catch(function(e){ toast(LIVE.say(e)); });
+        return;
+      }
+      MY_OBJECTIONS.unshift({ref:"OBJ-2026-"+String(119+MY_OBJECTIONS.length).padStart(6,"0"),
+        prem:ME.id, ground:g, st:"submitted", at:"just now",
+        due:"in 30 days", text:txt, dec:"", adj:null});
+      S.stack=[{s:"objections"}];
+      toast("Filed \u00b7 the panel has thirty days, and the amount is paused");
+      paint(); return;
+    }
+
+    /* posting a payment to an account is the moment the promise is kept, so it
+       says so and it tells the household, rather than just moving a row */
+    case "postpay": {
+      var pid = v;
+      if(LIVE.on){
+        LIVE.reconcile(Number(pid)).then(function(){
+          toast("Posted \u00b7 the household is being sent a receipt");
+          return LIVE.loadRecon();
+        }).then(paint).catch(function(e){ toast(LIVE.say(e)); });
+        return;
+      }
+      PENDING_PAY = PENDING_PAY.filter(function(x){ return String(x.id) !== String(pid); });
+      toast("Posted \u00b7 the household is being sent a receipt");
+      paint(); return;
+    }
 
     /* crew */
     case "outcome": S.scanOutcome=v; S.scanTouched=true; toast(v+" recorded · queued offline"); S.queued++; back(); return;
