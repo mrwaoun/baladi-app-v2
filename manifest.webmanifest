@@ -1,0 +1,55 @@
+{
+  "name": "Baladi · Zaytouna",
+  "short_name": "Baladi",
+  "description": "Your household waste fee, your collection days and your receipts.",
+  "lang": "en",
+  "dir": "auto",
+  "start_url": "./",
+  "scope": "./",
+  "id": "/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait",
+  "background_color": "#FBF7F2",
+  "theme_color": "#211D18",
+  "categories": [
+    "government",
+    "utilities",
+    "finance"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "What I owe",
+      "short_name": "Bill",
+      "url": "./#bill"
+    },
+    {
+      "name": "Request a pickup",
+      "short_name": "Pickup",
+      "url": "./#pickup"
+    }
+  ]
+}
