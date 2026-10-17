@@ -1,0 +1,126 @@
+BALADI - DEPLOY IN 7 STEPS
+==========================
+
+You are putting SEVEN files online. There is no code to compile and
+nothing to install on your computer.
+
+The files in this folder:
+  index.html               <- the whole Baladi app
+  vercel.json              <- one small settings file (lets the camera work)
+  manifest.webmanifest     <- lets a phone put Baladi on its home screen
+  sw.js                    <- same, and keeps the app opening with no signal
+  icon-192.png             <- the icon that appears on the home screen
+  icon-512.png             <- the same icon, larger
+  icon-maskable-512.png    <- the same icon for Android's round frame
+
+Do not rename them. Do not put them inside another folder.
+
+The app still works on its own if you only upload index.html and
+vercel.json. You lose the one-press "Install" on Android; the button
+at the top of the page then shows written steps instead, which is
+what every iPhone gets either way.
+
+
+STEP 1 - Make a brand new GitHub repository
+-------------------------------------------
+Go to:  https://github.com/new
+
+  Repository name:  baladi-app-v2
+  Visibility:      Public
+  DO NOT tick "Add a README file"
+  DO NOT choose a .gitignore or a licence
+
+Click "Create repository".
+
+(Use a NEW name. Your old repository may contain leftover files
+ that are what broke the last attempt. We are not touching it.)
+
+
+STEP 2 - Upload the files
+--------------------------
+On the new empty repository page click the link
+"uploading an existing file".
+
+Select everything in this folder EXCEPT START-HERE.txt and drag it
+onto that page. Wait until all seven names are listed.
+
+Click the green "Commit changes" button.
+
+You should now see exactly seven files listed, and nothing else.
+If you see another file, delete it (click it, then the bin icon).
+
+
+STEP 3 - Import it into Vercel
+-------------------------------
+Go to:  https://vercel.com/new
+
+Find "baladi-app-v2" in the list and click "Import".
+If it is not listed, click "Adjust GitHub App Permissions"
+and allow Vercel to see the new repository.
+
+
+STEP 4 - The settings page (this is where it usually goes wrong)
+-----------------------------------------------------------------
+Before clicking Deploy, open "Build and Output Settings"
+and make it look EXACTLY like this:
+
+  Framework Preset .... Other
+  Root Directory ...... (leave empty)
+  Build Command ....... (EMPTY - clear anything in it)
+  Output Directory .... (EMPTY - clear anything in it)
+  Install Command ..... (EMPTY)
+
+If any of those boxes are greyed out, click the toggle/"Override"
+switch next to them first, then clear them.
+
+There is no build step. If Vercel tries to run one, it fails.
+
+
+STEP 5 - Deploy
+----------------
+Click "Deploy". It takes about 20 seconds.
+
+You get a link like  baladi-app-v2.vercel.app
+Open it on your PHONE. Sign in with  70 150 153  and the code  680646.
+
+While you are there, press "Add" on the strip at the top of the page.
+That is the new button that puts Baladi on your phone's home screen.
+Check it appears with the other apps and opens straight to sign-in.
+
+STOP HERE AND CHECK IT WORKS before doing the domain.
+
+
+STEP 6 - Add your domain
+-------------------------
+In Vercel:  your project -> Settings -> Domains
+Type:  baladiservices.com   -> Add
+Then add  www.baladiservices.com  as well.
+
+Vercel will show you the exact records to create. Copy them.
+
+
+STEP 7 - Point the domain at Vercel
+------------------------------------
+Log in at domain.com -> your domain -> DNS / "DNS Records".
+
+Add the records Vercel showed you. Normally:
+
+  Type: A      Host/Name: @      Value: (the IP Vercel showed)
+  Type: CNAME  Host/Name: www    Value: (the value Vercel showed)
+
+Always use the values on YOUR Vercel screen, not any values
+written in this file.
+
+!! DO NOT change the domain's NAMESERVERS. !!
+   That moves all your DNS at once and will break your email.
+   Only add the A and CNAME records above.
+
+Save. Wait 10 minutes to a few hours. Vercel's Domains page turns
+green when it is live.
+
+
+IF SOMETHING FAILS
+------------------
+Copy the red error text from Vercel and send it to me, plus the
+link to your repository. I can read the error and tell you the
+one thing to change.

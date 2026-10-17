@@ -1432,14 +1432,23 @@ var LIVE = {
   /* ---- sign-in: a real one-time code, sent by the provider on the project ---- */
   /* WhatsApp, not SMS: it reaches a Lebanese number reliably and costs the
      recipient nothing. One constant, so it moves back to sms in a line. */
-  channel:"whatsapp",
+  /* The code goes out over WhatsApp, but the auth provider is never told that
+     and must not be. Its own "whatsapp" channel is reserved for Twilio, and
+     asking for it on a project without Twilio is refused outright. What this
+     project has instead is the Send SMS hook: the provider mints, hashes, rate
+     limits and expires the code, calls the hook, and the hook delivers it over
+     WhatsApp. So the request is an ordinary phone OTP in every respect except
+     which wire it goes down, and the verify that follows is type "sms" — the
+     only type a phone code has. Sending "whatsapp" here is a sign-in that
+     always fails, which is a quiet way to lose every user on day one. */
+  channel:"whatsapp",          /* how it is DELIVERED, by the hook */
   sendCode:function(e164){
     return LIVE.req("/auth/v1/otp", {method:"POST", auth:false,
-      body:{phone:e164, channel:LIVE.channel}});
+      body:{phone:e164}});
   },
   verify:function(e164, code){
     return LIVE.req("/auth/v1/verify", {method:"POST", auth:false,
-      body:{phone:e164, token:code, type:LIVE.channel}})
+      body:{phone:e164, token:code, type:"sms"}})
       .then(function(d){
         LIVE.token = d.access_token; LIVE.refresh = d.refresh_token;
         LIVE.sub = d.user && d.user.id;
