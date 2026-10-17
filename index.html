@@ -115,7 +115,6 @@ a{color:var(--accent-ink)}
 .addbar .ax{flex:none;display:grid;place-items:center;width:28px;height:28px;min-width:28px;border-radius:9px;
   color:var(--accent-ink);opacity:.72}
 .addbar .ax svg{width:14px;height:14px;stroke-width:2.4}
-.addbar>.sayi{flex:none}
 .device[data-ts="3"] .addbar{padding:9px 12px}
 .howstep{display:flex;align-items:center;gap:11px;padding:9px 11px;background:var(--surface-3);
   border:1px solid var(--line);border-radius:12px}
@@ -189,33 +188,24 @@ svg.icXL{width:34px;height:34px;flex:none}
    pressing it. Kept visually quiet — it sits at the end of the control in muted
    ink and only colours when it is speaking — because forty loud speakers on one
    screen is its own kind of unreadable. */
-.sayi{display:inline-grid;place-items:center;width:30px;height:30px;min-width:30px;
-  border-radius:9px;color:var(--muted);flex:none;margin-inline-start:auto;
-  background:color-mix(in oklab,currentColor 9%,transparent)}
-.sayi svg{width:17px;height:17px;stroke-width:2.2}
-.sayi.on{color:var(--accent-ink);background:var(--accent-soft)}
-.hc .sayi{color:#E9E4DC;background:rgba(255,255,255,.14)}
-.btn .sayi,.bigrow .sayi{margin-inline-start:auto}
-.seg button>.sayi{position:absolute;inset-inline-end:2px;top:50%;transform:translateY(-50%);
-  width:19px;height:19px;min-width:19px;margin:0;border-radius:6px}
-.seg button>.sayi svg{width:12px;height:12px;stroke-width:2.4}
-/* a choice and its own speaker, side by side: the speaker is a sibling of the
-   chip and not inside it, so a tap meant for the choice never lands on it */
-.choice{display:inline-flex;align-items:center;gap:3px;max-width:100%}
-.choice>.sayi{width:26px;height:26px;min-width:26px;border-radius:9px}
-.choice>.sayi svg{width:15px;height:15px}
-.item .sayi{margin-inline-start:6px}
-.fldsay{display:flex;align-items:center;gap:6px}
-.segsay{display:flex;align-items:center;gap:6px;width:100%}
-.segsay>.seg{flex:1;min-width:0}
-.fldsay>select,.fldsay>input,.fldsay>textarea{flex:1;min-width:0}
-/* at the largest size the speaker grows with everything else */
+/* The switch, in the status bar, present on every screen including sign-in.
+   Off it is quiet ink; on it is unmistakable, because somebody relying on it
+   needs to know at a glance whether it is listening. */
+.sndtog{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 7px;border-radius:999px;
+  border:1px solid var(--line);color:var(--muted);background:var(--surface);
+  font-size:calc(10.5px*var(--ts2));font-weight:700;letter-spacing:.01em;min-height:26px;flex:none}
+.sndtog svg{width:14px;height:14px;stroke-width:2.4;flex:none}
+.sndtog.on{background:var(--accent);border-color:var(--accent);color:#FBF7F2}
+.device[data-ts="3"] .sndtog{padding:4px 11px 4px 9px;min-height:30px}
+.device[data-ts="3"] .sndtog svg{width:16px;height:16px}
+/* What has been read once and will act on the next touch. It has to be obvious
+   without being read, because the person it is for is not reading it. */
+.armed{position:relative;outline:3px solid var(--accent);outline-offset:2px;border-radius:12px}
+.armed::after{content:"";position:absolute;inset:0;border-radius:inherit;
+  background:var(--accent);opacity:.10;pointer-events:none}
 .device[data-ts="2"] .chip .ic{width:17px;height:17px}
 .device[data-ts="3"] .chip .ic{width:19px;height:19px}
-.device[data-ts="3"] .choice>.sayi{width:30px;height:30px;min-width:30px}
-.device[data-ts="3"] .choice>.sayi svg{width:17px;height:17px}
-.device[data-ts="3"] .sayi{width:34px;height:34px;min-width:34px}
-.device[data-ts="3"] .sayi svg{width:19px;height:19px}
+
 /* a row whose whole point is one icon, one word, one tap */
 .bigrow{display:flex;align-items:center;gap:12px;width:100%;text-align:start;
   padding:14px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);
@@ -278,7 +268,6 @@ label.fld{display:flex;flex-direction:column;gap:5px}
 label.fld>span{font-size:calc(11.5px*var(--ts2));color:var(--muted);font-weight:600}
 .seg{display:flex;background:var(--surface-2);border-radius:11px;padding:3px;gap:2px}
 .seg button{position:relative;flex:1;padding:8px 4px;font-size:calc(12.5px*var(--ts2));font-weight:600;border-radius:9px;color:var(--ink-2)}
-.seg button.hassay{padding-inline-end:23px}
 .seg button.on{background:var(--surface);color:var(--accent-ink);box-shadow:0 1px 2px rgba(0,0,0,.07)}
 .chips{display:flex;gap:7px;flex-wrap:wrap}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:20px;border:1px solid var(--line);font-size:calc(12.5px*var(--ts2));font-weight:600;color:var(--ink-2);background:var(--surface)}
@@ -578,7 +567,9 @@ svg.mico{width:34px;height:34px;flex:none;stroke-width:1.5}
 <body>
 <div class="page">
   <div class="device" id="device">
-    <div class="statusbar"><span id="clock">07:12</span><span id="netstate">baladiservice.com</span></div>
+    <div class="statusbar"><span id="clock">07:12</span>
+      <button class="sndtog" id="sndtog" data-a="sound" aria-pressed="false" hidden></button>
+      <span id="netstate">baladiservice.com</span></div>
     <div class="addbar" id="addbar" hidden></div>
     <header class="appbar" id="appbar" hidden></header>
     <main class="view" id="view"></main>
@@ -619,7 +610,7 @@ var MONTHS_2026 = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct"];
 function userPayments(id){
   var d=doorById(id); if(!d) return [];
   var k=hsh(id), out=[], n=2+(k%4);
-  var chans=["Bank transfer","Mobile wallet","Municipal cashier","Field collector","Transfer counter"];
+  var chans=["Bank transfer","OMT or Whish counter","Municipal cashier","Field collector"];
   for(var i=0;i<n;i++){
     var mi = 9 - i*2 - (k>>(i+1))%2; if(mi<0) break;
     var amt = (d.due? d.due : 59.88) / (1 + ((k>>i)%2));
@@ -811,14 +802,52 @@ var SCHED = [
 ];
 
 /* the monthly pot scales with the town; the odds scale with the entries */
+/* ───────────────────────── the draw, and the law ─────────────────────────
+   A prize draw in Lebanon cannot be advertised with a prize that depends on how
+   the month goes. The amount has to be fixed and the deposit paid BEFORE anyone
+   is told about it. So the pot cannot be "fifty cents times whoever turns up" —
+   that figure is not known until the month it would be funding is over.
+
+   The pot is therefore set from the month that has already finished: last
+   month's participation and last month's collection decide what this month's
+   prize is, the deposit is lodged against that figure, and only then is it
+   advertised. A good October pays for a better November.
+
+   It also reads better to a household: the prize is the town's own result,
+   handed back. */
 var DRAW = {
-  participants: 4736,      /* customers who earned at least one voucher this month */
-  perCustomer: 0.50,       /* USD set aside per participating customer */
-  entries: 14208,          /* vouchers in the monthly pool */
-  annualEntries: 486330,   /* vouchers in the national pool */
-  grandDate: "28 December 2026"
+  /* last month — settled, audited, and the basis for what is on offer now */
+  prevMonth:       "September 2026",
+  prevParticipants: 4512,   /* households that earned at least one voucher */
+  prevCollected:    0.698,  /* share of billed fees actually collected */
+  perCustomer:      0.50,   /* USD set aside per participating household */
+
+  /* this month — open, and changing nothing about the prize */
+  month:           "October 2026",
+  participants:     4736,
+  entries:          14208,
+
+  /* the deposit lodged before any of it was advertised */
+  depositPaidOn:   "28 September 2026",
+  depositRef:      "DEP-2026-10-ZAY",
+
+  annualEntries:   486330,
+  grandDate:       "28 December 2026"
 };
-function potValue(){ return Math.round(DRAW.participants * DRAW.perCustomer); }
+
+/* Set by last month, not this one. Collection rate scales it, so the pot is a
+   share of money actually received rather than money merely invoiced. */
+function potValue(){
+  return Math.round(DRAW.prevParticipants * DRAW.perCustomer * DRAW.prevCollected);
+}
+function potBasis(){
+  return nf(DRAW.prevParticipants) + " households took part in " + DRAW.prevMonth +
+         ", and " + Math.round(DRAW.prevCollected*100) + "% of fees were collected.";
+}
+function potBasisAr(){
+  return "شارك " + nf(DRAW.prevParticipants) + " منزلاً في " + DRAW.prevMonth +
+         "، وحُصّل " + Math.round(DRAW.prevCollected*100) + "% من الرسوم.";
+}
 function oddsOne(entries, mine){ return Math.round(entries / Math.max(1,mine)); }
 
 /* the signed-in customer */
@@ -990,21 +1019,49 @@ var TAGPOINTS = [
    where to send the money and given a reference that is theirs alone; they put
    it in the transfer note. The municipality matches the reference against the
    account when the money lands. That is the whole mechanism, and it works with
-   a bank, a wallet, a counter or a person on a doorstep.                      */
+   a bank, a counter or a person on a doorstep.                               */
 var PAY_SETTLE_HOURS = 24;
+
+/* The one thing that goes wrong with a counter payment, in both languages.
+   Money arrives at the municipality every week with no reference on it, and
+   an unattached payment sits in a suspense list until somebody telephones
+   around. Saying the code is the difference. */
+var REF_INSIST_EN = "Say the reference code to the teller BEFORE you pay, and check it is written on the slip. " +
+                    "Without it the payment reaches the municipality but not your account, and clearing it takes days.";
+var REF_INSIST_AR = "اذكروا رمز المرجع للموظّف قبل الدفع، وتأكّدوا أنه مكتوب على الوصل. " +
+                    "بدونه تصل الدفعة إلى البلدية لكن ليس إلى حسابكم، وتسويتها تأخذ أياماً.";
 
 /* Where the money goes. Set by the municipality; these are placeholders until
    it supplies its own. Nothing here is a secret — they are published details. */
+/* PLACEHOLDER ACCOUNT DETAILS, and deliberately broken ones.
+   The IBAN below has Lebanon's correct shape — LB, two check digits, a
+   four-digit bank code and twenty more characters, twenty-eight in all — so
+   the screen lays out and reads exactly as it will in production.
+
+   Its check digits are 00, which no real IBAN ever has: every banking system
+   rejects it on sight. That is the point. A placeholder that passes validation
+   is a placeholder somebody can attempt a transfer against, and an account
+   number that looks real enough to try is worse than an empty field. Nobody
+   can pay into this one by accident.
+
+   Replace both lines the day the municipality opens its account. Nothing else
+   in the app has to change. */
+var PAYTO_PLACEHOLDER = true;
 var PAYTO = [
   {k:"bank",  n:"Bank transfer",        nAr:"تحويل مصرفي",
-   lines:[["Account name","Municipality of Zaytouna — waste fee"],["IBAN","to be set by the municipality"],["Bank","to be set by the municipality"]],
+   lines:[["Account name","Municipality of Zaytouna — waste fee"],
+          ["IBAN","LB00 0999 0000 0001 0019 0122 9114"],
+          ["Bank","Banque du Liban et d\u2019Outre-Mer — Jounieh"]],
    when:"Any time. Shows on the account within one business day."},
-  {k:"wallet",n:"Mobile wallet",        nAr:"محفظة إلكترونية",
-   lines:[["Wallet number","to be set by the municipality"],["Registered to","Municipality of Zaytouna"]],
-   when:"Any time, including weekends."},
-  {k:"counter",n:"Transfer counter",    nAr:"شباك التحويل",
-   lines:[["Beneficiary","Municipality of Zaytouna — waste fee"],["Reference","the code below, written on the slip"]],
-   when:"Branch hours. Keep the slip until the receipt arrives."},
+  /* OMT and Whish are the same errand to a household: walk to a counter, hand
+     over cash, quote the reference. Two buttons made it look like a decision
+     to be made. One button, both names, and the instruction that actually
+     matters \u2014 say the reference, or the money arrives unattached. */
+  {k:"counter",n:"OMT or Whish counter", nAr:"شبّاك OMT أو Whish",
+   lines:[["Beneficiary","Municipality of Zaytouna — waste fee"],
+          ["Tell the teller","the reference code below, before you pay"],
+          ["Keep","the slip, until the receipt arrives"]],
+   when:"Branch hours. Either network, any branch."},
   {k:"cashier",n:"Municipal cashier",   nAr:"صندوق البلدية",
    lines:[["Where","Municipal building, ground floor"],["Bring","your reference code, or your account number"]],
    when:"Monday to Friday, 08:00 to 14:00."},
@@ -1241,6 +1298,50 @@ var MATERIALS = [
   {en:"Aluminium and steel cans", ar:"علب ألمنيوم وحديد", t:118, usd:33040},
   {en:"Other recoverables", ar:"مواد أخرى", t:125, usd:6640}
 ];
+
+/* The weekday the cash collector works each zone. A household asking for a
+   collector is not asking for a special journey \u2014 it is asking to be on the
+   next round that already passes them, which is the only version of this that
+   scales past a dozen requests. */
+var COLLECTOR_DAY = {D:1, K:2, R:3, M:4, W:5, S:5};   /* 1 = Monday */
+var DAY_EN = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+var DAY_AR = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+
+/* Requests to be called on. Each one puts the household on the round for its
+   zone and is cleared when the collector takes the cash. */
+var CASH_CALLS = [];
+function zoneOf(prem){
+  var d = doorById(prem);
+  if(d && d.point) { var p = placeById(d.point); if(p && p.zone) return p.zone; }
+  return String(prem||"").indexOf("-") > 0 ? "D" : "D";
+}
+/* The next date the collector is in that zone, as a day name and a date. */
+function nextCollectorCall(zoneId){
+  var want = COLLECTOR_DAY[zoneId] != null ? COLLECTOR_DAY[zoneId] : 1;
+  var now = new Date(), d = new Date(now.getTime());
+  var add = (want - now.getDay() + 7) % 7;
+  /* asked for after 16:00 on the day itself: the round has gone, take the next */
+  if(add === 0 && now.getHours() >= 16) add = 7;
+  d.setDate(d.getDate() + add);
+  return { when: d, dayEn: DAY_EN[want], dayAr: DAY_AR[want],
+           dateEn: d.getDate() + " " + ["January","February","March","April","May","June","July",
+                                        "August","September","October","November","December"][d.getMonth()],
+           days: add };
+}
+function cashCalled(prem){
+  var hit = null;
+  CASH_CALLS.forEach(function(c){ if(c.prem === prem && !c.done) hit = c; });
+  return hit;
+}
+function askCollector(prem){
+  var open = cashCalled(prem);
+  if(open) return open;                      /* asking twice does not mean twice */
+  var z = zoneOf(prem), nx = nextCollectorCall(z);
+  var c = { prem: prem, zone: z, at: new Date(), due: nx, done: false,
+            ref: "CALL-" + String(1000 + CASH_CALLS.length + 1) };
+  CASH_CALLS.push(c);
+  return c;
+}
 
 var ZONES = [
   {id:"D", en:"Dayaa",           ar:"الضيعة",        rate:82, premises:1120, recy:76, comp:61, route:"COM-5A", bags:3410, qual:91, down:307},
@@ -1621,7 +1722,7 @@ var S = {
   hist:[], loginErr:"", muniMonth:"September 2026", routeOpen:null, newUser:null,
   scanRank:null, scanOutcome:null, scanTouched:false, users:[], camPhoto:false, photoShot:"",
   pickScan:false, pickTag:"", pickCamTried:false, obsSubject:"", obsKind:null,
-  picked:{},
+  picked:{}, readFirst:false, armed:null, armedEl:null, armedAt:0,
   geo:null, geoErr:"", geoBusy:false, pickPoint:"", photoCtx:false,
   readIds:{}, inboxTab:"notifs", chat:null, fbScore:0,
   wide:(typeof window!=="undefined" && window.matchMedia && window.matchMedia("(min-width:1100px)").matches),
@@ -1727,6 +1828,9 @@ var AR = {
   "Open":"فتح",
   "Pass":"سليم","Fault":"عطل","chosen":"مختار","Reason":"السبب",
   "Add to home screen":"أضف إلى الشاشة الرئيسية","Add":"أضف","Not now":"ليس الآن","Done":"تمّ",
+  "Sound":"الصوت","Sound on":"الصوت يعمل","Sound off":"الصوت متوقف",
+  "Sound is on. Touch anything to hear it. Touch it again to use it.":"الصوت يعمل. المس أي شيء لتسمعه. المسه مرة ثانية لتنفيذه.",
+  "Read the whole screen out loud":"اقرأ الشاشة كاملة بصوت عالٍ",
   "What you saw or were shown":"ما رأيته أو ما عُرض عليك",
   "the document, who confirmed it, what the premises looked like":"المستند، من أكّده، وكيف بدا العقار",
   "photograph the document or the premises":"صوّر المستند أو العقار",
@@ -1902,7 +2006,19 @@ var AR = {
   "Registered to":"مسجّل باسم",
   "Send feedback":"إرسال الملاحظات",
   "Vehicle check":"فحص المركبة",
-  "Wallet number":"رقم المحفظة",
+  "OMT or Whish counter":"شبّاك OMT أو Whish","Quote the reference":"اذكروا رمز المرجع",
+  "Ask a collector to call on me":"اطلبوا مرور المحصّل",
+  "A collector will call on you":"سيمرّ المحصّل عندكم",
+  "Your call reference":"مرجع الطلب","Receipt":"الإيصال",
+  "issued on the spot, and on WhatsApp":"يُسلَّم فوراً، وعلى واتساب",
+  "Never pay anyone who cannot issue a numbered receipt there and then.":"لا تدفعوا لأي شخص لا يسلّمكم إيصالاً مرقّماً فوراً.",
+  "household asked for you":"منزل طلب مروركم","households asked for you":"منازل طلبت مروركم",
+  "They are expecting you today and have the amount ready. Take these first.":"ينتظرونكم اليوم والمبلغ جاهز. ابدأوا بهم.",
+  "Tell the teller":"أخبروا الموظّف","Keep":"احتفظوا بـ",
+  "Branch hours. Either network, any branch.":"ضمن دوام الفروع. أي من الشبكتين، وأي فرع.",
+  "the reference code below, before you pay":"رمز المرجع أدناه، قبل الدفع",
+  "the slip, until the receipt arrives":"الوصل، إلى أن يصل الإيصال",
+  "Banque du Liban et d\u2019Outre-Mer — Jounieh":"بنك لبنان والمهجر — جونية",
   "What is wrong":"ما هو الخطأ",
   "Your question":"سؤالكم",
   "longest first":"الأطول أولاً",
@@ -2633,13 +2749,13 @@ function speak(text){
 }
 /* the button. The text travels in an attribute so a name with an apostrophe in
    it cannot break the handler, and the same markup works inside any card. */
-function sayBtn(text, cls){
-  if(!canSpeak()) return "";
-  return '<button class="sayb '+(cls||"")+'" data-a="say" data-say="'+h(String(text||""))+'" '+
-    'aria-label="'+h(t("Read this out loud"))+'">'+svg("speak")+'</button>';
-}
+/* The per-card speakers are gone with the per-control ones: the switch at the
+   top covers all of it, and with it on, touching a card reads the card. Kept as
+   an empty function rather than deleted so the six views that called it are not
+   all edited for a feature that now lives somewhere else entirely. */
+function sayBtn(){ return ""; }
 function markSaying(){
-  var all = document.querySelectorAll(".sayb, .sayi");
+  var all = document.querySelectorAll(".sayb");
   Array.prototype.forEach.call(all, function(b){
     b.classList.toggle("on", S.saying != null && b.getAttribute("data-say") === S.saying);
   });
@@ -2730,128 +2846,101 @@ function translateDom(root){
   });
 }
 
-/* Put a speaker on everything that can be pressed.
-   Done after the screen is drawn rather than at each of the four hundred places a
-   button is written, so it cannot be forgotten on the next screen somebody adds.
-   The text it speaks is the text actually on the control, read out of the DOM, so
-   it can never drift from what is on the glass.
+/* ---------------- sound: read it first, then do it ----------------
+   The earlier design hung a small speaker on every control. It worked, and it
+   was wrong: forty speakers on a screen is forty more things to understand,
+   and the one thing a person who cannot read does not need is more icons.
 
-   The speaker is a span and not a button: a button inside a button is invalid and
-   behaves unpredictably on touch. The click handler checks for it first and stops
-   the event, so pressing the speaker never also presses the thing it sits on. */
-function sayIcon(txt){
-  var b = document.createElement("span");
-  b.className = "sayi";
-  b.setAttribute("data-a", "say");
-  b.setAttribute("data-say", txt);
-  b.setAttribute("role", "button");
-  b.setAttribute("aria-label", t("Read this out loud"));
-  b.innerHTML = svg("speak");
-  return b;
+   This is the whole feature instead. One switch at the top. With it on, the
+   first touch on anything says what it is, and the second touch does it. With
+   it off, everything behaves exactly as it always did \u2014 so a reader is
+   never slowed down by a feature built for somebody else.
+
+   The arming is per control and short-lived: touch something else, or wait,
+   and the first touch rule applies again. That matters because the second
+   touch is a real press, and "Close the shift" is not a thing to do by
+   accident. */
+var ARM_MS = 9000;
+
+function soundOn(){ return !!S.readFirst && canSpeak(); }
+
+function soundSet(on){
+  S.readFirst = !!on;
+  S.armed = null;
+  try{ localStorage.setItem("baladi.sound", on ? "1" : "0"); }catch(e){}
+  /* The app bar gains and loses its read-the-screen button with this setting,
+     so the screen has to be redrawn and not just the switch repainted. */
+  if(S.role) paint(); else paintSound();
+  if(S.readFirst){
+    speak(t("Sound is on. Touch anything to hear it. Touch it again to use it."));
+  } else {
+    speakStop();
+  }
 }
+
+function soundRestore(){
+  try{ S.readFirst = localStorage.getItem("baladi.sound") === "1"; }catch(e){ S.readFirst = false; }
+}
+
+/* The switch lives in the status bar rather than the title bar, because the
+   title bar is not there on the sign-in screen and that is exactly where
+   somebody who needs this will arrive first. */
+function paintSound(){
+  var b = $("sndtog"); if(!b) return;
+  if(!canSpeak()){ b.hidden = true; return; }
+  b.hidden = false;
+  b.classList.toggle("on", !!S.readFirst);
+  b.setAttribute("aria-pressed", S.readFirst ? "true" : "false");
+  b.setAttribute("aria-label", t(S.readFirst ? "Sound on" : "Sound off"));
+  b.innerHTML = svg(S.readFirst ? "speak" : "mute") +
+                '<span>' + h(t(S.readFirst ? "Sound on" : "Sound")) + '</span>';
+}
+
 function ownText(el){
   var c = el.cloneNode(true);
-  Array.prototype.forEach.call(c.querySelectorAll(".sayi"), function(x){ x.remove(); });
+  Array.prototype.forEach.call(c.querySelectorAll(".sayi,.chev,.sndtog"), function(x){ x.remove(); });
   return (c.textContent || "").replace(/\s+/g, " ").trim();
 }
-function decorateSpeakers(root){
-  if(!canSpeak()) return;
-  var v = root || $("view"); if(!v) return;
 
-  /* every pressable control. Segmented choices and chips are not in this list
-     \u2014 they are narrow, and a speaker added inside one would sit on top of
-     the tap that selects it. They get their own treatment further down. */
-  Array.prototype.forEach.call(
-    v.querySelectorAll(".btn, .bigrow, .item, .chip.tap, .howstep"),
-    function(el){
-      if(el.querySelector(":scope > .sayi")) return;
-      if(el.querySelector(".sayb")) return;          /* already has its own, bigger one */
-      /* a control with no words at all is the one that most needs saying out loud,
-         so fall back to what it is labelled as for a screen reader */
-      var txt = ownText(el) || el.getAttribute("aria-label") || el.getAttribute("title") || "";
-      /* a control whose whole label is one or two characters is a shape, not a
-         word \u2014 the A at three sizes explains itself and a speaker saying
-         "A" three times is noise sitting on top of it */
-      if(!txt || txt.length < 3 || txt.length > 160) return;
-      el.appendChild(sayIcon(txt));
-    });
+/* What a control should say. Its own words first; what it is labelled as for a
+   screen reader second; and for a control that is only a shape, the shape has
+   to have been given a name somewhere or it stays silent. */
+function ctlSpeech(el){
+  var txt = ownText(el);
+  var lab = el.getAttribute("aria-label") || el.getAttribute("title") || "";
+  if(txt && txt.length > 1) return lab && lab.length > txt.length + 4 ? lab : txt;
+  return lab || txt || "";
+}
 
-  /* Every choice in a chip row gets a speaker of its own, placed BESIDE the
-     chip rather than inside it: the chip keeps its whole surface for the tap
-     that selects it, and the speaker beside it says which one it is. */
-  Array.prototype.forEach.call(v.querySelectorAll(".chips > .chip"), function(ch){
-    if(ch.classList.contains("tap")) return;      /* those carry their own, inside */
-    if(!ch.getAttribute("data-a")) return;        /* not a choice \u2014 a label, a prefix */
-    if(ch.parentNode && ch.parentNode.classList.contains("choice")) return;
-    var txt = ownText(ch) || ch.getAttribute("aria-label") || "";
-    if(!txt || txt.length < 2 || txt.length > 160) return;
-    var wrap = document.createElement("span");
-    wrap.className = "choice";
-    ch.parentNode.insertBefore(wrap, ch);
-    wrap.appendChild(ch);
-    wrap.appendChild(sayIcon(txt));
+function ctlKey(el){
+  return (el.getAttribute("data-a") || "") + "|" +
+         (el.getAttribute("data-v") || "") + "|" +
+         (el.getAttribute("data-x") || "") + "|" +
+         ctlSpeech(el).slice(0, 60);
+}
+
+function markArmed(){
+  Array.prototype.forEach.call(document.querySelectorAll(".armed"), function(x){
+    x.classList.remove("armed");
   });
+  if(!S.armedEl) return;
+  try{ S.armedEl.classList.add("armed"); }catch(e){}
+}
 
-  /* Every segment of a segmented choice gets a speaker of its own too. It is
-     pinned to the end of the button and the button is given room for it, so
-     the words and the middle of the button \u2014 where a thumb lands \u2014 still
-     belong to the choice itself. */
-  Array.prototype.forEach.call(v.querySelectorAll(".seg[data-g] button"), function(b){
-    if(b.querySelector(":scope > .sayi")) return;
-    var txt = ownText(b);
-    if(!txt || txt.length < 2 || txt.length > 160) return;
-    b.classList.add("hassay");
-    b.appendChild(sayIcon(txt));
-  });
-
-  /* and one more for the group, which reads the whole set in order \u2014
-     "English, or Arabic" \u2014 so the options can be heard before any of them
-     is touched. */
-  Array.prototype.forEach.call(v.querySelectorAll(".seg[data-g]"), function(seg){
-    if(seg.parentNode && seg.parentNode.classList.contains("segsay")) return;
-    var opts = Array.prototype.map.call(seg.querySelectorAll("button"), function(x){
-      return ownText(x);
-    }).filter(function(x){ return x && x.length > 1; });
-    if(opts.length < 2) return;
-    var wrap = document.createElement("div");
-    wrap.className = "segsay";
-    seg.parentNode.insertBefore(wrap, seg);
-    wrap.appendChild(seg);
-    wrap.appendChild(sayIcon(opts.join(", " + t("or") + " ")));
-  });
-
-  /* a dropdown is a list of choices nobody can see until it is open, which is the
-     worst case of all. The speaker beside it reads whatever is chosen, and
-     choosing a different one speaks it straight away \u2014 so the options can be
-     heard by moving through them rather than read. */
-  Array.prototype.forEach.call(v.querySelectorAll("select"), function(sel){
-    if(sel.parentNode && sel.parentNode.classList.contains("fldsay")) return;
-    var wrap = document.createElement("div");
-    wrap.className = "fldsay";
-    sel.parentNode.insertBefore(wrap, sel);
-    wrap.appendChild(sel);
-    var say = function(){
-      var o = sel.options[sel.selectedIndex];
-      return o ? (o.text || "").trim() : "";
-    };
-    var ico = sayIcon(say());
-    wrap.appendChild(ico);
-    sel.addEventListener("change", function(){
-      ico.setAttribute("data-say", say());
-      if(VOICE.on) speak(say());
-    });
-  });
-
-  /* the label above a field the operator has to fill in */
-  Array.prototype.forEach.call(v.querySelectorAll("label.fld > span, label.lab"), function(el){
-    if(el.querySelector(".sayi")) return;
-    var txt = ownText(el);
-    if(!txt || txt.length > 120) return;
-    el.style.display = "flex";
-    el.style.alignItems = "center";
-    el.style.gap = "6px";
-    el.appendChild(sayIcon(txt));
-  });
+/* Not every touch is on a control. Touching a card, a note, a row of figures
+   should read it too \u2014 that is most of what is on a screen, and none of it
+   is reachable if only buttons talk. */
+function readableBlock(node){
+  var el = node;
+  for(var i = 0; i < 6 && el && el !== document.body; i++){
+    if(el.classList && (el.classList.contains("card") || el.classList.contains("note") ||
+                        el.classList.contains("kv")   || el.classList.contains("howstep") ||
+                        el.classList.contains("item") || el.classList.contains("fold"))){
+      return el;
+    }
+    el = el.parentNode;
+  }
+  return null;
 }
 
 /* The mark, drawn rather than set in a typeface: the same shape the phone
@@ -2909,12 +2998,10 @@ function showAdd(){
   var want = !standalone() && !ADD.hidden && !addWaved();
   bar.hidden = !want;
   if(!want){ bar.innerHTML = ""; return; }
-  var said = t("Add to home screen") + ". " + addLine();
   bar.innerHTML =
     '<span class="ai">'+svg("home")+'</span>'+
     '<span class="at"><b>'+h(t("Add to home screen"))+'</b><span>'+h(addLine())+'</span></span>'+
-    (canSpeak() ? '<span class="sayi" data-a="say" role="button" data-say="'+h(said)+'" '+
-      'aria-label="'+h(t("Read this out loud"))+'">'+svg("speak")+'</span>' : '')+
+
     '<button class="ago" data-a="addhome">'+svg(ADD.prompt?"install":"plus")+h(t("Add"))+'</button>'+
     '<button class="ax" data-a="addno" aria-label="'+h(t("Not now"))+'">'+svg("no")+'</button>';
   translateDom(bar);
@@ -3018,6 +3105,7 @@ function paint(){
   var pg=document.querySelector(".page"); if(pg) pg.classList.toggle("wide", !!S.wide);
   document.documentElement.setAttribute("dir", S.ar?"rtl":"ltr");
   document.documentElement.setAttribute("lang", S.ar?"ar":"en");
+  paintSound();
   showAdd();
   if(!S.role){ paintLogin(); return; }
   var R=ROLES[S.role], c=cur();
@@ -3033,8 +3121,8 @@ function paint(){
   $("appbar").innerHTML =
     '<button class="iconbtn" data-a="back" aria-label="'+h(t("Back"))+'">'+svg("back")+'</button>'+
     '<div class="ttl">'+h(title)+'<span class="sub">'+h(c?t(R.label):TOWN)+'</span></div>'+
-    (canSpeak() ? '<button class="iconbtn'+(S.saying==="__screen__"?" on":"")+'" data-a="sayscreen" '+
-       'aria-label="'+h(t("Read the screen out loud"))+'">'+svg("speak")+'</button>' : '')+
+    (soundOn() ? '<button class="iconbtn'+(S.saying==="__screen__"?" on":"")+'" data-a="sayscreen" '+
+       'aria-label="'+h(t("Read the whole screen out loud"))+'">'+svg("speak")+'</button>' : '')+
     '<button class="iconbtn" data-a="guide" aria-label="'+h(t("Guide"))+'">'+svg("help")+'</button>'+
     '<button class="iconbtn" data-a="menu" aria-label="Menu">'+svg("gear")+'</button>';
   S.photoCtx = false;
@@ -3042,14 +3130,14 @@ function paint(){
   $("view").scrollTop = 0;
   layoutWide();
   translateDom();            translateDom($("appbar"));   translateDom($("tabbar"));
-  decorateSpeakers();
+  S.armed = null; S.armedEl = null;
   wireCarou();
   $("tabbar").innerHTML = R.tabs.map(function(x){
     return '<button data-a="tab" data-v="'+x[0]+'" class="'+(x[0]===S.tab&&!c?"on":"")+'">'+svg(x[2])+'<span>'+h(t(x[1]))+'</span></button>';
   }).join("");
   /* after the tab bar is drawn, not before \u2014 or its speakers are drawn and
      then thrown away with the markup that held them */
-  translateDom($("tabbar"));  decorateSpeakers($("tabbar"));
+  translateDom($("tabbar"));  paintSound();
   sidecard();
   var wantsCam = (key===S.role+".scan" || key===S.role+".sorting" || key==="facility.inspect"
                   || key==="customer.pickup" || S.camPhoto || S.pickScan);
@@ -3256,7 +3344,7 @@ function sheet(title, body){
      it asks for them itself. Settings is the one screen somebody who cannot read
      most needs \u2014 it is where the text size and the reading out loud live. */
   translateDom($("sheet"));
-  decorateSpeakers($("sheet"));
+  translateDom($("sheet"));
 }
 function closeSheet(){ $("sheet").classList.remove("on"); $("scrim").classList.remove("on"); }
 
@@ -3729,6 +3817,7 @@ function prizeCarousel(){
       '<div style="display:flex;gap:11px;align-items:flex-start">'+svg("gift","")+
       '<div><p class="eyebrow">'+h(t("Monthly prize"))+'</p>'+
       '<p class="h">'+money(potValue())+' in gold</p>'+
+      '<p class="sm">'+h(S.ar?potBasisAr():potBasis())+'</p>'+
       '<p class="sm">Drawn on the last day of the month. Your '+mine+' vouchers are '+mine+
       ' of '+nf(DRAW.entries)+' entries &mdash; about 1 in '+nf(oddsOne(DRAW.entries,mine))+'.</p></div></div></button>'+
     '<button class="card gold" style="text-align:start" data-a="tab" data-v="rewards">'+
@@ -3851,7 +3940,8 @@ function botAnswer(q){
            "You are at "+ME.bagsThisMonth+" bags this month. The rebate is on sorting, not on paying early.";
   if(has("draw","prize","win","voucher","gold","car"))
     return "One voucher per activity type per month \u2014 sorting recyclables, sorting organics, and paying on time \u2014 so three a month. "+
-           "This month's pot is "+money(potValue())+" in gold, drawn on 31 October. The national grand prize is an electric SUV, drawn on "+DRAW.grandDate+".";
+           "This month's pot is "+money(potValue())+" in gold, fixed before the month opened from "+DRAW.prevMonth+"'s result and drawn on 31 October. "+
+           "The national grand prize is an electric SUV, drawn on "+DRAW.grandDate+".";
   if(has("sort","recycl","organic","compost","which bag","plastic","glass"))
     return "Three bags. Organic takes food scraps, peel, bones, coffee and garden trimmings. Recyclables takes paper, card, bottles, cans and jars \u2014 empty, dry, lids off. "+
            "Everything else goes commingled. Nothing hazardous in any bag. Open What goes in which bag under Sorting for the full version.";
@@ -4145,6 +4235,31 @@ V["customer.pickup"]=function(){
   'Commingled waste is systematic collection &mdash; every point on the line, '+h(SCHED[0].days)+'. There is nothing to ask for.</div></div>';
 };
 
+/* Paying cash to a collector is the only way for a household with no bank, no
+   OMT branch within walking distance and no smartphone credit. Asking for one
+   has to be a button, and the answer has to be a day \u2014 not "someone will be
+   in touch", which is how a person decides the app is not for them. */
+function collectorCallBlock(){
+  var open = cashCalled(ME.id);
+  if(open){
+    return '<div class="note g"><span>'+svg("check")+'</span><div><b>'+
+      h(t("A collector will call on you"))+'</b>'+
+      h(S.ar ? ("يوم " + open.due.dayAr + " " + open.due.dateEn + "، ضمن الجولة المعتادة لمنطقتكم. احتفظوا بالمبلغ والمرجع جاهزين.")
+             : (open.due.dayEn + " " + open.due.dateEn + ", on your area's usual round. Have the amount and your reference ready."))+
+      '</div></div>'+
+      '<div class="card plain"><div class="kv" style="border:none"><span>'+h(t("Your call reference"))+
+        '</span><b class="mono">'+h(open.ref)+'</b></div>'+
+      '<div class="kv"><span>'+h(t("Receipt"))+'</span><b>'+h(t("issued on the spot, and on WhatsApp"))+'</b></div></div>'+
+      '<p class="sm">'+h(t("Never pay anyone who cannot issue a numbered receipt there and then."))+'</p>';
+  }
+  var nx = nextCollectorCall(zoneOf(ME.id));
+  return '<button class="btn" data-a="askcollector">'+svg("hand","ic ic3")+
+    h(t("Ask a collector to call on me"))+'</button>'+
+    '<p class="sm">'+h(S.ar
+      ? ("الجولة القادمة لمنطقتكم يوم " + nx.dayAr + " " + nx.dateEn + ". تُضاف طلبكم إليها.")
+      : ("The next round for your area is " + nx.dayEn + " " + nx.dateEn + ". Your request joins it."))+'</p>';
+}
+
 V["customer.pay"]=function(){
   var ref=myRef(), amt=dueNow();
   return '<div class="card acc" style="text-align:center"><p class="sm">'+h(t("Amount due"))+'</p>'+
@@ -4169,8 +4284,17 @@ V["customer.pay"]=function(){
           return '<div class="kv"><span>'+h(l[0])+'</span><b class="mono" style="font-size:11.5px;text-align:end">'+h(l[1])+'</b></div>';
         }).join("")+
         '<div class="kv"><span>Reference to quote</span><b class="mono">'+h(ref)+'</b></div>'+
+        /* On the counter methods this is the whole difference between a payment
+           that lands on the account and one that sits in a suspense list, so it
+           is said loudly rather than left in the small print. */
+        ((d.k === "counter" || d.k === "bank")
+          ? '<div class="note w"><span>'+svg("alert")+'</span><div><b>'+h(t("Quote the reference"))+'</b>'+
+            h(S.ar ? REF_INSIST_AR : REF_INSIST_EN)+'</div></div>'
+          : '')+
         '<p class="sm">'+h(d.when)+'</p></div></details>';
     }).join("")+
+
+    collectorCallBlock()+
 
     '<button class="btn p" data-a="paid" data-v="'+h(ref)+'">'+svg("yes","ic ic3")+h(t("I have sent the payment"))+'</button>'+
     '<p class="sm">Telling us does not record the payment \u2014 the municipality records it when the money arrives. '+
@@ -4262,8 +4386,11 @@ V["customer.rewards"]=function(){
   fold(t("Monthly prize")+" \u00b7 "+money(potValue()),
    '<div class="card plain">'+
    '<div class="kv" style="border:none"><span>A pot of gold worth</span><b>'+money(potValue())+'</b></div>'+
-   '<div class="kv"><span>How the value is set</span><b>'+money(DRAW.perCustomer)+' per participating customer</b></div>'+
-   '<div class="kv"><span>Participating this month</span><b class="num">'+nf(DRAW.participants)+'</b></div>'+
+   '<div class="kv"><span>Set by</span><b>'+h(DRAW.prevMonth)+'</b></div>'+
+   '<div class="kv"><span>Households taking part then</span><b class="num">'+nf(DRAW.prevParticipants)+'</b></div>'+
+   '<div class="kv"><span>Fees collected then</span><b>'+Math.round(DRAW.prevCollected*100)+'%</b></div>'+
+   '<div class="kv"><span>Deposit lodged</span><b>'+h(DRAW.depositPaidOn)+'</b></div>'+
+   '<p class="sm">'+h(t("The prize is fixed and its deposit paid before it is advertised, as the law requires. It is set by the month just finished \u2014 so this month's effort pays for next month's prize."))+'</p>'+
    '<div class="kv"><span>Next draw</span><b>31 Oct 2026</b></div>'+
    '<p class="sm">The pot grows as the town takes part, and the odds move with the number of entries. Both are published before each draw.</p></div>')+
   fold("This year \u00b7 "+(24+(S.trainBonus?1:0))+" vouchers earned",
@@ -5258,7 +5385,24 @@ V["driver.sync"]=V["crew.sync"];
 V["collector.round"]=function(){
   var left=ROUTE_DOORS.filter(function(d){ return !S.visited[d.id]; });
   var mult=commMult(COLLECTOR.obsUpheld, COLLECTOR.obsRejected);
-  return '<div class="card acc"><div class="kv" style="border:none"><span>Collected today</span><b>'+money(COLLECTOR.cashToday)+'</b></div>'+
+  /* Households that asked to be called on. They are already on the round \u2014
+     this lifts them to the top of it, because somebody standing at home with
+     cash ready is the easiest money of the day and the worst to miss. */
+  var called = left.filter(function(d){ return !!cashCalled(d.id); });
+  return (called.length
+    ? '<div class="note g"><span>'+svg("hand")+'</span><div><b>'+
+        h(called.length + " " + t(called.length === 1 ? "household asked for you" : "households asked for you"))+'</b>'+
+        h(t("They are expecting you today and have the amount ready. Take these first."))+'</div></div>'+
+      '<div class="card plain"><div class="list">'+called.map(function(d){
+        var c = cashCalled(d.id);
+        return '<button class="item" data-a="push" data-v="door" data-x="'+h(d.id)+'">'+
+          '<span class="av">'+svg("hand")+'</span>'+
+          '<span class="t"><b>'+h(S.ar?d.ar:d.n)+' \u00b7 '+money(d.due)+'</b>'+
+          '<span>'+h(d.a)+' \u00b7 '+h(c.ref)+'</span></span>'+
+          '<span class="chev">'+svg("chev")+'</span></button>';
+      }).join("")+'</div></div>'
+    : '')+
+    '<div class="card acc"><div class="kv" style="border:none"><span>Collected today</span><b>'+money(COLLECTOR.cashToday)+'</b></div>'+
     '<div class="kv"><span>Doors left</span><b class="num">'+left.length+' of '+ROUTE_DOORS.length+'</b></div>'+
     '<div class="kv"><span>Deposit due</span><b>before 17:00</b></div></div>'+
     '<button class="card gold" style="text-align:start;width:100%" data-a="push" data-v="earnings">'+
@@ -5281,11 +5425,6 @@ V["collector.round"]=function(){
           '<span class="dr">'+(d.due
             ? '<b>'+money(d.due)+'</b><span'+(d.days>60?' class="late"':'')+'>'+d.days+'d</span>'
             : '<span class="pill p-neut">exempt</span>')+'</span></button>'+
-        /* the name read out, because a collector who cannot read the list still
-           has to knock on the right door and ask for the right person */
-        (canSpeak() ? '<button class="dact" data-a="say" data-say="'+
-            h((S.ar?d.ar:d.n)+". "+d.id+". "+(d.due? t("Owing")+" "+money(d.due) : t("Exempt")))+'" '+
-            'aria-label="'+h(t("Read the name out loud"))+'">'+svg("speak")+'</button>' : '')+
         '<a class="dact" target="_blank" rel="noopener" aria-label="Open in maps" href="'+
           h(mapOut(pl.lat, pl.lon))+'">'+svg("map")+'</a>'+
         '<button class="dact skip" data-a="skipstop" data-v="'+h(d.id)+'">'+svg("skip","ic ic3")+h(t("Skip"))+'</button>'+
@@ -5834,7 +5973,7 @@ V["muni.analytics"]=function(){
     ["Publish diversion as a contract target", "Diversion is "+a.divRate.toFixed(1)+"% and recyclables are worth "+money(a.matVal)+" at the gate. A contractor with a share of that revenue has a reason to protect it."]
   ];
   var comms=[
-    ["Lead with the pot, not the penalty", money(potValue())+" in gold this month and "+nf(DRAW.participants)+" households taking part. Draw participation moves behaviour faster than arrears letters."],
+    ["Lead with the pot, not the penalty", money(potValue())+" in gold this month, set by "+DRAW.prevMonth+"'s "+Math.round(DRAW.prevCollected*100)+"% collection. A better month now is a bigger prize next month, and that is a story arrears letters cannot tell."],
     ["Target "+a.worstZone.en+" with a street-level number", "People respond to their own street, not the town. The app already shows each household its street's sorted-bag share."],
     ["Address contamination directly", "Contamination at the pad is "+TONNES.contamination+"%. Three images of what does not belong in the organic bag will do more than a page of rules."],
     ["Name the saving", "Each household that sorts keeps material out of central treatment. Published per household, that is a number people repeat."],
@@ -6323,12 +6462,13 @@ V["admin.draw"]=function(){
     '<div><p class="eyebrow">'+h(S.drawKind==="monthly"?"October prize":"Grand prize · "+DRAW.grandDate)+'</p>'+
     '<p class="h">'+h(S.drawKind==="monthly"?money(potValue())+" in gold":"An electric SUV")+'</p>'+
     '<p class="sm">'+h(S.drawKind==="monthly"
-      ? "Value set at "+money(DRAW.perCustomer)+" for every customer who took part. Drawn from every voucher earned in Zaytouna this month."
+      ? "Fixed at "+money(potValue())+" before the month opened, from "+DRAW.prevMonth+"'s result. Drawn from every voucher earned in Zaytouna this month."
       : "Drawn nationally on 28 December from every voucher earned this year across all participating municipalities.")+'</p></div></div></div>'+
     (S.drawKind==="monthly"
       ? '<div class="card plain"><p class="eyebrow">How the pot is set</p>'+
-        '<div class="kv" style="border:none"><span>Participating customers</span><b class="num">'+nf(DRAW.participants)+'</b></div>'+
-        '<div class="kv"><span>Set aside per customer</span><b>'+money(DRAW.perCustomer)+'</b></div>'+
+        '<div class="kv" style="border:none"><span>Set by</span><b>'+h(DRAW.prevMonth)+'</b></div>'+
+        '<div class="kv"><span>Households taking part then</span><b class="num">'+nf(DRAW.prevParticipants)+'</b></div>'+
+        '<div class="kv"><span>Deposit reference</span><b class="mono">'+h(DRAW.depositRef)+'</b></div>'+
         '<div class="kv"><span>Pot this month</span><b>'+money(potValue())+' in gold</b></div>'+
         '<div class="kv"><span>Odds on one voucher</span><b>1 in '+nf(oddsOne(DRAW.entries,1))+'</b></div>'+
         '<div class="kv"><span>Odds on three</span><b>1 in '+nf(oddsOne(DRAW.entries,3))+'</b></div></div>'
@@ -6790,18 +6930,45 @@ function runDraw(){
 }
 
 document.addEventListener("click", function(ev){
-  /* The speaker first, before anything else can claim the event. It sits inside
-     buttons and inside segmented choices, and pressing it must read the control
-     out rather than press it \u2014 otherwise someone checking what a button says
-     would trigger it, which for "Close the shift" is a bad afternoon. */
-  var si = ev.target.closest(".sayi");
-  if(si){
-    ev.preventDefault(); ev.stopPropagation();
-    var stxt = si.getAttribute("data-say") || "";
-    if(S.saying === stxt){ speakStop(); markSaying(); return; }
-    S.saying = stxt; markSaying();
-    if(!speak(stxt)){ S.saying = null; markSaying(); toast(t("This handset has no voice installed")); }
-    return;
+  /* The switch is never itself subject to the rule it turns on. Someone who
+     cannot read it out loud must still be able to turn it off. */
+  var tog = ev.target.closest(".sndtog");
+  if(tog){ ev.preventDefault(); ev.stopPropagation(); soundSet(!S.readFirst); return; }
+
+  /* Read it first, then do it. The first touch on a control says what it is and
+     stops there; the second touch, on the same control, goes through to the
+     handler below as an ordinary press. */
+  if(soundOn()){
+    var ctl = ev.target.closest("[data-a], .seg[data-g] button");
+    /* Reading the screen out is itself a reading action with nothing to undo,
+       so making somebody press it twice is a rule applied for its own sake. */
+    if(ctl && ctl.getAttribute("data-a") === "sayscreen") ctl = null;
+    if(ctl){
+      var key = ctlKey(ctl);
+      var stale = (Date.now() - (S.armedAt || 0)) > ARM_MS;
+      if(S.armed !== key || stale){
+        ev.preventDefault(); ev.stopPropagation();
+        var words = ctlSpeech(ctl);
+        S.armed = key; S.armedEl = ctl; S.armedAt = Date.now();
+        markArmed();
+        if(words) speak(words);
+        return;                       /* said, not done */
+      }
+      S.armed = null; S.armedEl = null; markArmed();   /* second touch: let it through */
+    } else {
+      /* not a control at all \u2014 a card, a note, a row of figures. Read it,
+         and that is the whole of it; there is nothing to run. */
+      var blk = readableBlock(ev.target);
+      if(blk){
+        var btxt = ownText(blk);
+        if(btxt && btxt.length > 1){
+          ev.preventDefault(); ev.stopPropagation();
+          S.armed = null; S.armedEl = null; markArmed();
+          speak(btxt.slice(0, 600));
+          return;
+        }
+      }
+    }
   }
   var seg = ev.target.closest(".seg[data-g] button");
   if(seg){
@@ -6809,7 +6976,7 @@ document.addEventListener("click", function(ev){
     Array.prototype.forEach.call(seg.parentNode.children,function(b){ b.classList.remove("on"); });
     seg.classList.add("on");
     if(g==="stream"){ S.stream=v; paint(); }
-    if(VOICE.on && canSpeak()){ var picked = (seg.textContent||"").replace(/\s+/g," ").trim();
+    if(false){ var picked = (seg.textContent||"").replace(/\s+/g," ").trim();
       if(picked) speak(picked); }
     if(g==="lang"){ S.ar = v==="ar"; closeSheet(); paint(); }
     if(g==="cur2"){ S.lbp = v==="lbp"; closeSheet(); paint(); }
@@ -7078,6 +7245,17 @@ document.addEventListener("click", function(ev){
     }
     case "obspick": S.obsKind=+v; paint(); return;
     case "pick": S.picked[v]=x; paint(); return;
+    case "askcollector": {
+      var c = askCollector(ME.id);
+      /* It is on the collector's round from this moment, which is the whole
+         point \u2014 a request that only produces a message is a request nobody
+         acts on. */
+      var d = doorById(ME.id);
+      if(d) d.cashCall = c.ref;
+      toast(S.ar ? ("سيمرّ المحصّل يوم " + c.due.dayAr)
+                 : ("A collector will call on " + c.due.dayEn));
+      paint(); return;
+    }
     case "addhome": addHome(); return;
     case "addno": ADD.hidden=true; addKeep(); showAdd(); closeSheet(); return;
 
@@ -7539,6 +7717,7 @@ function tick(){
   $("clock").textContent = String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
 }
 tick(); setInterval(tick,20000);
+soundRestore();
 try{ history.replaceState({b:0}, ""); history.pushState({b:1}, ""); }catch(e){}
 paint();
 </script>
