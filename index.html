@@ -254,6 +254,13 @@ svg.icXL{width:34px;height:34px;flex:none}
 .p-gold{color:var(--gold);background:var(--gold-soft);border-color:color-mix(in oklab,var(--gold) 36%,transparent)}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+/* four numbers, read at arm's length, instead of eighteen rows of a report */
+.imetrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.im{background:var(--surface-3);border:1px solid var(--line);border-radius:13px;padding:10px 12px}
+.im>b{display:block;font-family:"Archivo",sans-serif;font-size:calc(21px*var(--ts));
+  font-weight:700;line-height:1.1;letter-spacing:-.02em}
+.im>b>span{font-size:calc(11px*var(--ts2));font-weight:600;color:var(--muted);margin-inline-start:3px;letter-spacing:0}
+.im>span{display:block;font-size:calc(11px*var(--ts2));color:var(--muted);margin-top:2px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .stat{background:var(--surface-3);border:1px solid var(--line);border-radius:13px;padding:9px 11px;display:flex;flex-direction:column;gap:1px}
 .stat b{font-family:"Archivo",sans-serif;font-size:calc(21px*var(--ts));font-weight:700;letter-spacing:-.02em;line-height:1.15}
@@ -561,7 +568,7 @@ svg.mico{width:34px;height:34px;flex:none;stroke-width:1.5}
 .nxt .m span{display:block;font-size:calc(11.5px*var(--ts2));color:var(--muted)}
 .nxt .w{flex:none;text-align:end}
 .nxt .w b{display:block;font-size:calc(13px*var(--ts));font-family:"Archivo",sans-serif}
-.nxt .w span{display:block;font-size:calc(11px*var(--ts2));color:var(--muted)}
+.nxt .w span{display:block;font-size:calc(11px*var(--ts2));color:var(--muted);white-space:nowrap;letter-spacing:-.01em}
 </style>
 </head>
 <body>
@@ -648,18 +655,61 @@ function userStats(id){
           thisMonth:1+(k%9), since:["Feb","Mar","Apr"][(k%3)]+" 2026",
           qual:62+(k%36), flags:d?d.flags:0, rebate:(1+(k%9))>=REBATE_BAGS};
 }
+/* Two jobs skip a stop for completely different reasons, and one list was
+   being used for both. A crew skips a BIN \u2014 nothing out, lorry in the way.
+   A fee collector skips a DOOR, and is there for money: nobody home, the
+   household wants to pay another way, somebody asks them to come back on
+   payday. Telling a collector "nothing out at the point" was a list written
+   for the wrong person. */
 var SKIP_REASONS = ["Access blocked \u2014 vehicle cannot reach",
                     "Nothing out at the point",
                     "Road works or a parked lorry",
                     "Unsafe to stop here now",
-                    "Out of time on this round"];
+                    "Out of time on this round",
+                    "Other \u2014 with a note"];
 var SKIP_REASONS_AR = ["الوصول مسدود — لا يمكن للمركبة",
                        "لا شيء عند النقطة",
                        "أشغال أو شاحنة متوقفة",
                        "غير آمن للتوقف الآن",
-                       "نفد وقت الجولة"];
+                       "نفد وقت الجولة",
+                       "أخرى — مع ملاحظة"];
 /* one pictogram per reason, in the same order, so the list can be read by shape */
-var SKIP_ICONS = ["blocked","empty","roadworks","alert","clock"];
+var SKIP_ICONS = ["blocked","empty","roadworks","alert","clock","doc"];
+
+/* The fee collector's own list. Every entry is about money or about the person
+   at the door, because that is the job. */
+var CASH_SKIP_REASONS = ["Nobody home",
+                         "Asked to call back \u2014 no cash today",
+                         "Will pay another way \u2014 counter or transfer",
+                         "Says it is already paid",
+                         "Refused to pay",
+                         "Premises closed or empty",
+                         "Disputes the amount",
+                         "Unsafe to call here now",
+                         "Out of time on this round",
+                         "Other \u2014 with a note"];
+var CASH_SKIP_REASONS_AR = ["لا أحد في المنزل",
+                            "طلبوا المرور لاحقاً — لا نقد اليوم",
+                            "سيدفعون بطريقة أخرى — شبّاك أو تحويل",
+                            "يقولون إنه مدفوع",
+                            "رفضوا الدفع",
+                            "العقار مقفل أو فارغ",
+                            "يعترضون على المبلغ",
+                            "غير آمن المرور الآن",
+                            "نفد وقت الجولة",
+                            "أخرى — مع ملاحظة"];
+var CASH_SKIP_ICONS = ["nohome","clock","cash","yes","no","lock","scales","alert","clock","doc"];
+
+/* Which list a role is shown. The collector is collecting money; everybody
+   else on a round is collecting waste. */
+function skipList(){
+  return S.role === "collector"
+    ? {en:CASH_SKIP_REASONS, ar:CASH_SKIP_REASONS_AR, ic:CASH_SKIP_ICONS, money:true}
+    : {en:SKIP_REASONS,      ar:SKIP_REASONS_AR,      ic:SKIP_ICONS,      money:false};
+}
+/* Some of these are not a skip at all \u2014 they are a promise to come back,
+   and the round should carry them rather than lose them. */
+function skipIsCallback(r){ return /call back|another way|disputes/i.test(String(r||"")); }
 /* anything reported faulty lands here, with its comment and its photograph */
 var FAULTS = [
   {id:"FT-1042", where:"R-14-P", what:"Bin lid broken off", by:"Crew B", at:"9 Oct, 07:12", photo:true,
@@ -896,18 +946,44 @@ var RANKS = [
 ];
 /* A collection point and a drop-off station are not the same job, so they do
    not get the same question. */
-var POINT_OUTCOMES = ["Passed — nothing out","Waste left beside the point","Access blocked","Other — with a comment"];
-var POINT_OUTCOMES_AR = ["مررنا — لا شيء بالخارج","نفايات بجانب النقطة","الوصول مسدود","أخرى — مع ملاحظة"];
-var DOP_OUTCOMES = ["Emptied — all bins","Emptied — some bins full","Station overflowing","Contaminated load","Access blocked"];
-var DOP_OUTCOMES_AR = ["أُفرغت كل الحاويات","أُفرغ البعض والباقي ممتلئ","المحطة فائضة","حمولة ملوّثة","الوصول مسدود"];
-var BAG_OUTCOMES = ["Collected","Left — not properly sorted","Left — not at the point"];
-var BAG_OUTCOMES_AR = ["مرفوع","مُترك — الفرز غير سليم","مُترك — ليس عند النقطة"];
+/* One list. Every answer a crew member can give at a collection point or a
+   drop-off station, in the order they come up on a round. "Emptied all bins"
+   first because it is the answer nine times in ten. */
+var POINT_OUTCOMES = ["Emptied — all bins","Access blocked",
+                      "Oversized waste — needs drop-off","Waste not at the collection point",
+                      "Other — with a comment"];
+var POINT_OUTCOMES_AR = ["أُفرغت كل الحاويات","الوصول مسدود",
+                         "نفايات ضخمة — تحتاج محطة","النفايات ليست عند نقطة الجمع",
+                         "أخرى — مع ملاحظة"];
+/* A station answers the same question, so it gets the same list. One thing
+   fewer for a crew to learn, and one list fewer to keep in step. */
+var DOP_OUTCOMES = POINT_OUTCOMES;
+var DOP_OUTCOMES_AR = POINT_OUTCOMES_AR;
+/* A bag used to be ranked, then given an outcome, then commented on. All
+   three said one thing: was it sorted, and did we take it. One list says it. */
+var BAG_OUTCOMES = ["Collected — sorted correctly","Collected — partly mixed",
+                    "Left — not properly sorted","Left — not at the point",
+                    "Left — oversized, needs drop-off","Other — with a comment"];
+var BAG_OUTCOMES_AR = ["مرفوع — فرز سليم","مرفوع — مختلط جزئياً",
+                       "مُترك — الفرز غير سليم","مُترك — ليس عند النقطة",
+                       "مُترك — ضخم، يحتاج محطة","أخرى — مع ملاحظة"];
 /* A pictogram for every outcome, in the order of the list above it. Nobody has
    to read "Access blocked" to know which one it is \u2014 the circle with a bar
    through it is in a different shape from the empty bin beside it. */
-var POINT_ICONS = ["empty","dump","blocked","doc"];
-var DOP_ICONS   = ["yes","half","overflow","contam","blocked"];
-var BAG_ICONS   = ["truck","unsorted","offpoint"];
+var POINT_ICONS = ["yes","blocked","overflow","offpoint","doc"];
+var DOP_ICONS   = POINT_ICONS;
+var BAG_ICONS   = ["yes","mixed","unsorted","offpoint","overflow","doc"];
+/* The outcome that still wants a sentence typed after it. */
+function outcomeNeedsNote(o){ return /other/i.test(String(o||"")); }
+/* A bag outcome carries its own rank now, so the rank is read back out of it
+   rather than asked for twice. */
+function rankFromOutcome(o){
+  var x = String(o||"");
+  if(/sorted correctly/i.test(x)) return "ok";
+  if(/partly mixed/i.test(x))     return "mix";
+  if(/^Left/i.test(x))            return "rej";
+  return null;
+}
 
 /* the town's own collection points, so a location can be turned into a recommendation */
 /* ===================== what a tag can be =====================
@@ -1396,9 +1472,9 @@ function subById(id){ var o=null; ROUTEPERF.forEach(function(r){ r.subs.forEach(
 /* what the municipality types in each month */
 var MUNI_MONTHS = ["September 2026","August 2026","July 2026"];
 var MUNI_DATA = {
-  "September 2026":{toCentral:612, recySoldT:98, recySoldUsd:9840, organicsToCompost:92, tPaidContractor:782, filed:true},
-  "August 2026":{toCentral:634, recySoldT:91, recySoldUsd:9120, organicsToCompost:88, tPaidContractor:806, filed:true},
-  "July 2026":{toCentral:648, recySoldT:86, recySoldUsd:8470, organicsToCompost:81, tPaidContractor:821, filed:true}
+  "September 2026":{toCentral:612, recySoldT:98, recySoldUsd:9840, organicsToCompost:92, tPaidContractor:782, costPaidUsd:46920, filed:true},
+  "August 2026":{toCentral:634, recySoldT:91, recySoldUsd:9120, organicsToCompost:88, tPaidContractor:806, costPaidUsd:48360, filed:true},
+  "July 2026":{toCentral:648, recySoldT:86, recySoldUsd:8470, organicsToCompost:81, tPaidContractor:821, costPaidUsd:49260, filed:true}
 };
 
 /* loads arriving at the facility gate, and the inspection log */
@@ -1722,7 +1798,7 @@ var S = {
   hist:[], loginErr:"", muniMonth:"September 2026", routeOpen:null, newUser:null,
   scanRank:null, scanOutcome:null, scanTouched:false, users:[], camPhoto:false, photoShot:"",
   pickScan:false, pickTag:"", pickCamTried:false, obsSubject:"", obsKind:null,
-  picked:{}, readFirst:false, armed:null, armedEl:null, armedAt:0,
+  picked:{}, readFirst:false, armed:null, armedEl:null, armedAt:0, scanNote:"",
   geo:null, geoErr:"", geoBusy:false, pickPoint:"", photoCtx:false,
   readIds:{}, inboxTab:"notifs", chat:null, fbScore:0,
   wide:(typeof window!=="undefined" && window.matchMedia && window.matchMedia("(min-width:1100px)").matches),
@@ -1747,7 +1823,7 @@ var AR = {
   "Customer":"المشترك","Collection crew":"طاقم الرفع","Driver":"السائق","Field collector":"الجابي الميداني",
   "Operations":"العمليات","Claims reviewer":"مراجع المطالبات","Municipality":"البلدية","Administrator":"المسؤول",
   "Sign in":"تسجيل الدخول","Continue":"متابعة","Back":"رجوع","Save":"حفظ","Submit":"إرسال","Cancel":"إلغاء",
-  "Guide":"دليل","Next collection":"الرفع القادم","Full schedule":"الجدول الكامل","Collection days":"أيام الرفع",
+  "Guide":"دليل","Next collection":"الرفع القادم","Collection days":"أيام الرفع",
   "Put out between":"أخرج الكيس بين","Prizes":"الجوائز","Vouchers":"القسائم","Impact":"الأثر",
   "Confirm":"تأكيد","Close":"إغلاق","Next":"التالي","Done":"تم","Export":"تصدير","Search":"بحث",
   "Switch interface":"تبديل الواجهة","Sign out":"تسجيل الخروج","Language":"اللغة","Currency":"العملة",
@@ -1806,7 +1882,7 @@ var AR = {
   "Every cash payment issues a numbered receipt and can be sent by SMS or WhatsApp.":"كل دفعة نقدية تُصدر وصلاً مرقّماً ويمكن إرساله برسالة نصية أو عبر واتساب.",
   "Swipe for the rest: trees equivalent, bags sorted for life, tonnes kept out of central treatment.":"اسحبوا للباقي: ما يعادل أشجاراً، وأكياس مفروزة مدى الحياة، وأطنان أُبعدت عن المعالجة المركزية.",
   "Each item resolves to a scan, an exception or a weighbridge ticket, so it can be opened back later.":"كل بند يعود إلى مسح أو استثناء أو بطاقة وزن، فيمكن فتحه لاحقاً.",
-  "Three services, three schedules. Each line shows its own next day and time. Full schedule opens the detail.":"ثلاث خدمات، ثلاثة جداول. كل سطر يعرض يومه ووقته التاليين. الجدول الكامل يفتح التفاصيل.",
+  "Three services, three schedules. Each line shows its next day and the window it runs in \u2014 a time on its own does not tell a household whether they have already missed it.":"ثلاث خدمات، ثلاثة جداول. كل سطر يعرض يومه التالي والفترة التي يمرّ فيها — الوقت وحده لا يخبر المنزل إن كان قد فاته.",
   "The yearly waste tariff, split into two instalments. Pay now opens the channels; Payment history lists every receipt.":"رسم النفايات السنوي، مقسّم إلى قسطين. «ادفع الآن» يفتح القنوات، و«سجلّ الدفعات» يعرض كل وصل.",
   /* ---- the screens that were written as English literals ----
      Most of this app writes its words straight into the markup rather than
@@ -2008,6 +2084,19 @@ var AR = {
   "Vehicle check":"فحص المركبة",
   "OMT or Whish counter":"شبّاك OMT أو Whish","Quote the reference":"اذكروا رمز المرجع",
   "Ask a collector to call on me":"اطلبوا مرور المحصّل",
+  "What happened here":"ماذا حصل هنا","What happened":"ماذا حصل","in a few words":"بكلمات قليلة",
+  "Why no payment":"لماذا لم يُدفع","Noted \u00b7 back on the next round":"سُجّل · يعود في الجولة القادمة",
+  "Recorded":"سُجّل",
+  "The door stays on the round and comes back round. A reason now is what stops it being knocked on blind next week.":"يبقى الباب على الجولة ويعود دوره. السبب الآن هو ما يمنع طرقه عشوائياً الأسبوع المقبل.",
+  "A skipped stop is not a serviced stop. It is recorded with a reason, and it stays on the round for the next pass.":"النقطة المتخطّاة ليست نقطة مخدومة. تُسجَّل مع سببها وتبقى على الجولة للمرور التالي.",
+  "Kept out of treatment and burial":"ما لم يذهب إلى المعالجة والطمر","since":"منذ",
+  "Recyclables":"قابل للتدوير","Organics":"عضوي","Bags sorted":"أكياس مفروزة",
+  "CO\u2082e avoided":"مكافئ CO\u2082 موفَّر","The whole ledger":"السجل الكامل",
+  "Every kilogram here is one the town did not pay to haul or to bury.":"كل كيلوغرام هنا لم تدفع البلدية كلفة نقله أو طمره.",
+  "Recyclables recovered":"مواد مستردّة","Organics diverted":"عضوي محوَّل",
+  "Commingled handed over":"مختلط مُسلَّم","this year":"هذه السنة",
+  "Equivalent trees planted":"ما يعادل أشجاراً مزروعة","Material value at the gate":"قيمة المواد عند البوابة",
+  "Landfill volume avoided":"حجم مطمر موفَّر","Town collected":"جُمع في البلدة","Town diverted":"حُوِّل في البلدة",
   "A collector will call on you":"سيمرّ المحصّل عندكم",
   "Your call reference":"مرجع الطلب","Receipt":"الإيصال",
   "issued on the spot, and on WhatsApp":"يُسلَّم فوراً، وعلى واتساب",
@@ -2338,6 +2427,13 @@ function t(s){ return S.ar && AR[s] ? AR[s] : s; }
 function h(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
 function $(id){ return document.getElementById(id); }
 function nf(n,d){ return Number(n).toLocaleString("en-US",{minimumFractionDigits:d||0,maximumFractionDigits:d===undefined?0:d}); }
+/* The same money, rounded to the dollar. For a council ledger in the hundreds
+   of thousands, the cents are noise \u2014 they make a reader check whether the
+   figure is a total or a line item. An individual bill still shows them. */
+function money0(usd){
+  if(!S.lbp) return "$"+nf(Math.round(usd||0), 0);
+  return money(usd);
+}
 function money(usd){
   if(!S.lbp){ var c=Math.round(usd*100); return "$"+nf(c/100, c%100?2:0); }
   var v=usd*FX, u=S.ar?" ل.ل":" LL";
@@ -3560,6 +3656,7 @@ function onScan(raw, src){
   /* nothing logged means nothing was wrong: a bag is assumed sorted, a point assumed clear */
   var P0=parseCode(code);
   S.scanRank    = P0.thing==="bag" ? "ok" : null;
+  S.scanNote    = "";
   S.scanOutcome = P0.thing==="bag" ? BAG_OUTCOMES[0]
                 : P0.kind==="dop"  ? DOP_OUTCOMES[0]
                 : POINT_OUTCOMES[0];
@@ -3790,9 +3887,10 @@ V["customer.home"]=function(){
     SCHED.map(function(x){
       return '<div class="nxt"><span class="ico">'+svg(x.icon)+'</span>'+
         '<span class="m"><b>'+h(S.ar?x.ar:x.en)+'</b><span>'+h(S.ar?x.daysAr:x.days)+'</span></span>'+
-        '<span class="w"><b>'+h(S.ar?x.nextAr:x.next)+'</b><span class="mono">'+h(x.at)+'</span></span></div>';
-    }).join("")+
-    '<button class="link" data-a="push" data-v="schedule" style="text-align:start">'+h(t("Full schedule"))+' &rsaquo;</button></div>'+
+        /* the window, not the start time. "06:30" does not tell a household
+           whether they have already missed it; "06:30 \u2013 09:00" does. */
+        '<span class="w"><b>'+h(S.ar?x.nextAr:x.next)+'</b><span class="mono">'+h(x.win)+'</span></span></div>';
+    }).join("")+'</div>'+
 
   '<div class="quick">'+
     '<button data-a="push" data-v="pickup">'+svg("bag")+'<span>'+h(t("Request a pickup"))+'</span></button>'+
@@ -4015,42 +4113,37 @@ V["customer.sortguide"]=function(){
     '<button class="btn p" data-a="push" data-v="training">'+svg("task","ic")+h(t("Sorting training"))+'</button>'+
     '<button class="btn" data-a="push" data-v="dropoff">'+svg("map","ic")+h(t("Drop-off network"))+'</button>';
 };
-V["customer.schedule"]=function(){
-  return SCHED.map(function(x){
-    return '<div class="card"><div style="display:flex;gap:11px;align-items:flex-start">'+
-      '<span class="tagi">'+svg(x.icon)+'</span>'+
-      '<div style="flex:1"><p class="h">'+h(S.ar?x.ar:x.en)+'</p>'+
-      '<p class="sm">'+h(S.ar?x.howAr:x.howEn)+'</p></div></div>'+
-      '<div class="kv"><span>'+h(t("Collection days"))+'</span><b>'+h(S.ar?x.daysAr:x.days)+'</b></div>'+
-      '<div class="kv"><span>'+h(t("Next collection"))+'</span><b>'+h(S.ar?x.nextAr:x.next)+' '+h(x.at)+'</b></div>'+
-      '<div class="kv"><span>'+h(t("Put out between"))+'</span><b class="mono">'+h(x.win)+'</b></div></div>';
-  }).join("")+
-  '<p class="sm">Each service runs on its own schedule. A change of day is announced in the app and by SMS at least three days ahead.</p>';
-};
+/* The schedule detail screen was removed on 17 October 2026 along with the
+   "Full schedule" link that was its only way in. Everything it showed \u2014 the
+   days, and now the window each service runs in \u2014 is on the home card, and
+   the "how it works" sentence per service is in the sorting guide. A screen
+   nothing can open is worse than no screen. */
 
 V["customer.impact"]=function(){
+  var div = (TONNES.divertedTruck/TONNES.total*100).toFixed(1);
   return ''+
-  '<div class="card"><p class="eyebrow">This year</p>'+
-  '<div class="kv"><span>Recyclables recovered</span><b>'+ME.recycleKg+' kg</b></div>'+
-  '<div class="kv"><span>Organics diverted</span><b>'+ME.organicKg+' kg</b></div>'+
-  '<div class="kv"><span>Commingled handed over</span><b>'+ME.otherKg+' kg</b></div>'+
-  '<div class="kv"><span>Bags scanned</span><b>23</b></div></div>'+
-  '<div class="card acc"><p class="eyebrow">Kept out of central treatment and disposal</p>'+
-  '<div class="kv" style="border:none"><span>Lifetime, since '+h(ME.since)+'</span><b>'+myAvoidedT().toFixed(2)+' t &middot; '+nf(myAvoidedKg())+' kg</b></div>'+
-  '<div class="kv"><span>Recyclables, lifetime</span><b>'+nf(ME.recycleKgLife)+' kg</b></div>'+
-  '<div class="kv"><span>Organics, lifetime</span><b>'+nf(ME.organicKgLife)+' kg</b></div>'+
-  '<div class="kv"><span>Bags sorted, lifetime</span><b class="num">'+nf(ME.bagsLifetime)+'</b></div>'+
-  '<p class="sm">Every kilogram here is one the town did not pay to haul to the central facility or to bury.</p></div>'+
-  '<div class="card"><p class="eyebrow">What that is worth</p>'+
-  '<div class="kv"><span>Equivalent trees planted</span><b class="num">'+myTrees()+'</b></div>'+
-  '<div class="kv"><span>CO&#8322;e avoided</span><b>'+myCo2Kg()+' kg</b></div>'+
-  '<div class="kv"><span>Material value at the gate</span><b>'+money(9.4)+'</b></div>'+
-  '<div class="kv"><span>Landfill volume avoided</span><b>0.34 m&#179;</b></div></div>'+
-  '<div class="card plain"><p class="eyebrow">Town-wide this year</p>'+
-  '<div class="kv"><span>Collected</span><b>'+nf(TONNES.total)+' t</b></div>'+
-  '<div class="kv"><span>Diverted before the landfill line</span><b>'+nf(TONNES.divertedTruck)+' t</b></div>'+
-  '<div class="kv"><span>Diversion rate</span><b>'+(TONNES.divertedTruck/TONNES.total*100).toFixed(1)+'%</b></div></div>'+
-  '<p class="sm">Figures come from weighbridge tickets and your own scanned bags. Conversion factors are the municipality&rsquo;s published ones and are shown in the annual report.</p>';
+  '<div class="card acc"><p class="eyebrow">'+h(t("Kept out of treatment and burial"))+'</p>'+
+    '<div class="big">'+myAvoidedT().toFixed(2)+' t</div>'+
+    '<p class="sm">'+h(t("since"))+' '+h(ME.since)+' \u00b7 '+nf(myAvoidedKg())+' kg</p></div>'+
+
+  '<div class="imetrics">'+
+    '<div class="im"><b>'+nf(ME.recycleKgLife)+'<span>kg</span></b><span>'+h(t("Recyclables"))+'</span></div>'+
+    '<div class="im"><b>'+nf(ME.organicKgLife)+'<span>kg</span></b><span>'+h(t("Organics"))+'</span></div>'+
+    '<div class="im"><b class="num">'+nf(ME.bagsLifetime)+'</b><span>'+h(t("Bags sorted"))+'</span></div>'+
+    '<div class="im"><b>'+myCo2Kg()+'<span>kg</span></b><span>'+h(t("CO\u2082e avoided"))+'</span></div>'+
+  '</div>'+
+  '<p class="sm">'+h(t("Every kilogram here is one the town did not pay to haul or to bury."))+'</p>'+
+
+  fold(t("The whole ledger"),
+    '<div class="kv" style="border:none"><span>'+h(t("Recyclables recovered"))+' \u00b7 '+h(t("this year"))+'</span><b>'+ME.recycleKg+' kg</b></div>'+
+    '<div class="kv"><span>'+h(t("Organics diverted"))+' \u00b7 '+h(t("this year"))+'</span><b>'+ME.organicKg+' kg</b></div>'+
+    '<div class="kv"><span>'+h(t("Commingled handed over"))+'</span><b>'+ME.otherKg+' kg</b></div>'+
+    '<div class="kv"><span>'+h(t("Equivalent trees planted"))+'</span><b class="num">'+myTrees()+'</b></div>'+
+    '<div class="kv"><span>'+h(t("Material value at the gate"))+'</span><b>'+money(9.4)+'</b></div>'+
+    '<div class="kv"><span>'+h(t("Landfill volume avoided"))+'</span><b>0.34 m&#179;</b></div>'+
+    '<div class="kv" style="border-top:1px dashed var(--line);padding-top:8px"><span>'+h(t("Town collected"))+'</span><b>'+nf(TONNES.total)+' t</b></div>'+
+    '<div class="kv"><span>'+h(t("Town diverted"))+'</span><b>'+nf(TONNES.divertedTruck)+' t \u00b7 '+div+'%</b></div>'+
+    '<p class="sm">Figures come from weighbridge tickets and your own scanned bags. Conversion factors are the municipality\u2019s published ones and are shown in the annual report.</p>');
 };
 
 V["customer.sorting"]=function(){
@@ -4962,16 +5055,9 @@ V["crew.scanned"]=function(code){
         h(S.scanTouched ? "Logged as "+(S.ar?rankName.ar:rankName.en) : t("Assumed sorted correctly"))+'</b>'+
         h(S.scanTouched ? "Change it below if that is not right."
                         : "Nothing to do if that is right \u2014 walk on. Log something below only when it is not.")+'</div></div>'+
-      '<div class="sect"><span class="eyebrow">'+h(t("Rank the bag"))+'</span></div><div class="chips">'+
-      RANKS.map(function(r){ return '<button class="chip'+(S.scanRank===r.id?" on":"")+'" data-a="rank" data-v="'+r.id+'">'+
-        svg(r.ic,"ic")+h(S.ar?r.ar:r.en)+'</button>'; }).join("")+'</div>'+
       '<div class="sect"><span class="eyebrow">'+h(t("What happened to the bag"))+'</span></div>'+
-      BAG_OUTCOMES.map(function(o,ix){
-        return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+
-          '<span class="rl">'+svg(BAG_ICONS[ix],"ic icL ic3")+h(S.ar?BAG_OUTCOMES_AR[ix]:o)+'</span>'+
-          (S.scanOutcome===o?'<span class="pill p-acc"><i></i>'+h(t("logged"))+'</span>':'<span class="chev">'+svg("chev")+'</span>')+
-          '</button>'; }).join("")+
-      commentBlock()+
+      outcomeList(BAG_OUTCOMES, BAG_OUTCOMES_AR, BAG_ICONS)+
+      noteBlock()+
       (spot? spotBlock() : '')+
       '<button class="btn p" data-a="scandone" data-v="'+h(code)+'">'+svg("chev","ic ic3")+h(t("Next"))+' '+h(t("bag"))+'</button>';
   }
@@ -4984,13 +5070,9 @@ V["crew.scanned"]=function(code){
         h(S.scanTouched ? "Logged as "+S.scanOutcome : t("Assumed emptied, nothing left behind"))+'</b>'+
         h(S.scanTouched ? "Change it below if that is not right."
                         : "A station is assumed cleared. Log something below only when it is not.")+'</div></div>'+
-      '<div class="sect"><span class="eyebrow">'+h(t("What was at the station"))+'</span></div>'+
-      DOP_OUTCOMES.map(function(o,ix){
-        return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+
-          '<span class="rl">'+svg(DOP_ICONS[ix],"ic icL ic3")+h(S.ar?DOP_OUTCOMES_AR[ix]:o)+'</span>'+
-          (S.scanOutcome===o?'<span class="pill p-acc"><i></i>'+h(t("logged"))+'</span>':'<span class="chev">'+svg("chev")+'</span>')+
-          '</button>'; }).join("")+
-      commentBlock()+
+      '<div class="sect"><span class="eyebrow">'+h(t("What happened here"))+'</span></div>'+
+      outcomeList(DOP_OUTCOMES, DOP_OUTCOMES_AR, DOP_ICONS)+
+      noteBlock()+
       (spot? spotBlock() : '')+
       '<button class="btn p" data-a="scandone" data-v="'+h(code)+'">'+svg("chev","ic ic3")+h(t("Next"))+' '+h(t("station"))+'</button>';
   }
@@ -5004,13 +5086,9 @@ V["crew.scanned"]=function(code){
       h(S.scanTouched ? "Logged as "+S.scanOutcome : t("Assumed no issue at the point"))+'</b>'+
       h(S.scanTouched ? "Change it below if that is not right."
                       : "Nothing to do if that is right \u2014 walk on. Log something below only when it is not.")+'</div></div>'+
-    '<div class="sect"><span class="eyebrow">'+h(t("What was at the point"))+'</span></div>'+
-    POINT_OUTCOMES.map(function(o,ix){
-      return '<button class="btn row'+(S.scanOutcome===o?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+
-        '<span class="rl">'+svg(POINT_ICONS[ix],"ic icL ic3")+h(S.ar?POINT_OUTCOMES_AR[ix]:o)+'</span>'+
-        (S.scanOutcome===o?'<span class="pill p-acc"><i></i>'+h(t("logged"))+'</span>':'<span class="chev">'+svg("chev")+'</span>')+
-        '</button>'; }).join("")+
-    commentBlock()+
+    '<div class="sect"><span class="eyebrow">'+h(t("What happened here"))+'</span></div>'+
+    outcomeList(POINT_OUTCOMES, POINT_OUTCOMES_AR, POINT_ICONS)+
+    noteBlock()+
     (spot? spotBlock() : '')+
     '<button class="btn p" data-a="scandone" data-v="'+h(code)+'">'+svg("chev","ic ic3")+h(t("Next"))+' '+h(t("point"))+'</button>';
 };
@@ -5026,6 +5104,29 @@ function placeRow(pl){
     '<a class="btn sm" style="margin-top:7px" target="_blank" rel="noopener" href="'+h(mapOut(pl.lat,pl.lon))+'">'+
       svg("map","ic")+h(t("Open in maps"))+'</a></div>';
 }
+/* One list of outcomes, drawn the same way wherever it appears. Picking one
+   is the whole answer \u2014 there is no second question underneath it. */
+function outcomeList(list, listAr, icons){
+  return list.map(function(o, ix){
+    var on = S.scanOutcome === o;
+    return '<button class="btn row'+(on?" on":"")+'" data-a="outcome" data-v="'+h(o)+'">'+
+      '<span class="rl">'+svg(icons[ix],"ic icL ic3")+h(S.ar?listAr[ix]:o)+'</span>'+
+      (on ? '<span class="pill p-acc"><i></i>'+h(t("logged"))+'</span>'
+          : '<span class="chev">'+svg("chev")+'</span>')+
+      '</button>';
+  }).join("");
+}
+
+/* The comment chips are gone: every one of them was really an outcome, and the
+   two lists disagreed with each other often enough to be a problem. What is
+   left is a box, and it only appears for the outcome that actually needs a
+   sentence written. */
+function noteBlock(){
+  if(!outcomeNeedsNote(S.scanOutcome)) return '';
+  return '<label class="fld"><span>'+h(t("What happened"))+'</span>'+
+    '<input id="scannote" placeholder="'+h(t("in a few words"))+'" value="'+h(S.scanNote||"")+'"></label>';
+}
+
 function commentBlock(){
   return '<div class="sect"><span class="eyebrow">'+h(t("Comment"))+'</span></div>'+
     '<div class="chips">'+SCAN_COMMENTS.map(function(c,i){
@@ -5806,6 +5907,15 @@ function townParticipation(){
   ZONES.forEach(function(z){ b += z.recy*z.premises; n += z.premises; });
   return n? b/n : 0;
 }
+/* Organics is the half of the service that costs the most to run and saves the
+   most when it works, and it was not on the overview at all \u2014 only
+   recycling was. A municipality reading one number and not the other is
+   reading half the story. */
+function townOrganics(){
+  var b=0, n=0;
+  ZONES.forEach(function(z){ b += z.comp*z.premises; n += z.premises; });
+  return n? b/n : 0;
+}
 V["muni.overview"]=function(){
   return ''+
   '<div class="heros">'+
@@ -5813,15 +5923,18 @@ V["muni.overview"]=function(){
       money(collected())+" of "+money(netBillable())+" net billable", 69.4, false)+
     headlineRate("Recycling participation", townParticipation(),
       "share of premises putting out a sorted bag", 58.1, false)+
+    headlineRate("Organics participation", townOrganics(),
+      "share of premises separating food waste", 41.7, false)+
   '</div>'+
   '<div class="grid2">'+
     '<div class="stat"><b>'+money(outstanding())+'</b><span>outstanding · 1,884 accounts</span></div>'+
     '<div class="stat"><b>'+nf(premises())+'</b><span>premises on the register</span></div></div>'+
     '<div class="card"><p class="eyebrow">Billed against collected</p>'+
-    '<div class="kv"><span>Gross billable</span><b>'+money(grossBillable())+'</b></div>'+
-    '<div class="kv"><span>Sorting rebates</span><b style="color:var(--good)">&minus;'+money(rebateTotal())+'</b></div>'+
-    '<div class="kv"><span>Net billable</span><b>'+money(netBillable())+'</b></div>'+
-    '<div class="kv"><span>Collected</span><b>'+money(collected())+'</b></div></div>'+
+    '<div class="kv"><span>Gross billable</span><b>'+money0(grossBillable())+'</b></div>'+
+    '<div class="kv"><span>Sorting rebates</span><b style="color:var(--good)">&minus;'+money0(rebateTotal())+'</b></div>'+
+    '<div class="kv"><span>Net billable</span><b>'+money0(netBillable())+'</b></div>'+
+    '<div class="kv"><span>Collected</span><b>'+money0(collected())+'</b></div>'+
+    '<div class="kv"><span>Still to collect</span><b>'+money0(outstanding())+'</b></div></div>'+
     '<div class="sect"><span class="eyebrow">Rate by neighbourhood</span></div>'+
     '<div class="card plain">'+zoneBars()+'</div>'+
     '<div class="sect"><span class="eyebrow">Tools</span></div>'+
@@ -5839,9 +5952,9 @@ V["muni.overview"]=function(){
 TITLES.datain="Monthly data"; TITLES.analytics="Analytics"; TITLES.routeeff="Route efficiency"; TITLES.subroute="Sub-route";
 
 V["muni.datain"]=function(){
-  var m=S.muniMonth, d=MUNI_DATA[m]||{toCentral:0,recySoldT:0,recySoldUsd:0,organicsToCompost:0,tPaidContractor:0,filed:false};
+  var m=S.muniMonth, d=MUNI_DATA[m]||{toCentral:0,recySoldT:0,recySoldUsd:0,organicsToCompost:0,tPaidContractor:0,costPaidUsd:0,filed:false};
   return '<div class="note"><span>'+svg("db")+'</span><div><b>What the municipality files each month</b>'+
-    'Four figures the app cannot observe for itself. They feed the annual report, the cost-recovery line and the analytics.</div></div>'+
+    'Six figures the app cannot observe for itself. They feed the annual report, the cost-recovery line and the analytics.</div></div>'+
     '<label class="fld"><span>Month</span><select id="mmonth" data-a="mmonth">'+
       MUNI_MONTHS.map(function(x){ return '<option value="'+h(x)+'"'+(x===m?' selected':'')+'>'+h(x)+'</option>'; }).join("")+
     '</select></label>'+
@@ -5851,13 +5964,23 @@ V["muni.datain"]=function(){
     '<label class="fld"><span>Recyclables sold &mdash; revenue (USD)</span><input id="f_recyu" class="mono" inputmode="decimal" value="'+d.recySoldUsd+'"></label>'+
     '<label class="fld"><span>Organic waste sent to composting (tonnes)</span><input id="f_org" class="mono" inputmode="decimal" value="'+d.organicsToCompost+'"></label>'+
     '<label class="fld"><span>Tonnes paid to the collection company</span><input id="f_paid" class="mono" inputmode="decimal" value="'+d.tPaidContractor+'"></label>'+
+    /* Without this the platform can say what came in and never what went out,
+       which makes every cost-recovery figure a guess. */
+    '<label class="fld"><span>Cost paid for collection (USD)</span><input id="f_cost" class="mono" inputmode="decimal" value="'+(d.costPaidUsd||0)+'"></label>'+
     '</div>'+
+    (d.costPaidUsd && d.tPaidContractor
+      ? '<div class="card acc"><div class="kv" style="border:none"><span>Cost per tonne</span>'+
+        '<b>'+money(d.costPaidUsd/d.tPaidContractor)+'</b></div>'+
+        '<div class="kv"><span>Against fees collected that month</span>'+
+        '<b>'+Math.round(d.costPaidUsd / Math.max(1, collected()/12) * 100)+'% of the monthly average</b></div></div>'
+      : '')+
     '<button class="btn p" data-a="savemuni">'+h(t("Save"))+' '+h(m)+'</button>'+
     '<div class="card plain"><p class="eyebrow">Filed so far</p>'+
-    '<div class="tw"><table><tr><th>Month</th><th class="ta-e">To central</th><th class="ta-e">Sold</th><th class="ta-e">Compost</th><th class="ta-e">Paid</th></tr>'+
+    '<div class="tw"><table><tr><th>Month</th><th class="ta-e">To central</th><th class="ta-e">Sold</th><th class="ta-e">Compost</th><th class="ta-e">Paid</th><th class="ta-e">Cost</th></tr>'+
     MUNI_MONTHS.map(function(x){ var r=MUNI_DATA[x];
       return '<tr><td>'+h(x)+'</td><td class="ta-e num">'+nf(r.toCentral)+' t</td><td class="ta-e num">'+nf(r.recySoldT)+' t</td>'+
-        '<td class="ta-e num">'+nf(r.organicsToCompost)+' t</td><td class="ta-e num">'+nf(r.tPaidContractor)+' t</td></tr>'; }).join("")+
+        '<td class="ta-e num">'+nf(r.organicsToCompost)+' t</td><td class="ta-e num">'+nf(r.tPaidContractor)+' t</td>'+
+        '<td class="ta-e num">'+money0(r.costPaidUsd||0)+'</td></tr>'; }).join("")+
     '</table></div></div>'+
     '<p class="sm">A month stays editable until the report is exported, and every change is written to the audit trail.</p>';
 };
@@ -6716,7 +6839,7 @@ V["admin.data"]=function(){
 var GUIDES = {
  "customer.home":["Your home screen",[
   ["Amount due","The yearly waste tariff, split into two instalments. Pay now opens the channels; Payment history lists every receipt."],
-  ["Next collection","Three services, three schedules. Each line shows its own next day and time. Full schedule opens the detail."],
+  ["Next collection","Three services, three schedules. Each line shows its next day and the window it runs in \u2014 a time on its own does not tell a household whether they have already missed it."],
   ["Prizes","Swipe sideways between this month's gold pot and the national grand prize."],
   ["Impact","Swipe for the rest: trees equivalent, bags sorted for life, tonnes kept out of central treatment."],
   ["Your street","The share of doors on your street that put out a sorted bag this month."]]],
@@ -7090,6 +7213,7 @@ document.addEventListener("click", function(ev){
           stream: P1.stream || S.stream,
           rank: P1.thing==="bag" ? (S.scanRank||"ok") : null,
           outcome: S.scanOutcome || null,
+          comment_text: S.scanNote || null,
           was_touched: !!S.scanTouched,
           source: (S.lastScan && S.lastScan.src==="handheld") ? "handheld" : "camera"
         }).then(function(){ toast("Recorded on the round"); })
@@ -7102,25 +7226,30 @@ document.addEventListener("click", function(ev){
     }
     case "serveLearnNoop": return;
     case "skipstop": {
-      var sid=v;
-      sheet(t("Skip this stop"),
-        '<p class="b2">A skipped stop is not a serviced stop. It is recorded with a reason, '+
-        'and it stays on the round for the next pass.</p>'+
-        SKIP_REASONS.map(function(r,ix){
+      var sid=v, L=skipList();
+      sheet(t(L.money ? "Why no payment" : "Skip this stop"),
+        '<p class="b2">'+h(L.money
+          ? t("The door stays on the round and comes back round. A reason now is what stops it being knocked on blind next week.")
+          : t("A skipped stop is not a serviced stop. It is recorded with a reason, and it stays on the round for the next pass."))+'</p>'+
+        L.en.map(function(r,ix){
           return '<button class="btn row" data-a="skipdone" data-v="'+h(sid)+'" data-x="'+ix+'">'+
-            '<span class="rl">'+svg(SKIP_ICONS[ix],"ic icL ic3")+h(S.ar?SKIP_REASONS_AR[ix]:r)+'</span>'+
+            '<span class="rl">'+svg(L.ic[ix],"ic icL ic3")+h(S.ar?L.ar[ix]:r)+'</span>'+
             '<span class="chev">'+svg("chev")+'</span></button>';
         }).join(""));
       return;
     }
     case "skipdone": {
-      var rs = SKIP_REASONS[+x] || SKIP_REASONS[0];
+      var L2 = skipList();
+      var rs = L2.en[+x] || L2.en[0];
       S.skipped[v] = rs;
       if(S.role==="crew" || S.role==="driver" || S.role==="collector"){
         FAULTS.unshift({id:"SK-"+(1000+Object.keys(S.skipped).length), where:v, what:"Stop skipped \u00b7 "+rs,
                         by:S.who||t(ROLES[S.role].label), at:"just now", photo:false, note:""});
       }
-      closeSheet(); paint(); toast("Skipped \u00b7 "+rs);
+      closeSheet(); paint();
+      /* "come back on payday" is a promise, not a dead end */
+      toast(skipIsCallback(rs) ? (t("Noted \u00b7 back on the next round")+" \u00b7 "+rs)
+                               : (t("Recorded")+" \u00b7 "+rs));
       return;
     }
     case "servestop": {
@@ -7370,7 +7499,8 @@ document.addEventListener("click", function(ev){
       var m=($("mmonth")&&$("mmonth").value)||S.muniMonth;
       var num=function(id){ var e=$(id); return e? (parseFloat(String(e.value).replace(/[^0-9.\-]/g,""))||0) : 0; };
       MUNI_DATA[m]={toCentral:num("f_central"), recySoldT:num("f_recyt"), recySoldUsd:num("f_recyu"),
-                    organicsToCompost:num("f_org"), tPaidContractor:num("f_paid"), filed:true};
+                    organicsToCompost:num("f_org"), tPaidContractor:num("f_paid"),
+                    costPaidUsd:num("f_cost"), filed:true};
       S.muniMonth=m; paint(); toast(m+" filed · the report and the analytics now use it"); return;
     }
     case "savenewuser": {
@@ -7490,7 +7620,21 @@ document.addEventListener("click", function(ev){
     }
 
     /* crew */
-    case "outcome": S.scanOutcome=v; S.scanTouched=true; toast(v+" recorded · queued offline"); S.queued++; back(); return;
+    case "outcome": {
+      S.scanOutcome = v; S.scanTouched = true;
+      /* The rank is no longer asked for separately \u2014 the answer carries it. */
+      var rk = rankFromOutcome(v);
+      if(rk) S.scanRank = rk;
+      if(outcomeNeedsNote(v)){
+        /* the one answer that is not an answer on its own: stay put, show the
+           box, and do not file anything until there are words in it */
+        S.scanNote = ""; paint();
+        var nb = $("scannote"); if(nb) nb.focus();
+        return;
+      }
+      S.scanNote = "";
+      toast(v + " \u00b7 " + t("queued offline")); S.queued++; back(); return;
+    }
     case "cmt":
       Array.prototype.forEach.call(b.parentNode.children,function(c){ c.classList.remove("on"); });
       b.classList.add("on");
