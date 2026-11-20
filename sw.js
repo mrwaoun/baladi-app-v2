@@ -11,7 +11,10 @@
    the phone can reach the server, so nobody is ever looking at last month's
    tariff because a cache held on to it. The cache only answers when the network
    does not. */
-var CACHE = "baladi-v1";
+/* Bumped with every shipped build. The activate handler deletes every cache
+   that is not this one, so a bump is what stops a phone serving the previous
+   file back to its owner after an update. */
+var CACHE = "baladi-v2";
 var SHELL = ["./", "./index.html", "./manifest.webmanifest",
              "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 
