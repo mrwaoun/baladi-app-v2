@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#211D18">
+<title>Baladi — record a bag</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --paper:#FBF7F2; --surface:#FFFFFF; --sunk:#F2EBE2; --line:#E3DACE;
+  --ink:#211D18; --muted:#6C655E; --accent:#6B3A1E; --accent-2:#C38249;
+  --good:#3F6B3A; --good-wash:#E6EFE2; --warn:#A4471F; --warn-wash:#F8E6DC;
+  --body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#17130F; --surface:#211B16; --sunk:#2A231D; --line:#3A3129;
+  --ink:#F3EDE6; --muted:#B4AAA0; --accent:#D49A6A; --accent-2:#C08A5A;
+  --good:#8DBB83; --good-wash:#1F2C1C; --warn:#E58A62; --warn-wash:#3B241A;
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --paper:#17130F; --surface:#211B16; --sunk:#2A231D; --line:#3A3129;
+  --ink:#F3EDE6; --muted:#B4AAA0; --accent:#D49A6A; --accent-2:#C08A5A;
+  --good:#8DBB83; --good-wash:#1F2C1C; --warn:#E58A62; --warn-wash:#3B241A;
+  color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-size:16px;line-height:1.5;padding:16px 16px calc(28px + env(safe-area-inset-bottom,0px));
+  padding-top:calc(14px + env(safe-area-inset-top,0px))}
+.wrap{max-width:520px;margin-inline:auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.mark{width:36px;height:36px;border-radius:9px;flex:none;
+  background:linear-gradient(145deg,var(--accent-2),var(--accent));display:grid;place-items:center}
+.mark svg{width:22px;height:22px;stroke:#FBF7F2;fill:none;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+.wordmark{font-family:var(--display);font-weight:700;font-size:19px;line-height:1}
+.sub{color:var(--muted);font-size:12.5px;margin:1px 0 0}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;
+  background:var(--surface);flex:none}
+.lang button{border:0;background:transparent;color:var(--muted);padding:6px 11px;
+  font:inherit;font-size:13px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--accent);color:#FBF7F2;font-weight:600}
+h1{font-family:var(--display);font-size:22px;font-weight:700;margin:2px 0 0;line-height:1.2}
+p{margin:0}
+.lead{color:var(--muted);font-size:14.5px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.card.good{background:var(--good-wash);border-color:var(--good)}
+.tag{font-family:var(--mono);font-size:15px;font-weight:500;letter-spacing:.04em}
+.eyebrow{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--muted);font-weight:700;margin:0 0 4px}
+html[dir=rtl] .eyebrow{letter-spacing:0}
+.scanbox{position:relative;border-radius:14px;overflow:hidden;background:#000;
+  aspect-ratio:4/3;display:grid;place-items:center}
+.scanbox video{width:100%;height:100%;object-fit:cover;display:block}
+.scanbox .ret{position:absolute;inset:16% 12%;border:3px solid rgba(251,247,242,.9);
+  border-radius:12px;box-shadow:0 0 0 2000px rgba(0,0,0,.28)}
+.scanbox .msg{position:absolute;inset-inline:10px;bottom:10px;color:#FBF7F2;
+  font-size:13px;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+.scanbox.off{background:var(--sunk);aspect-ratio:auto;padding:26px 16px;color:var(--muted);
+  text-align:center;font-size:14px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  font:inherit;font-size:16px;font-weight:650;padding:14px;border-radius:12px;
+  border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;
+  min-height:52px}
+.btn.p{background:var(--accent);border-color:var(--accent);color:#FBF7F2}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn svg{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.pick{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-radius:14px;
+  border:1.5px solid var(--line);background:var(--surface);color:var(--ink);text-align:start;
+  cursor:pointer;font:inherit}
+.pick svg{width:26px;height:26px;flex:none;stroke:var(--accent);fill:none;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+.pick .t{flex:1;min-width:0}
+.pick b{display:block;font-size:16px;font-weight:650}
+.pick span.d{display:block;font-size:13px;color:var(--muted);line-height:1.35}
+.pick.on{border-color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.stack{display:flex;flex-direction:column;gap:10px}
+label.fld{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:600}
+input[type=text]{font:inherit;font-family:var(--mono);font-size:17px;padding:12px;
+  border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);
+  width:100%;text-transform:uppercase}
+input:focus-visible,button:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+.note{display:flex;gap:10px;background:var(--sunk);border-radius:12px;padding:11px 12px;
+  font-size:13.5px;line-height:1.45}
+.note svg{width:19px;height:19px;flex:none;stroke:var(--accent);fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;margin-top:1px}
+.note b{display:block}
+.note.warn{background:var(--warn-wash)} .note.warn svg{stroke:var(--warn)}
+.shot{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-radius:14px;
+  border:1.5px dashed var(--line);background:var(--surface);color:var(--ink);text-align:start;
+  cursor:pointer;font:inherit}
+.shot.on{border-style:solid;border-color:var(--good)}
+.shot img{width:52px;height:52px;object-fit:cover;border-radius:9px;flex:none}
+.shot svg{width:26px;height:26px;flex:none;stroke:var(--accent);fill:none;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+.shot b{display:block;font-size:15px;font-weight:650}
+.shot span.d{display:block;font-size:13px;color:var(--muted);line-height:1.35}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;
+  border-bottom:1px solid var(--line);font-size:14.5px}
+.kv:last-child{border-bottom:0}
+.kv b{text-align:end}
+.big{font-family:var(--display);font-size:30px;font-weight:700;line-height:1.1}
+.tick{width:46px;height:46px;border-radius:50%;background:var(--good);display:grid;
+  place-items:center;margin-inline:auto}
+.tick svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:3;
+  stroke-linecap:round;stroke-linejoin:round}
+.foot{color:var(--muted);font-size:12px;text-align:center}
+.hidden{display:none !important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <span class="mark"><svg viewBox="0 0 24 24"><path d="M5 9h11a3 3 0 0 0 3-3V4"/><circle cx="10" cy="14" r="2.2"/><path d="M10 9v2.8"/></svg></span>
+      <div><div class="wordmark">Baladi</div><p class="sub" id="town">Municipality of Zaytouna</p></div>
+    </div>
+    <div class="lang" role="group" aria-label="Language">
+      <button id="en" aria-pressed="true">EN</button>
+      <button id="ar" aria-pressed="false">ع</button>
+    </div>
+  </header>
+  <main id="view"></main>
+  <p class="foot">baladiservice.com</p>
+</div>
+
+<input type="file" id="snap" accept="image/*" capture="environment" class="sr" tabindex="-1" aria-hidden="true">
+
+<script>
+(function(){
+"use strict";
+
+/* ===================================================================
+   The page a phone camera opens when it reads the square on a bag.
+   It is deliberately not part of the application: no account, nothing
+   installed, and nothing to sign in to. Four answers at most, and on most
+   days only two, because the photograph is asked for only of a household
+   the crew has already flagged for mixing its bags.
+   =================================================================== */
+
+var TOWN = "Municipality of Zaytouna", TOWN_AR = "بلدية زيتونة";
+
+/* Which package the municipality holds decides what this page may promise.
+   The application writes it on the same origin; absent that, assume the lean
+   one, because promising a discount nobody agreed to pay is the worse error. */
+function tier(){
+  try { var t = localStorage.getItem("baladi.tier"); if(t === "t1" || t === "t2" || t === "t3") return t; }
+  catch(e){}
+  return "t2";
+}
+
+/* A flag is counted by the crew, never declared here. In service this page
+   asks the register; until then it reads what the application wrote on this
+   device and falls back to a seed, so the behaviour can be seen. */
+var FLAG_PHOTO_AT = 2;
+var FLAGS = {"TAG-0417": 3, "TAG-0912": 2};
+try {
+  var st = JSON.parse(localStorage.getItem("baladi.flags") || "null");
+  if(st && typeof st === "object") for(var k in st) FLAGS[k] = st[k];
+} catch(e){}
+function flagged(tag){
+  var q = new URLSearchParams(location.search);
+  if(q.get("f") === "1") return true;          /* for showing the behaviour */
+  return (FLAGS[String(tag||"").toUpperCase()] || 0) >= FLAG_PHOTO_AT;
+}
+
+/* The round passes on its day. Nothing on this page books anything. */
+var SCHED = [
+  {en:"Recyclables", ar:"القابل للتدوير", day:"Tuesday", dayAr:"الثلاثاء", win:"06:30 – 09:00"},
+  {en:"Organic", ar:"العضوي", day:"Daily", dayAr:"يومياً", win:"06:00 – 08:30"},
+  {en:"Rejects", ar:"المتبقّي", day:"Friday", dayAr:"الجمعة", win:"07:00 – 09:30"}
+];
+
+var TYPES = [
+  {k:"organic", en:"Organic", ar:"عضوي",
+   dEn:"Food, garden, anything that rots", dAr:"طعام، حديقة، كل ما يتعفّن",
+   ic:'<path d="M20 4C9 4 4 10 4 16c0 2 1 4 1 4s8-1 11-6c2-3 4-10 4-10z"/><path d="M5 20c3-5 7-8 11-10"/>'},
+  {k:"recycle", en:"Recyclables", ar:"قابل للتدوير",
+   dEn:"Plastic, glass, metal, paper, card", dAr:"بلاستيك، زجاج، معدن، ورق",
+   ic:'<path d="M7 19h10l2-4"/><path d="M12 3 8 10h8z"/><path d="M5 11 3 15l3 4"/><path d="M19 11l2 4"/>'},
+  {k:"rejects", en:"Rejects", ar:"متبقّي",
+   dEn:"Everything that is neither", dAr:"كل ما عدا ذلك",
+   ic:'<path d="M5 7h14"/><path d="M7 7l1 13h8l1-13"/><path d="M10 4h4"/>'}
+];
+
+var L = {
+  en:{
+    title:"Record a bag", lead:"Point the camera at the square on the bag.",
+    manual:"Or type the code printed under it", code:"Bag code", cont:"Continue",
+    noCam:"The camera could not be opened. Type the code printed under the square instead.",
+    noDet:"This browser cannot read codes from the camera. Type the code printed under the square.",
+    hold:"Hold the square inside the frame", scanAgain:"Scan again",
+    what:"What is in this bag?", bag:"Bag",
+    photoT:"Photograph what is inside",
+    photoD:"Open the camera and photograph the contents.",
+    photoDone:"Photograph taken", photoAgain:"Tap to take it again",
+    why:"Why we are asking", whyD:"Bags from this address have been found mixed on collection. A photograph is asked for until the sorting is right again.",
+    send:"Send", sending:"Sending", needType:"Say what is in the bag first.",
+    needPhoto:"A photograph is needed for this address.",
+    doneT:"Recorded", nextT:"Next collection",
+    nothing:"There is nothing to book. The truck passes on its day — put the bag out inside that window.",
+    credited:"Credited to your account", creditD:"Taken off the fee the municipality bills you.",
+    draw:"Draw entries added", refT:"Your reference number",
+    refD:"Printed on your municipal fee notice. Without it the bag is still collected and counted, but nothing comes off your bill.",
+    sent:"Sent to the municipality", sentD:"What you sorted is counted and passed on with the rest of the street.",
+    noRef:"No reference, no credit", noRefD:"The bag is recorded and will be collected, but it cannot be matched to your account.",
+    another:"Record another bag", recAt:"Recorded at", ref:"Reference"
+  },
+  ar:{
+    title:"تسجيل كيس", lead:"وجّهوا الكاميرا إلى المربع على الكيس.",
+    manual:"أو اكتبوا الرمز المطبوع تحته", code:"رمز الكيس", cont:"متابعة",
+    noCam:"تعذّر فتح الكاميرا. اكتبوا الرمز المطبوع تحت المربع.",
+    noDet:"هذا المتصفّح لا يقرأ الرموز من الكاميرا. اكتبوا الرمز يدوياً.",
+    hold:"ابقوا المربع داخل الإطار", scanAgain:"مسح من جديد",
+    what:"ماذا في هذا الكيس؟", bag:"الكيس",
+    photoT:"صوّروا ما بداخله",
+    photoD:"افتحوا الكاميرا وصوّروا المحتوى.",
+    photoDone:"تمّ التصوير", photoAgain:"اضغطوا لإعادة التصوير",
+    why:"لماذا نطلب ذلك", whyD:"أكياس من هذا العنوان وُجدت مختلطة عند الرفع، والصورة مطلوبة حتى يستقيم الفرز.",
+    send:"إرسال", sending:"جارٍ الإرسال", needType:"حدّدوا محتوى الكيس أولاً.",
+    needPhoto:"الصورة مطلوبة لهذا العنوان.",
+    doneT:"تمّ التسجيل", nextT:"الرفع القادم",
+    nothing:"لا حاجة لأي حجز. تمرّ الشاحنة في يومها — أخرجوا الكيس ضمن ذلك الوقت.",
+    credited:"مقيّد لحسابكم", creditD:"يُحسم من الرسم الذي تفوتره البلدية.",
+    draw:"مشاركات أُضيفت للسحب", refT:"رقم المرجع الخاص بكم",
+    refD:"مطبوع على إشعار الرسم البلدي. بدونه يُرفع الكيس ويُحتسب، لكن لا يُحسم شيء من فاتورتكم.",
+    sent:"أُرسل إلى البلدية", sentD:"يُحتسب ما فرزتم ويُرسل مع بقية الحي.",
+    noRef:"بلا مرجع، بلا حسم", noRefD:"يُسجّل الكيس ويُرفع، لكن لا يمكن ربطه بحسابكم.",
+    another:"تسجيل كيس آخر", recAt:"وقت التسجيل", ref:"المرجع"
+  }
+};
+
+var lang = "en";
+try { if((localStorage.getItem("baladi.lang") || "") === "ar") lang = "ar"; } catch(e){}
+function T(){ return L[lang]; }
+function esc(x){ return String(x == null ? "" : x)
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function $(id){ return document.getElementById(id); }
+
+var S = {step:"scan", tag:"", type:null, photo:"", ref:"", res:null, camErr:"", busy:false};
+
+var q = new URLSearchParams(location.search);
+var fromLink = (q.get("t") || q.get("bag") || "").toUpperCase();
+if(/^[A-Z0-9-]{3,24}$/.test(fromLink)){ S.tag = fromLink; S.step = "fill"; }
+
+function clock(){
+  var d = new Date();
+  return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+}
+function svg(p, cls){ return '<svg viewBox="0 0 24 24" class="' + (cls||"") + '">' + p + '</svg>'; }
+var IC = {
+  cam:'<path d="M3 8h3l2-3h8l2 3h3v11H3z"/><circle cx="12" cy="13" r="3.6"/>',
+  tick:'<path d="M5 13l4.5 4.5L19 7"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  alert:'<path d="M12 4 2.5 20h19z"/><path d="M12 10v4"/><path d="M12 17h.01"/>',
+  scan:'<path d="M4 8V4h4"/><path d="M20 8V4h-4"/><path d="M4 16v4h4"/><path d="M20 16v4h-4"/><path d="M7 12h10"/>'
+};
+
+/* ---------------------------------------------------------------- camera */
+var stream = null, loopId = null, detector = null;
+
+function canDetect(){ return typeof window.BarcodeDetector === "function"; }
+
+function stopCam(){
+  if(loopId){ clearInterval(loopId); loopId = null; }
+  if(stream){ try { stream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){} stream = null; }
+}
+
+function startCam(){
+  var v = $("vid");
+  if(!v) return;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    S.camErr = T().noCam; paint(); return;
+  }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}}, audio:false})
+    .then(function(st){
+      stream = st;
+      v.srcObject = st;
+      v.setAttribute("playsinline", "");
+      v.muted = true;
+      return v.play();
+    })
+    .then(function(){
+      if(!canDetect()) return;                 /* preview still helps them aim */
+      try { detector = new window.BarcodeDetector({formats:["qr_code","code_128","code_39","ean_13"]}); }
+      catch(e){ detector = null; return; }
+      loopId = setInterval(function(){
+        if(!detector || !stream) return;
+        detector.detect(v).then(function(hits){
+          if(!hits || !hits.length) return;
+          var raw = String(hits[0].rawValue || "").trim();
+          if(!raw) return;
+          /* the sticker carries a link, so take the code out of it */
+          var m = raw.match(/[?&](?:t|bag)=([A-Za-z0-9-]{3,24})/);
+          var code = (m ? m[1] : raw).toUpperCase();
+          if(!/^[A-Z0-9-]{3,24}$/.test(code)) return;
+          stopCam();
+          S.tag = code; S.step = "fill"; paint();
+        }).catch(function(){});
+      }, 320);
+    })
+    .catch(function(){ S.camErr = T().noCam; paint(); });
+}
+
+/* ---------------------------------------------------------------- screens */
+function nextRow(){
+  var t = T();
+  return '<div class="card"><p class="eyebrow">' + esc(t.nextT) + '</p>' +
+    SCHED.map(function(x){
+      return '<div class="kv"><span>' + esc(lang === "ar" ? x.ar : x.en) + '</span>' +
+        '<b>' + esc(lang === "ar" ? x.dayAr : x.day) + ' · <span class="tag">' + esc(x.win) + '</span></b></div>';
+    }).join("") +
+    '<p class="lead" style="margin-top:8px">' + esc(t.nothing) + '</p></div>';
+}
+
+function viewScan(){
+  var t = T();
+  var box = S.camErr
+    ? '<div class="scanbox off">' + esc(S.camErr) + '</div>'
+    : '<div class="scanbox"><video id="vid" playsinline muted></video><span class="ret"></span>' +
+      '<span class="msg">' + esc(canDetect() ? t.hold : t.noDet) + '</span></div>';
+  return '<h1>' + esc(t.title) + '</h1>' +
+    '<p class="lead">' + esc(t.lead) + '</p>' +
+    box +
+    '<label class="fld"><span>' + esc(t.manual) + '</span>' +
+      '<input type="text" id="code" inputmode="latin" autocomplete="off" spellcheck="false" placeholder="TAG-0000" value="' + esc(S.tag) + '"></label>' +
+    '<button class="btn p" id="go">' + svg(IC.scan) + esc(t.cont) + '</button>';
+}
+
+function viewFill(){
+  var t = T(), need = flagged(S.tag);
+  var ready = !!S.type && (!need || !!S.photo);
+  return '<h1>' + esc(t.what) + '</h1>' +
+    '<p class="lead">' + esc(t.bag) + ' <span class="tag">' + esc(S.tag) + '</span></p>' +
+    '<div class="stack">' +
+      TYPES.map(function(b){
+        return '<button class="pick' + (S.type === b.k ? " on" : "") + '" data-type="' + b.k + '">' +
+          svg(b.ic) + '<span class="t"><b>' + esc(lang === "ar" ? b.ar : b.en) + '</b>' +
+          '<span class="d">' + esc(lang === "ar" ? b.dAr : b.dEn) + '</span></span>' +
+          (S.type === b.k ? svg(IC.tick) : "") + '</button>';
+      }).join("") +
+    '</div>' +
+
+    (need
+      ? '<div class="note warn">' + svg(IC.alert) + '<div><b>' + esc(t.why) + '</b>' + esc(t.whyD) + '</div></div>' +
+        '<button class="shot' + (S.photo ? " on" : "") + '" id="shot">' +
+          (S.photo ? '<img src="' + S.photo + '" alt="">' : svg(IC.cam)) +
+          '<span class="t"><b>' + esc(S.photo ? t.photoDone : t.photoT) + '</b>' +
+          '<span class="d">' + esc(S.photo ? t.photoAgain : t.photoD) + '</span></span></button>'
+      : '') +
+
+    (tier() === "t3"
+      ? '<label class="fld" style="margin-top:2px"><span>' + esc(t.refT) + '</span>' +
+          '<input type="text" id="ref" autocomplete="off" spellcheck="false" placeholder="C-2417" value="' + esc(S.ref) + '"></label>' +
+        '<div class="note">' + svg(IC.info) + '<div>' + esc(t.refD) + '</div></div>'
+      : '') +
+
+    '<button class="btn p" id="send"' + (ready ? "" : " disabled") + '>' + svg(IC.tick) + esc(t.send) + '</button>' +
+    nextRow() +
+    '<button class="btn" id="rescan">' + svg(IC.scan) + esc(t.scanAgain) + '</button>';
+}
+
+function viewDone(){
+  var t = T(), r = S.res || {}, ty = null;
+  TYPES.forEach(function(x){ if(x.k === r.type) ty = x; });
+  return '<div class="card good" style="text-align:center">' +
+      '<span class="tick">' + svg(IC.tick) + '</span>' +
+      '<h1 style="margin-top:8px">' + esc(t.doneT) + '</h1>' +
+      '<p class="lead">' + esc(t.bag) + ' <span class="tag">' + esc(r.tag) + '</span> · ' +
+        esc(ty ? (lang === "ar" ? ty.ar : ty.en) : "") + '</p></div>' +
+    '<div class="card">' +
+      '<div class="kv"><span>' + esc(t.recAt) + '</span><b class="tag">' + esc(r.at) + '</b></div>' +
+      (r.ref ? '<div class="kv"><span>' + esc(t.ref) + '</span><b class="tag">' + esc(r.ref) + '</b></div>' : '') +
+    '</div>' +
+    (tier() === "t3"
+      ? (r.credit > 0
+          ? '<div class="card"><p class="eyebrow">' + esc(t.credited) + '</p>' +
+            '<div class="big">$' + r.credit.toFixed(2) + '</div>' +
+            '<p class="lead">' + esc(t.creditD) + '</p>' +
+            '<div class="kv" style="margin-top:6px"><span>' + esc(t.draw) + '</span><b>' + r.entries + '</b></div></div>'
+          : '<div class="note warn">' + svg(IC.alert) + '<div><b>' + esc(t.noRef) + '</b>' + esc(t.noRefD) + '</div></div>')
+      : '<div class="note">' + svg(IC.info) + '<div><b>' + esc(t.sent) + '</b>' + esc(t.sentD) + '</div></div>') +
+    nextRow() +
+    '<button class="btn p" id="again">' + svg(IC.scan) + esc(t.another) + '</button>';
+}
+
+function paint(){
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  $("town").textContent = lang === "ar" ? TOWN_AR : TOWN;
+  $("en").setAttribute("aria-pressed", String(lang === "en"));
+  $("ar").setAttribute("aria-pressed", String(lang === "ar"));
+  document.title = "Baladi — " + T().title;
+
+  var v = $("view");
+  v.innerHTML = S.step === "done" ? viewDone() : S.step === "fill" ? viewFill() : viewScan();
+
+  if(S.step === "scan" && !S.camErr) setTimeout(startCam, 60); else stopCam();
+}
+
+/* --------------------------------------------------------------- actions */
+function refOk(r){ return /^[A-Za-z]{1,2}-?\d{3,6}$/.test(String(r||"").trim()); }
+
+function send(){
+  var t = T();
+  if(!S.type){ alert(t.needType); return; }
+  if(flagged(S.tag) && !S.photo){ alert(t.needPhoto); return; }
+  var linked = tier() === "t3" && refOk(S.ref);
+  S.res = {
+    tag: S.tag || "TAG-0000",
+    type: S.type,
+    ref: linked ? S.ref.trim().toUpperCase() : "",
+    at: clock(),
+    credit: linked ? 0.40 : 0,
+    entries: linked ? 1 : 0
+  };
+  /* On a live site this is a POST. Here it is kept on the device so the
+     round trip can be seen end to end without inventing a server. */
+  try {
+    var log = JSON.parse(localStorage.getItem("baladi.bags") || "[]");
+    log.unshift(S.res);
+    localStorage.setItem("baladi.bags", JSON.stringify(log.slice(0, 50)));
+  } catch(e){}
+  S.step = "done";
+  paint();
+}
+
+document.addEventListener("click", function(ev){
+  var el = ev.target.closest("button");
+  if(!el) return;
+
+  if(el.id === "en" || el.id === "ar"){
+    lang = el.id;
+    try { localStorage.setItem("baladi.lang", lang); } catch(e){}
+    paint(); return;
+  }
+  if(el.dataset && el.dataset.type){
+    S.type = el.dataset.type;
+    if($("ref")) S.ref = $("ref").value;
+    paint(); return;
+  }
+  if(el.id === "go"){
+    var c = ($("code") && $("code").value || "").trim().toUpperCase();
+    if(!/^[A-Z0-9-]{3,24}$/.test(c)){ $("code").focus(); return; }
+    stopCam(); S.tag = c; S.step = "fill"; paint(); return;
+  }
+  if(el.id === "shot"){
+    if($("ref")) S.ref = $("ref").value;
+    var sn = $("snap");
+    sn.value = "";          /* so the same picture twice still counts as a change */
+    sn.click();
+    return;
+  }
+  if(el.id === "send"){ if($("ref")) S.ref = $("ref").value; send(); return; }
+  if(el.id === "rescan" || el.id === "again"){
+    S.step = "scan"; S.tag = ""; S.type = null; S.photo = ""; S.res = null; S.camErr = "";
+    paint(); return;
+  }
+});
+
+document.addEventListener("input", function(ev){
+  if(ev.target && ev.target.id === "ref") S.ref = ev.target.value;
+});
+
+/* Bound once, here, and never inside the click that opens the camera.
+   Attaching it on each tap was the bug: the camera takes the phone away from
+   the page, and whatever happened in between could leave the picture arriving
+   with nothing listening for it - so the photograph was taken and the rest of
+   the screen stayed dead. */
+$("snap").addEventListener("change", function(){
+  var f = this.files && this.files[0];
+  if(!f) return;
+  var fr = new FileReader();
+  /* shown back, so "taken" is something they can see rather than something
+     the page merely claims */
+  fr.onload = function(){ S.photo = String(fr.result || ""); paint(); };
+  fr.onerror = function(){ S.photo = ""; paint(); };
+  fr.readAsDataURL(f);
+});
+
+window.addEventListener("pagehide", stopCam);
+document.addEventListener("visibilitychange", function(){ if(document.hidden) stopCam(); });
+
+paint();
+})();
+</script>
+</body>
+</html>

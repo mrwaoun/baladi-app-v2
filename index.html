@@ -1845,8 +1845,11 @@ var S = {
    a code they have just photographed. */
 try{
   if(typeof location !== "undefined"){
+    /* The bag form is its own page now, so a sticker's link belongs there.
+       A camera that reads the square lands on bag.html directly; this only
+       catches a link made before the page existed. */
     var _bq = /[?&](?:t|bag)=([A-Za-z0-9\-]{3,24})/.exec(location.search);
-    if(_bq){ S.bagTag = _bq[1].toUpperCase(); S.step = "bag"; S.bagStep = "fill"; }
+    if(_bq){ location.replace("bag.html" + location.search); }
   }
 }catch(e){}
 /* ?live=1 opens the session against the municipality's database instead of this file */
@@ -2897,6 +2900,11 @@ var TABS = {
     t2:[["queue","Queue","queue"],["map","Map","map"],["crews","Crews","users"],["reports","Reports","alert"]],
     t3:[["queue","Queue","queue"],["map","Map","map"],["crews","Crews","users"],["reports","Reports","alert"]]
   },
+  /* Paying is one errand and sorting is another; stacking them on one screen
+     made both hard to find. */
+  customer:{
+    t3:[["home","Home","home"],["bill","Bill","cash"],["sorting","Sorting","bag"],["rewards","Rewards","gift"]]
+  },
   admin:{
     t1:[["setup","Setup","gear"],["users","Users","users"],["data","Data","db"]],
     t2:[["setup","Setup","gear"],["users","Users","users"],["data","Data","db"]],
@@ -2930,6 +2938,29 @@ function tabsFor(role){
    any phone camera opens it; this is the page it opens. Every question on it
    has to be answerable standing over a bin with one hand free, which is why
    there are four of them and three are a single tap. */
+/* A household is asked for a photograph only once it has given the crew
+   reason to ask. Flags are counted, never set by hand: a bag the crew ranks
+   as partly mixed or not properly sorted counts one, and a facility finding
+   counts one. At FLAG_PHOTO_AT the bag page starts asking.
+   The bag page is a separate document and cannot read this, so in service
+   both read the same register; here each keeps the same rule and the same
+   seed, which is why the threshold and the seed are written out in full. */
+var FLAG_PHOTO_AT = 2;
+var FLAGS = {"TAG-0417": 3, "TAG-0912": 2};
+function flagCount(tag){ return FLAGS[String(tag||"").toUpperCase()] || 0; }
+function tagFlagged(tag){ return flagCount(tag) >= FLAG_PHOTO_AT; }
+function flagBump(tag, why){
+  var k = String(tag||"").toUpperCase();
+  if(!k) return 0;
+  FLAGS[k] = (FLAGS[k] || 0) + 1;
+  try{ localStorage.setItem("baladi.flags", JSON.stringify(FLAGS)); }catch(e){}
+  return FLAGS[k];
+}
+try{
+  var _fl = JSON.parse(localStorage.getItem("baladi.flags") || "null");
+  if(_fl && typeof _fl === "object") FLAGS = Object.assign(FLAGS, _fl);
+}catch(e){}
+
 var BAGREQ = [];
 var BAGTYPES = [
   {k:"organic", en:"Organic",     ar:"عضوي",
@@ -4256,7 +4287,8 @@ function paintLogin(){
     v.innerHTML =
     '<div class="mark">'+markSvg()+'</div>'+
     '<div class="tierrow"><h2 style="font-size:21px;font-weight:600;margin:0">'+h(t("Choose an interface"))+'</h2>'+
-    '<span class="tierbadge">'+h(tierDef().n)+'</span></div>'+
+    '<button class="tierbadge" data-a="changetier" title="'+h(t("Change package"))+'">'+
+      h(tierDef().n)+svg("chev")+'</button></div>'+
     '<p class="b2">'+(S.who? h(S.who)+' \u2014 this number is cleared for every role. ' : 'This number is cleared for every role. ')+
     'A number normally carries one clearance and lands straight in it. '+
     h(t("These are the interfaces this package opens."))+'</p>'+
@@ -4277,16 +4309,57 @@ function paintLogin(){
 
 /* ============================== customer ============================== */
 TITLES.bagscanned="Scan result"; TITLES.tags="Request tags"; TITLES.points="Where to get tags";
-TITLES.training="Sorting training"; TITLES.pickup="Request a pickup"; TITLES.pay="Bill and savings";
+TITLES.training="Sorting training"; TITLES.pay="Bill and savings";
 TITLES.history="Payment history"; TITLES.creports="Report a problem"; TITLES.impact="My impact";
 TITLES.dropoff="Drop-off network"; TITLES.voucher="Draw vouchers";
 
+/* There is nothing to book. The round passes on its day, and the only useful
+   thing to tell somebody holding a bag is when that is. */
+function nextCollNote(){
+  var nx = (typeof SCHED !== "undefined" && SCHED.length) ? SCHED[0] : null;
+  if(!nx) return "";
+  return '<div class="note"><span>'+svg("clock")+'</span><div><b>'+h(t("Next collection"))+'</b>'+
+    h(S.ar?nx.ar:nx.en)+' \u00b7 '+h(S.ar?nx.nextAr:nx.next)+' '+h(nx.win)+'. '+
+    h(t("Put it out inside that window. There is nothing to book."))+'</div></div>';
+}
 function myFee(){ var c=CATS[0]; return catAnnual({pct:S.tariff.res}); }
 function feeOf(id){ var c=null; CATS.forEach(function(x){ if(x.id===id) c=x; }); return catAnnual({pct:S.tariff[id]}); }
 function myRebate(){ return Math.round(feeOf("res")*REBATE_PCT)/100; }
 function myPayable(){ return Math.round((feeOf("res")-myRebate())*100)/100; }
 
+TITLES.bill="Bill and savings";
+V["customer.bill"]=function(){ return V["customer.pay"](); };
+/* The home screen says the two things a household opens the app for - what it
+   owes and when the truck comes - and offers doors to everything else. What
+   used to be stacked here now lives one tap away, where there is room for it. */
 V["customer.home"]=function(){
+  var nx = SCHED && SCHED.length ? SCHED[0] : null;
+  return ''+
+  '<button class="card acc" style="width:100%;text-align:start" data-a="tab" data-v="bill">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'+
+      '<div><p class="sm">'+h(t("Amount due"))+' &middot; '+h(dueLabel())+
+        (liveOn()?' <span class="pill p-good"><i></i>live</span>':'')+'</p>'+
+        '<div class="big">'+money(dueNow())+'</div>'+
+        '<p class="sm">'+h(t("Saved by sorting"))+' '+money(myRebate())+'</p></div>'+
+      '<span class="chev">'+svg("chev")+'</span></div></button>'+
+
+  (nx ? '<div class="card"><p class="eyebrow">'+h(t("Next collection"))+'</p>'+
+    '<div class="nxt"><span class="ico">'+svg(nx.icon)+'</span>'+
+      '<span class="m"><b>'+h(S.ar?nx.ar:nx.en)+'</b><span>'+h(S.ar?nx.daysAr:nx.days)+'</span></span>'+
+      '<span class="w"><b>'+h(S.ar?nx.nextAr:nx.next)+'</b><span class="mono">'+h(nx.win)+'</span></span></div>'+
+    '<p class="sm" style="margin-top:6px">'+h(t("Put the bags out inside that window. There is nothing to book \u2014 the truck passes on its day."))+'</p></div>' : '')+
+
+  '<div class="quick">'+
+    '<button data-a="push" data-v="sortguide">'+svg("leaf")+'<span>'+h(t("How to sort"))+'</span></button>'+
+    '<button data-a="push" data-v="impact">'+svg("chart")+'<span>'+h(t("My impact"))+'</span></button>'+
+    /* Rewards has a tab of its own; what lost one was the account, so that is
+       what belongs here. */
+    '<button data-a="push" data-v="account">'+svg("user")+'<span>'+h(t("Account"))+'</span></button>'+
+    '<button data-a="push" data-v="creports">'+svg("alert")+'<span>'+h(t("Report a problem"))+'</span></button>'+
+  '</div>'+
+  '';
+};
+V["customer.homeOld"]=function(){
   var kg=ME.recycleKg+ME.organicKg+ME.otherKg;
   return ''+
   '<div class="card acc"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'+
@@ -4311,7 +4384,6 @@ V["customer.home"]=function(){
     }).join("")+'</div>'+
 
   '<div class="quick">'+
-    '<button data-a="push" data-v="pickup">'+svg("bag")+'<span>'+h(t("Request a pickup"))+'</span></button>'+
     '<button data-a="push" data-v="tags">'+svg("ticket")+'<span>'+h(t("Request tags"))+'</span></button>'+
     '<button data-a="push" data-v="sortguide">'+svg("leaf","ic ic3")+svg("leaf")+'<span>'+h(t("How to sort"))+'</span></button>'+
     '<button data-a="push" data-v="training">'+svg("task")+'<span>'+h(t("Sorting training"))+(S.trainDone?' \u2713':'')+'</span></button>'+
@@ -4325,6 +4397,9 @@ V["customer.home"]=function(){
 
   '';
 };
+/* customer.homeOld above is the crowded version this replaced. It is listed on
+   no tab and reachable from nothing; it is kept only so that anything wanted
+   back can be lifted out of it rather than rebuilt. */
 
 function prizeCarousel(){
   var mine=myVouchers().length;
@@ -4568,9 +4643,8 @@ V["customer.sorting"]=function(){
   var ok=ME.bagsThisMonth>=REBATE_BAGS;
   return ''+
   '<div class="note"><span>'+svg("ticket")+'</span><div><b>Your tag is read for you</b>'+
-  'Put the tagged bag out and the crew scans it on the round \u2014 that is what credits it. '+
-  'If you are asking for a pickup, the tag goes on the request itself.</div></div>'+
-  '<button class="btn p" data-a="push" data-v="pickup">'+svg("bag","ic")+h(t("Request a pickup"))+'</button>'+
+  'Put the tagged bag out and the crew scans it on the round \u2014 that is what credits it.</div></div>'+
+  nextCollNote()+
 
   '<button class="card flat" style="text-align:start;width:100%;padding:11px 13px" data-a="push" data-v="sortguide">'+svg("leaf","ic ic3")+
     ill("bags3","xs")+
@@ -4616,7 +4690,7 @@ V["customer.bagscanned"]=function(code){
       '<p class="mono">'+h(code)+'</p>'+
       '<p class="sm">'+h(codeSubject(P))+'. This is a place, not a bag \u2014 nothing is credited by scanning it.</p></div>'+
       placeRow(pl)+
-      '<button class="btn p" data-a="push" data-v="pickup">'+svg("truck","ic ic3")+h(t("Request a pickup"))+'</button>'+
+      nextCollNote()+
       '<button class="btn" data-a="back">'+svg("back","ic ic3")+h(t("Back"))+'</button>';
   }
   var mine = P.prem===ME.id;
@@ -4633,7 +4707,7 @@ V["customer.bagscanned"]=function(code){
   '<div class="kv"><span>'+h(t("Credited"))+'</span><b>'+(P.state==="issued"?"when the crew records the pickup":"not yet issued")+'</b></div></div>'+
   (mine? '' : '<div class="note w"><span>'+svg("alert")+'</span><div><b>This tag is not on your account</b>'+
     'It is issued to '+h(codeSubject(P))+'. Scanning it will not credit you.</div></div>')+
-  '<button class="btn p" data-a="push" data-v="pickup">'+svg("truck","ic ic3")+h(t("Request a pickup"))+' for this bag</button>'+
+  nextCollNote()+
   '<button class="btn" data-a="back">'+svg("back","ic ic3")+h(t("Back"))+'</button>';
 };
 
@@ -6216,30 +6290,35 @@ V["collector.earnings"]=function(){
    the bag form is a suggestion box: somebody records a full bag and nothing
    happens until the fixed day comes round, which is the complaint the fixed
    day already generates. */
+/* What households recorded on the bag page. There is nothing to dispatch -
+   the round passes on its day - so this is a record, not a queue: it is the
+   data the municipality is paying for, and it is read from the same origin
+   the bag page writes to. In service both sides read the register instead. */
+function bagsRecorded(){
+  try {
+    var v = JSON.parse(localStorage.getItem("baladi.bags") || "[]");
+    return Array.isArray(v) ? v : [];
+  } catch(e){ return []; }
+}
 function bagReqCard(){
-  if(!BAGREQ.length){
-    return '<div class="note"><span>'+svg("info")+'</span><div><b>'+h(t("On-demand collection"))+'</b>'+
-      h(t("Nothing asked for yet. A bag a household records appears here, and can be added to a round without waiting for its fixed day."))+
+  var rows = bagsRecorded();
+  if(!rows.length){
+    return '<div class="note"><span>'+svg("info")+'</span><div><b>'+h(t("Bags recorded by households"))+'</b>'+
+      h(t("Nothing recorded yet. A household that scans the square on its bag appears here, with what it says is inside."))+
       '</div></div>';
   }
-  var waiting = 0;
-  BAGREQ.forEach(function(r){ if(!r.dispatched) waiting++; });
   return '<div class="card plain" style="padding:0">'+
     '<div class="sect" style="padding:11px 12px 0"><span class="eyebrow">'+
-      h(t("Asked for by households"))+'</span>'+
-      '<span class="pill '+(waiting?"p-acc":"p-good")+'"><i></i>'+
-      h(String(waiting))+' '+h(t("waiting"))+'</span></div>'+
+      h(t("Bags recorded by households"))+'</span>'+
+      '<span class="pill p-good"><i></i>'+h(String(rows.length))+'</span></div>'+
     '<div class="list" style="padding:0 12px">'+
-    BAGREQ.slice(0,8).map(function(r,i){
-      var T = bagType(r.type), W = bagWhenDef(r.when);
-      return '<button class="item" data-a="bagdispatch" data-v="'+i+'">'+
-        '<span class="av">'+svg(T?T.ic:"bag")+'</span>'+
-        '<span class="t"><b class="mono">'+h(r.tag)+'</b>'+
-        '<span>'+h(S.ar?(T?T.ar:""):(T?t(T.en):""))+' · '+
-          h(S.ar?(W?W.ar:""):(W?t(W.en):""))+
-          (r.ref ? ' · '+h(r.ref) : '')+'</span></span>'+
-        '<span class="r"><span class="mono">'+h(r.at)+'</span>'+
-        '<span>'+h(r.dispatched ? t("on a round") : t("tap to add"))+'</span></span></button>';
+    rows.slice(0, 8).map(function(r){
+      var T = bagType(r.type);
+      return '<div class="item"><span class="av">'+svg(T?T.ic:"bag")+'</span>'+
+        '<span class="t"><b class="mono">'+h(r.tag||"")+'</b>'+
+        '<span>'+h(S.ar?(T?T.ar:""):(T?t(T.en):""))+(r.ref? ' \u00b7 '+h(r.ref) : '')+'</span></span>'+
+        '<span class="r"><span class="mono">'+h(r.at||"")+'</span>'+
+        '<span>'+h(r.credit>0 ? t("credited") : t("recorded"))+'</span></span></div>';
     }).join("")+'</div></div>';
 }
 V["ops.queue"]=function(){
@@ -7609,7 +7688,20 @@ document.addEventListener("click", function(ev){
         return;
       }
       if(!phoneOk(S.phone)){ S.loginErr="That number is not on the register"; paintLogin(); return; }
-      S.loginErr=""; S.otpErr=""; S.otpTries=0; S.step="otp"; paintLogin(); return;
+      /* The shared access code is switched off while the WhatsApp sender is
+         being connected: a number on the register goes straight in. The live
+         path above is untouched and still sends a real one-time code, so this
+         is a door held open on purpose, not a hole. */
+      S.loginErr=""; S.otpErr=""; S.otpTries=0;
+      var ent0 = findNumber(S.cc, S.phone);
+      S.who = ent0 ? ent0.name : S.phone;
+      if(ent0 && ent0.role && ROLES[ent0.role] && roleAllowed(ent0.role)){
+        bindCustomer(ent0);
+        S.role = ent0.role; S.tab = tabsFor(ent0.role)[0][0]; S.stack=[]; S.hist=[];
+        $("view").className="view"; paint();
+        toast("Signed in as "+t(ROLES[ent0.role].label));
+      } else { S.step="role"; paintLogin(); }
+      return;
     case "checkotp": {
       var code=digits($("otp")&&$("otp").value);
       if(code.length!==6){ S.otpErr="The code is six digits"; paintLogin(); return; }
@@ -7767,7 +7859,10 @@ document.addEventListener("click", function(ev){
       return;
     case "tier":
       tierSet(v);
-      S.role=null; S.step="phone"; S.stack=[]; S.hist=[];
+      /* Changing the package does not change who you are. If this number has
+         already been recognised, go back to the interfaces rather than asking
+         for it again. */
+      S.role=null; S.step = S.who ? "role" : "phone"; S.stack=[]; S.hist=[];
       $("view").className="login"; closeSheet(); paintLogin();
       toast(TIERS[v].n+" · "+t(TIERS[v].ttl)); return;
     case "changetier":
@@ -7776,10 +7871,7 @@ document.addEventListener("click", function(ev){
 
     /* the bag form: four answers, and the only one that can go wrong is the
        reference, which is why it is the only one checked */
-    case "bagopen":
-      closeSheet(); S.role=null; S.step="bag";
-      S.bagStep = S.bagTag ? "fill" : "scan";
-      $("view").className="login"; paintLogin(); return;
+    case "bagopen": closeSheet(); location.href = "bag.html"; return;
     case "bagnext": {
       var bte = $("bagtag"), btv = bte ? bte.value.trim() : "";
       if(!btv){ toast(t("Type the code printed under the square")); return; }
@@ -7812,11 +7904,6 @@ document.addEventListener("click", function(ev){
       S.bagStep="scan"; S.bagType=null; S.bagPhoto=""; S.bagRes=null;
       S.step = S.tier ? "phone" : "tier";
       paintLogin(); return;
-    case "bagdispatch": {
-      var bq = BAGREQ[+v];
-      if(bq && !bq.dispatched){ bq.dispatched = true; paint(); toast(t("Added to the round")); }
-      return;
-    }
     case "role":
       S.role=v; S.tab=tabsFor(v)[0][0]; S.stack=[]; S.hist=[];
       $("view").className="view"; closeSheet(); paint();
@@ -8156,6 +8243,11 @@ document.addEventListener("click", function(ev){
       /* The rank is no longer asked for separately \u2014 the answer carries it. */
       var rk = rankFromOutcome(v);
       if(rk) S.scanRank = rk;
+      /* A bag the crew ranks as partly mixed or not properly sorted counts
+         against the tag. This is the only thing that raises a flag, and it is
+         what decides whether the household is later asked to photograph a bag
+         before it is recorded. */
+      if((rk === "mix" || rk === "rej") && S.lastScan) flagBump(S.lastScan, rk);
       if(outcomeNeedsNote(v)){
         /* the one answer that is not an answer on its own: stay put, show the
            box, and do not file anything until there are words in it */
