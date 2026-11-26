@@ -127,6 +127,7 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--accent-2);outli
     </div>
     <div class="lang" role="group" aria-label="Language">
       <button id="en" aria-pressed="true">EN</button>
+      <button id="fr" aria-pressed="false">FR</button>
       <button id="ar" aria-pressed="false">ع</button>
     </div>
   </header>
@@ -148,7 +149,8 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--accent-2);outli
    the crew has already flagged for mixing its bags.
    =================================================================== */
 
-var TOWN = "Municipality of Zaytouna", TOWN_AR = "بلدية زيتونة";
+var TOWN = "Municipality of Zaytouna", TOWN_AR = "بلدية زيتونة",
+    TOWN_FR = "Municipalité de Zaytouna";
 
 /* Which package the municipality holds decides what this page may promise.
    The application writes it on the same origin; absent that, assume the lean
@@ -176,20 +178,26 @@ function flagged(tag){
 
 /* The round passes on its day. Nothing on this page books anything. */
 var SCHED = [
-  {en:"Recyclables", ar:"القابل للتدوير", day:"Tuesday", dayAr:"الثلاثاء", win:"06:30 – 09:00"},
-  {en:"Organic", ar:"العضوي", day:"Daily", dayAr:"يومياً", win:"06:00 – 08:30"},
-  {en:"Rejects", ar:"المتبقّي", day:"Friday", dayAr:"الجمعة", win:"07:00 – 09:30"}
+  {en:"Recyclables", ar:"القابل للتدوير", fr:"Recyclables",
+   day:"Tuesday", dayAr:"الثلاثاء", dayFr:"Mardi", win:"06:30 – 09:00"},
+  {en:"Organic", ar:"العضوي", fr:"Organique",
+   day:"Daily", dayAr:"يومياً", dayFr:"Tous les jours", win:"06:00 – 08:30"},
+  {en:"Rejects", ar:"المتبقّي", fr:"Refus",
+   day:"Friday", dayAr:"الجمعة", dayFr:"Vendredi", win:"07:00 – 09:30"}
 ];
 
 var TYPES = [
-  {k:"organic", en:"Organic", ar:"عضوي",
+  {k:"organic", en:"Organic", ar:"عضوي", fr:"Organique",
    dEn:"Food, garden, anything that rots", dAr:"طعام، حديقة، كل ما يتعفّن",
+   dFr:"Restes, jardin, tout ce qui se décompose",
    ic:'<path d="M20 4C9 4 4 10 4 16c0 2 1 4 1 4s8-1 11-6c2-3 4-10 4-10z"/><path d="M5 20c3-5 7-8 11-10"/>'},
-  {k:"recycle", en:"Recyclables", ar:"قابل للتدوير",
+  {k:"recycle", en:"Recyclables", ar:"قابل للتدوير", fr:"Recyclables",
    dEn:"Plastic, glass, metal, paper, card", dAr:"بلاستيك، زجاج، معدن، ورق",
+   dFr:"Plastique, verre, métal, papier, carton",
    ic:'<path d="M7 19h10l2-4"/><path d="M12 3 8 10h8z"/><path d="M5 11 3 15l3 4"/><path d="M19 11l2 4"/>'},
-  {k:"rejects", en:"Rejects", ar:"متبقّي",
+  {k:"rejects", en:"Rejects", ar:"متبقّي", fr:"Refus",
    dEn:"Everything that is neither", dAr:"كل ما عدا ذلك",
+   dFr:"Tout le reste",
    ic:'<path d="M5 7h14"/><path d="M7 7l1 13h8l1-13"/><path d="M10 4h4"/>'}
 ];
 
@@ -216,6 +224,29 @@ var L = {
     noRef:"No reference, no credit", noRefD:"The bag is recorded and will be collected, but it cannot be matched to your account.",
     another:"Record another bag", recAt:"Recorded at", ref:"Reference"
   },
+  fr:{
+    title:"Enregistrer un sac", lead:"Dirigez la cam\u00e9ra vers le carr\u00e9 sur le sac.",
+    manual:"Ou saisissez le code imprim\u00e9 en dessous", code:"Code du sac", cont:"Continuer",
+    noCam:"La cam\u00e9ra n\u2019a pas pu \u00eatre ouverte. Saisissez plut\u00f4t le code imprim\u00e9 sous le carr\u00e9.",
+    noDet:"Ce navigateur ne sait pas lire les codes avec la cam\u00e9ra. Saisissez le code imprim\u00e9 sous le carr\u00e9.",
+    hold:"Maintenez le carr\u00e9 dans le cadre", scanAgain:"Scanner \u00e0 nouveau",
+    what:"Que contient ce sac ?", bag:"Sac",
+    photoT:"Photographiez le contenu",
+    photoD:"Ouvrez la cam\u00e9ra et photographiez le contenu.",
+    photoDone:"Photo prise", photoAgain:"Touchez pour la reprendre",
+    why:"Pourquoi nous le demandons",
+    whyD:"Des sacs de cette adresse ont \u00e9t\u00e9 trouv\u00e9s m\u00e9lang\u00e9s au ramassage. Une photo est demand\u00e9e tant que le tri n\u2019est pas redevenu correct.",
+    send:"Envoyer", sending:"Envoi en cours", needType:"Indiquez d\u2019abord le contenu du sac.",
+    needPhoto:"Une photo est exig\u00e9e pour cette adresse.",
+    doneT:"Enregistr\u00e9", nextT:"Prochain ramassage",
+    nothing:"Il n\u2019y a rien \u00e0 r\u00e9server. Le camion passe le jour pr\u00e9vu \u2014 sortez le sac dans cette plage horaire.",
+    credited:"Cr\u00e9dit\u00e9 sur votre compte", creditD:"D\u00e9duit de la redevance que la municipalit\u00e9 vous facture.",
+    draw:"Participations ajout\u00e9es au tirage", refT:"Votre num\u00e9ro de r\u00e9f\u00e9rence",
+    refD:"Imprim\u00e9 sur votre avis de redevance municipale. Sans lui, le sac est quand m\u00eame ramass\u00e9 et compt\u00e9, mais rien n\u2019est d\u00e9duit de votre facture.",
+    sent:"Transmis \u00e0 la municipalit\u00e9", sentD:"Ce que vous avez tri\u00e9 est compt\u00e9 et transmis avec le reste de la rue.",
+    noRef:"Sans r\u00e9f\u00e9rence, pas de cr\u00e9dit", noRefD:"Le sac est enregistr\u00e9 et sera ramass\u00e9, mais il ne peut pas \u00eatre rattach\u00e9 \u00e0 votre compte.",
+    another:"Enregistrer un autre sac", recAt:"Enregistr\u00e9 \u00e0", ref:"R\u00e9f\u00e9rence"
+  },
   ar:{
     title:"تسجيل كيس", lead:"وجّهوا الكاميرا إلى المربع على الكيس.",
     manual:"أو اكتبوا الرمز المطبوع تحته", code:"رمز الكيس", cont:"متابعة",
@@ -241,7 +272,12 @@ var L = {
 };
 
 var lang = "en";
-try { if((localStorage.getItem("baladi.lang") || "") === "ar") lang = "ar"; } catch(e){}
+try {
+  /* the application writes the same key on this origin, so a household that
+     set its language there does not have to set it again here */
+  var st0 = localStorage.getItem("baladi.lang") || "";
+  if(st0 === "ar" || st0 === "fr") lang = st0;
+} catch(e){}
 function T(){ return L[lang]; }
 function esc(x){ return String(x == null ? "" : x)
   .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
@@ -318,8 +354,8 @@ function nextRow(){
   var t = T();
   return '<div class="card"><p class="eyebrow">' + esc(t.nextT) + '</p>' +
     SCHED.map(function(x){
-      return '<div class="kv"><span>' + esc(lang === "ar" ? x.ar : x.en) + '</span>' +
-        '<b>' + esc(lang === "ar" ? x.dayAr : x.day) + ' · <span class="tag">' + esc(x.win) + '</span></b></div>';
+      return '<div class="kv"><span>' + esc(lang === "ar" ? x.ar : lang === "fr" ? x.fr : x.en) + '</span>' +
+        '<b>' + esc(lang === "ar" ? x.dayAr : lang === "fr" ? x.dayFr : x.day) + ' · <span class="tag">' + esc(x.win) + '</span></b></div>';
     }).join("") +
     '<p class="lead" style="margin-top:8px">' + esc(t.nothing) + '</p></div>';
 }
@@ -346,8 +382,8 @@ function viewFill(){
     '<div class="stack">' +
       TYPES.map(function(b){
         return '<button class="pick' + (S.type === b.k ? " on" : "") + '" data-type="' + b.k + '">' +
-          svg(b.ic) + '<span class="t"><b>' + esc(lang === "ar" ? b.ar : b.en) + '</b>' +
-          '<span class="d">' + esc(lang === "ar" ? b.dAr : b.dEn) + '</span></span>' +
+          svg(b.ic) + '<span class="t"><b>' + esc(lang === "ar" ? b.ar : lang === "fr" ? b.fr : b.en) + '</b>' +
+          '<span class="d">' + esc(lang === "ar" ? b.dAr : lang === "fr" ? b.dFr : b.dEn) + '</span></span>' +
           (S.type === b.k ? svg(IC.tick) : "") + '</button>';
       }).join("") +
     '</div>' +
@@ -378,7 +414,7 @@ function viewDone(){
       '<span class="tick">' + svg(IC.tick) + '</span>' +
       '<h1 style="margin-top:8px">' + esc(t.doneT) + '</h1>' +
       '<p class="lead">' + esc(t.bag) + ' <span class="tag">' + esc(r.tag) + '</span> · ' +
-        esc(ty ? (lang === "ar" ? ty.ar : ty.en) : "") + '</p></div>' +
+        esc(ty ? (lang === "ar" ? ty.ar : lang === "fr" ? ty.fr : ty.en) : "") + '</p></div>' +
     '<div class="card">' +
       '<div class="kv"><span>' + esc(t.recAt) + '</span><b class="tag">' + esc(r.at) + '</b></div>' +
       (r.ref ? '<div class="kv"><span>' + esc(t.ref) + '</span><b class="tag">' + esc(r.ref) + '</b></div>' : '') +
@@ -398,9 +434,10 @@ function viewDone(){
 function paint(){
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-  $("town").textContent = lang === "ar" ? TOWN_AR : TOWN;
-  $("en").setAttribute("aria-pressed", String(lang === "en"));
-  $("ar").setAttribute("aria-pressed", String(lang === "ar"));
+  $("town").textContent = lang === "ar" ? TOWN_AR : lang === "fr" ? TOWN_FR : TOWN;
+  ["en","fr","ar"].forEach(function(k){
+    $(k).setAttribute("aria-pressed", String(lang === k));
+  });
   document.title = "Baladi — " + T().title;
 
   var v = $("view");
@@ -440,7 +477,7 @@ document.addEventListener("click", function(ev){
   var el = ev.target.closest("button");
   if(!el) return;
 
-  if(el.id === "en" || el.id === "ar"){
+  if(el.id === "en" || el.id === "ar" || el.id === "fr"){
     lang = el.id;
     try { localStorage.setItem("baladi.lang", lang); } catch(e){}
     paint(); return;

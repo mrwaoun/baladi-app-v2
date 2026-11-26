@@ -14,7 +14,7 @@
 /* Bumped with every shipped build. The activate handler deletes every cache
    that is not this one, so a bump is what stops a phone serving the previous
    file back to its owner after an update. */
-var CACHE = "baladi-v3";
+var CACHE = "baladi-v4";
 var SHELL = ["./", "./index.html", "./bag.html", "./manifest.webmanifest",
              "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 
